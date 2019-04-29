@@ -1,0 +1,6 @@
+**/[Oo]bj
+**/[Bb]in
+
+*.ide
+*.suo
+*db.lock
