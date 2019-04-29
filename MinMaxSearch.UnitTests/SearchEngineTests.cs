@@ -44,11 +44,17 @@ namespace MinMaxSearch.UnitTests
         public void Evaluate_CheckThatRecordPassThroughStatesOptionIsWorking()
         {
             var state2 = A.Fake<IState>();
+            var state1 = A.Fake<IState>();
             A.CallTo(() => state2.GetNeighbors()).Returns(new List<IState>());
             A.CallTo(() => state2.Evaluate(A<int>.Ignored, A<List<IState>>.That.IsEmpty()))
                 .Throws(new Exception("passedStats list should have been empty"));
+            A.CallTo(() => state2.Evaluate(A<int>.Ignored, A<List<IState>>._))
+                .Invokes((int i, List<IState> l) =>
+                {
+                    Assert.AreEqual(1, l.Count, "passThroughStates should only have one node (state1)");
+                    Assert.IsTrue(l.Contains(state1), "passThroughStates should contain state1");
+                });
 
-            var state1 = A.Fake<IState>();
             A.CallTo(() => state1.GetNeighbors()).Returns(new List<IState> { state2 });
 
             var searchEngine = new SearchEngine(5);
@@ -61,15 +67,19 @@ namespace MinMaxSearch.UnitTests
             var endState = A.Fake<IState>();
             A.CallTo(() => endState.GetNeighbors()).Returns(new List<IState>());
             A.CallTo(() => endState.Evaluate(A<int>.Ignored, A<List<IState>>.That.IsEmpty())).Returns(10);
+            A.CallTo(() => endState.ToString()).Returns("endState");
 
             var state2 = A.Fake<IState>();
             A.CallTo(() => state2.GetNeighbors()).Returns(new List<IState> { endState });
-            
+            A.CallTo(() => state2.ToString()).Returns("state2");
+
             var state3 = A.Fake<IState>();
             A.CallTo(() => state3.GetNeighbors()).Returns(new List<IState> { state2 });
+            A.CallTo(() => state3.ToString()).Returns("state3");
 
             var state1 = A.Fake<IState>();
             A.CallTo(() => state1.GetNeighbors()).Returns(new List<IState> { state3, state2 });
+            A.CallTo(() => state1.ToString()).Returns("state1");
 
             var searchEngine = new SearchEngine(5) { RemeberDeadEndStates = true, FavorShortPaths = true};
             var evaluation = searchEngine.Evaluate(state1, Player.Max);

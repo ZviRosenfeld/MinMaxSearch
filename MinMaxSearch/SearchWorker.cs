@@ -9,13 +9,11 @@ namespace MinMaxSearch
     class SearchWorker
     {
         private readonly int maxDepth;
-        private int leaves;
-        private int internalNodes;
-        private readonly IDictionary<IState, Tuple<double, List<IState>>> endStates;
+        private readonly IDictionary<IState, SearchResult> endStates;
         private readonly SearchEngine searchEngine;
         private readonly List<IPruner> pruners;
 
-        public SearchWorker(int maxDepth, SearchEngine searchEngine, List<IPruner> pruners, IDictionary<IState, Tuple<double, List<IState>>> endStates)
+        public SearchWorker(int maxDepth, SearchEngine searchEngine, List<IPruner> pruners, IDictionary<IState, SearchResult> endStates)
         {
             this.maxDepth = maxDepth;
             this.searchEngine = searchEngine;
@@ -26,60 +24,53 @@ namespace MinMaxSearch
         public SearchResult Evaluate(IState startState, Player player, CancellationToken cancellationToken)
         {
             var evaluation = Evaluate(startState, player, 0, double.MinValue, double.MaxValue, cancellationToken, new List<IState>());
-            evaluation.Item2.Reverse();
-            return new SearchResult(evaluation.Item2.First(), evaluation.Item1, evaluation.Item2, leaves, internalNodes);
+            evaluation.StateSequence.Reverse();
+            // Removeing the top node will make the result "nicer"
+            return evaluation.CloneAndRemoveTopNode();
         }
 
-        public (double, List<IState>, bool) Evaluate(IState startState, Player player, int depth, double alpha, double bata, CancellationToken cancellationToken, List<IState> statesUpToNow)
+        public SearchResult Evaluate(IState startState, Player player, int depth, double alpha, double bata, CancellationToken cancellationToken, List<IState> statesUpToNow)
         {
-            if (!startState.GetNeighbors().Any())
-            {
-                leaves++;
-                return (startState.Evaluate(depth, statesUpToNow), new List<IState>(), true);
-            }
-            if (searchEngine.RemeberDeadEndStates && endStates.ContainsKey(startState))
-            {
-                leaves++;
-                return (endStates[startState].Item1, endStates[startState].Item2, true);
-            }
-            if (ShouldStop(startState, depth, cancellationToken, statesUpToNow))
-            {
-                leaves++;
-                return (startState.Evaluate(depth, statesUpToNow), new List<IState>(), false);
-            }
+            if (!startState.GetNeighbors().Any())           
+                return new SearchResult(startState, startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0, true);
             
+            if (searchEngine.RemeberDeadEndStates && endStates.ContainsKey(startState))
+                return endStates[startState];
+            
+            if (ShouldStop(startState, depth, cancellationToken, statesUpToNow))
+                return new SearchResult(startState, startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0, false);
+               
             statesUpToNow = new List<IState>(statesUpToNow) { startState };
-            internalNodes++;
             return EvaluateChildren(startState, player, depth, alpha, bata, cancellationToken, statesUpToNow);
         }
 
-        private (double, List<IState>, bool) EvaluateChildren(IState startState, Player player, int depth, double alpha, double bata,
+        private SearchResult EvaluateChildren(IState startState, Player player, int depth, double alpha, double bata,
             CancellationToken cancellationToken, List<IState> statesUpToNow)
         {
             var bestEvaluation = player == Player.Max ? double.MinValue : double.MaxValue;
-            List<IState> stateSequence = null;
+            SearchResult bestResult = null;
             var allChildrenAreEndStates = true;
             foreach (var state in startState.GetNeighbors())
             {
                 var stateEvaluation = Evaluate(state, Utils.GetReversePlayer(player), depth + 1, alpha, bata, cancellationToken, statesUpToNow);
-                allChildrenAreEndStates = allChildrenAreEndStates && stateEvaluation.Item3;
-                if (IsBetterThen(stateEvaluation.Item1, bestEvaluation, stateEvaluation.Item2.Count, stateSequence?.Count, player))
+                allChildrenAreEndStates = allChildrenAreEndStates && stateEvaluation.DeadEnd;
+                if (IsBetterThen(stateEvaluation.Evaluation, bestEvaluation, stateEvaluation.StateSequence.Count, bestResult?.StateSequence?.Count, player))
                 {
-                    bestEvaluation = stateEvaluation.Item1;
-                    stateSequence = stateEvaluation.Item2;
-                    stateSequence.Add(state);
-                    if (AlphaBataShouldPrune(alpha, bata, stateEvaluation.Item1, player))
+                    bestEvaluation = stateEvaluation.Evaluation;
+                    bestResult = stateEvaluation;
+                    if (AlphaBataShouldPrune(alpha, bata, stateEvaluation.Evaluation, player))
                         break;
-                    if (ShouldDieEarlly(bestEvaluation, player, stateSequence.Count))
+                    if (ShouldDieEarlly(bestEvaluation, player, bestResult.StateSequence.Count))
                         break;
-                    UpdateAlphaAndBata(ref alpha, ref bata, stateEvaluation.Item1, player);
+                    UpdateAlphaAndBata(ref alpha, ref bata, stateEvaluation.Evaluation, player);
                 }
             }
 
+            var finalResult = bestResult.CloneAndAddStateToTop(startState, allChildrenAreEndStates);
             if (allChildrenAreEndStates && searchEngine.RemeberDeadEndStates)
-                 endStates[startState] = new Tuple<double, List<IState>>(bestEvaluation, stateSequence.ToList());
+                 endStates[startState] = finalResult;
 
-            return (bestEvaluation, stateSequence, allChildrenAreEndStates);
+            return finalResult;
         }
         
         private bool ShouldStop(IState state, int depth, CancellationToken cancellationToken, List<IState> passedStates)

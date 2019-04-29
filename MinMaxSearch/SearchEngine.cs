@@ -11,7 +11,7 @@ namespace MinMaxSearch
     {
         private readonly int maxDepth;
         private readonly List<IPruner> pruners = new List<IPruner>();
-        private readonly IDictionary<IState, Tuple<double, List<IState>>> endStates = new ConcurrentDictionary<IState, Tuple<double, List<IState>>>();
+        private readonly IDictionary<IState, SearchResult> endStates = new ConcurrentDictionary<IState, SearchResult>();
 
         public void AddPruner(IPruner pruner) => pruners.Add(pruner);
 

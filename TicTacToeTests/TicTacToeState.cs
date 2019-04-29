@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using MinMaxSearch;
 
 namespace TicTacToeTests
@@ -105,6 +106,20 @@ namespace TicTacToeTests
                 default:
                     return 0;
             }
+        }
+
+        public override string ToString()
+        {
+            var builder = new StringBuilder();
+
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                    builder.Append(GetValue(Board[i, j]) + " ");
+                builder.Append("#" + Environment.NewLine);
+            }
+
+            return builder.ToString();
         }
     }
 }
