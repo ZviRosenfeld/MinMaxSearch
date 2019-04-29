@@ -116,7 +116,7 @@ namespace TicTacToeTests
         public static SearchEngine GetSearchEngine(int depth) => 
             new SearchEngine(depth)
             {
-                RemeberDeadEndStates = true,
+                RememberDeadEndStates = true,
                 DieEarly = true,
                 MinScore = -0.5,
                 MaxScore = 0.5

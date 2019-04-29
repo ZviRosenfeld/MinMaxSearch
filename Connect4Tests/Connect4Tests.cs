@@ -153,7 +153,7 @@ namespace Connect4Tests
         public static SearchEngine GetSearchEngine(int depth) =>
             new SearchEngine(depth)
             {
-                RemeberDeadEndStates = true,
+                RememberDeadEndStates = true,
                 DieEarly = true,
                 MinScore = BoardEvaluator.MinEvaluation + 1,
                 MaxScore = BoardEvaluator.MaxEvaluation -1

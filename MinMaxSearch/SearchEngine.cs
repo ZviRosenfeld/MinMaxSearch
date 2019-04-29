@@ -24,7 +24,7 @@ namespace MinMaxSearch
         /// If true, the engine will remember when a state leades to an endState and - when encountering that state again - used the stored evaluation. 
         /// Note that this will only work if you implement Equals and GetHashValue in a meaningful way in the states. 
         /// </summary>
-        public bool RemeberDeadEndStates { get; set; } = false;
+        public bool RememberDeadEndStates { get; set; } = false;
 
         /// <summary>
         /// Note that this will only work if you implement Equals and GetHashValue in a meaningful way in the states. 

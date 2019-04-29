@@ -81,7 +81,7 @@ namespace MinMaxSearch.UnitTests
             A.CallTo(() => state1.GetNeighbors()).Returns(new List<IState> { state3, state2 });
             A.CallTo(() => state1.ToString()).Returns("state1");
 
-            var searchEngine = new SearchEngine(5) { RemeberDeadEndStates = true, FavorShortPaths = true};
+            var searchEngine = new SearchEngine(5) { RememberDeadEndStates = true, FavorShortPaths = true};
             var evaluation = searchEngine.Evaluate(state1, Player.Max);
             
             Assert.AreEqual(2, evaluation.StateSequence.Count, "StateSequence doesn't  contain all the states is should");

@@ -34,7 +34,7 @@ namespace MinMaxSearch
             if (!startState.GetNeighbors().Any())           
                 return new SearchResult(startState, startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0, true);
             
-            if (searchEngine.RemeberDeadEndStates && endStates.ContainsKey(startState))
+            if (searchEngine.RememberDeadEndStates && endStates.ContainsKey(startState))
                 return endStates[startState];
             
             if (ShouldStop(startState, depth, cancellationToken, statesUpToNow))
@@ -67,7 +67,7 @@ namespace MinMaxSearch
             }
 
             var finalResult = bestResult.CloneAndAddStateToTop(startState, allChildrenAreEndStates);
-            if (allChildrenAreEndStates && searchEngine.RemeberDeadEndStates)
+            if (allChildrenAreEndStates && searchEngine.RememberDeadEndStates)
                  endStates[startState] = finalResult;
 
             return finalResult;
