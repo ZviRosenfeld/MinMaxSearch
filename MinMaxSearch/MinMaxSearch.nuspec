@@ -2,10 +2,11 @@
 <package >
   <metadata>
     <id>MinMaxSearch</id>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <description>A MinMax Search Engine</description>
     <authors>Zvi Rosenfeld</authors>
 	<license type="expression">MIT</license>
+	<projectUrl>https://github.com/ZviRosenfeld/MinMaxSearch</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <tags>MinMaxSearch MinMax</tags>
   </metadata>

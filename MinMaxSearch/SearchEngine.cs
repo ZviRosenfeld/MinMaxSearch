@@ -19,12 +19,7 @@ namespace MinMaxSearch
         /// At unstable states, we'll continue searching even after we've hit the maxDepth limit
         /// </summary>
         public Func<IState, int, List<IState>, bool> IsUnstableState { get; set; } = ((s, d, l) => false);
-
-        /// <summary>
-        /// If true, the engine will recored the states it's passed through and pass them on to avaluaters and pruners.
-        /// </summary>
-        public bool RecordPassThroughStates { get; set; } = false;
-
+        
         /// <summary>
         /// If true, the engine will remember when a state leades to an endState and - when encountering that state again - used the stored evaluation. 
         /// Note that this will only work if you implement Equals and GetHashValue in a meaningful way in the states. 
@@ -61,10 +56,7 @@ namespace MinMaxSearch
         public SearchResult Evaluate(IState startState, Player player, CancellationToken cancellationToken)
         {
             if (PreventLoops)
-            {
                 AddPruner(new PreventLoopPruner());
-                RecordPassThroughStates = true;
-            }
             
             if (!startState.GetNeighbors().Any())
                 throw new NoNeighborsException(startState);

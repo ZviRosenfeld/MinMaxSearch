@@ -47,9 +47,8 @@ namespace MinMaxSearch
                 leaves++;
                 return (startState.Evaluate(depth, statesUpToNow), new List<IState>(), false);
             }
-
-            if (searchEngine.RecordPassThroughStates)
-                statesUpToNow = new List<IState>(statesUpToNow) { startState };
+            
+            statesUpToNow = new List<IState>(statesUpToNow) { startState };
             internalNodes++;
             return EvaluateChildren(startState, player, depth, alpha, bata, cancellationToken, statesUpToNow);
         }

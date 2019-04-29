@@ -5,9 +5,7 @@ namespace MinMaxSearch.Pruners
 {
     /// <summary>
     /// A pruner that prevents loops.
-    /// Note that this pruner will only work if: 
-    /// A) option RecordPassThroughStates is set to true on the SearchEngine, and 
-    /// B) the states implement Equals in a meaningfull way.
+    /// Note that this pruner will only work if the states implement Equals in a meaningfull way.
     /// </summary>
     class PreventLoopPruner : IPruner
     {

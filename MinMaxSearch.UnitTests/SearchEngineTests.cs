@@ -39,24 +39,9 @@ namespace MinMaxSearch.UnitTests
 
             Assert.AreEqual(10, result.Evaluation, "Engine seems to have stopped before reaching a stable state");
         }
-
+        
         [TestMethod]
-        public void Evaluate_RecordPassThroughStatesOptionOff_PassedThroughStatsArentRecorded()
-        {
-            var state2 = A.Fake<IState>();
-            A.CallTo(() => state2.GetNeighbors()).Returns(new List<IState>());
-            A.CallTo(() => state2.Evaluate(A<int>.Ignored, A<List<IState>>.That.Not.IsEmpty()))
-                .Throws(new Exception("passedStats list should have been empty"));
-
-            var state1 = A.Fake<IState>();
-            A.CallTo(() => state1.GetNeighbors()).Returns(new List<IState>{state2});
-
-            var searchEngine = new SearchEngine(5) { RecordPassThroughStates = false };
-            searchEngine.Evaluate(state1, Player.Max);           
-        }
-
-        [TestMethod]
-        public void Evaluate_RecordPassThroughStatesOptionOn_PassedThroughStatsAreRecorded()
+        public void Evaluate_CheckThatRecordPassThroughStatesOptionIsWorking()
         {
             var state2 = A.Fake<IState>();
             A.CallTo(() => state2.GetNeighbors()).Returns(new List<IState>());
@@ -66,7 +51,7 @@ namespace MinMaxSearch.UnitTests
             var state1 = A.Fake<IState>();
             A.CallTo(() => state1.GetNeighbors()).Returns(new List<IState> { state2 });
 
-            var searchEngine = new SearchEngine(5) { RecordPassThroughStates = true };
+            var searchEngine = new SearchEngine(5);
             searchEngine.Evaluate(state1, Player.Max);
         }
 
