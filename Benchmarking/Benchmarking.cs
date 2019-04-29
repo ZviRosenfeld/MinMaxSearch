@@ -28,7 +28,7 @@ namespace Benchmarking
         [TestCategory("Benchmarking")]
         public void BenchmarkConnect4()
         {
-            var engine = Connect4Tests.Connect4Tests.GetSearchEngine(9);
+            var engine = Connect4Tests.Connect4Tests.GetSearchEngine(10);
             var startState = new Connect4State(new[,]
             {
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},

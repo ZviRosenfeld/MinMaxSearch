@@ -7,7 +7,6 @@ namespace MinMaxSearch.Pruners
     /// </summary>
     public interface IPruner
     {
-        /// <param name="passedThroughStates">This list will only be filled if the RecordPassThrough flag is on in the SearchEngine</param>
         bool ShouldPrune(IState state, int depth, List<IState> passedThroughStates);
     }
 }
