@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using MinMaxSearch.Pruners;
@@ -21,14 +20,6 @@ namespace MinMaxSearch
             this.endStates = endStates;
         }
         
-        public SearchResult Evaluate(IState startState, Player player, CancellationToken cancellationToken)
-        {
-            var evaluation = Evaluate(startState, player, 0, double.MinValue, double.MaxValue, cancellationToken, new List<IState>());
-            evaluation.StateSequence.Reverse();
-            // Removeing the top node will make the result "nicer"
-            return evaluation.CloneAndRemoveTopNode();
-        }
-
         public SearchResult Evaluate(IState startState, Player player, int depth, double alpha, double bata, CancellationToken cancellationToken, List<IState> statesUpToNow)
         {
             if (!startState.GetNeighbors().Any())           
@@ -50,10 +41,13 @@ namespace MinMaxSearch
             var bestEvaluation = player == Player.Max ? double.MinValue : double.MaxValue;
             SearchResult bestResult = null;
             var allChildrenAreEndStates = true;
+            int leaves = 0, internalNodes = 0;
             foreach (var state in startState.GetNeighbors())
             {
                 var stateEvaluation = Evaluate(state, Utils.GetReversePlayer(player), depth + 1, alpha, bata, cancellationToken, statesUpToNow);
                 allChildrenAreEndStates = allChildrenAreEndStates && stateEvaluation.DeadEnd;
+                leaves += stateEvaluation.Leaves;
+                internalNodes += stateEvaluation.IntarnalNodes;
                 if (IsBetterThen(stateEvaluation.Evaluation, bestEvaluation, stateEvaluation.StateSequence.Count, bestResult?.StateSequence?.Count, player))
                 {
                     bestEvaluation = stateEvaluation.Evaluation;
@@ -66,11 +60,10 @@ namespace MinMaxSearch
                 }
             }
 
-            var finalResult = bestResult.CloneAndAddStateToTop(startState, allChildrenAreEndStates);
             if (allChildrenAreEndStates && searchEngine.RememberDeadEndStates)
-                 endStates[startState] = finalResult;
+                 endStates[startState] = bestResult.CloneAndAddStateToTop(startState, true, 1, 0);
 
-            return finalResult;
+            return bestResult.CloneAndAddStateToTop(startState, allChildrenAreEndStates, leaves, internalNodes + 1);
         }
         
         private bool ShouldStop(IState state, int depth, CancellationToken cancellationToken, List<IState> passedStates)

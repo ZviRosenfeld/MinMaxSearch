@@ -65,7 +65,10 @@ namespace MinMaxSearch
                 throw new EmptyPlayerException(nameof(player) + " can't be " + nameof(Player.Empty));
 
             var searchWorker = new SearchWorker(maxDepth, this, pruners, endStates);
-            return searchWorker.Evaluate(startState, player, cancellationToken);
+            var evaluation = searchWorker.Evaluate(startState, player, 0, double.MinValue, double.MaxValue, cancellationToken, new List<IState>());
+            evaluation.StateSequence.Reverse();
+            // Removeing the top node will make the result "nicer"
+            return evaluation.CloneAndRemoveTopNode();
         }
     }
 }
