@@ -28,16 +28,8 @@ namespace Benchmarking
         [TestCategory("Benchmarking")]
         public void BenchmarkConnect4()
         {
-            var engine = Connect4Tests.Connect4Tests.GetSearchEngine();
-            var startState = new Connect4State(new[,]
-            {
-                {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
-                {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
-                {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
-                {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
-                {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
-                {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
-            }, Player.Max);
+            var engine = Connect4TestUtils.GetSearchEngine();
+            var startState = new Connect4State(Connect4TestUtils.GetEmptyBoard(), Player.Max);
 
             PrintBenchmarkData(engine, startState, 10);
         }

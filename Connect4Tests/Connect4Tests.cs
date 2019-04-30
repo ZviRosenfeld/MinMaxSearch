@@ -1,4 +1,6 @@
 ﻿using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MinMaxSearch;
 
@@ -20,7 +22,7 @@ namespace Connect4Tests
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
             }, Player.Max);
 
-            var engine = GetSearchEngine();
+            var engine = Connect4TestUtils.GetSearchEngine();
             var evaluation = engine.Evaluate(startState, Player.Max, 2);
 
             Assert.IsTrue(BoardEvaluator.IsWin(((Connect4State) evaluation.NextMove).Board, Player.Max),
@@ -41,7 +43,7 @@ namespace Connect4Tests
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
             }, Player.Min);
 
-            var engine = GetSearchEngine();
+            var engine = Connect4TestUtils.GetSearchEngine();
             var newState = (Connect4State)engine.Evaluate(startState, Player.Min, 2).NextMove;
 
             Assert.AreEqual(Player.Min, newState.Board[3, 1], "Min didn't block Max's win");
@@ -60,7 +62,7 @@ namespace Connect4Tests
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
             }, Player.Max);
 
-            var engine = GetSearchEngine();
+            var engine = Connect4TestUtils.GetSearchEngine();
             var evaluation = engine.Evaluate(startState, Player.Max, 3);
             
             Assert.IsTrue(BoardEvaluator.IsWin(((Connect4State) evaluation.StateSequence.Last()).Board, Player.Max), "Should have found a wining state");
@@ -79,7 +81,7 @@ namespace Connect4Tests
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
             }, Player.Max);
 
-            var engine = GetSearchEngine();
+            var engine = Connect4TestUtils.GetSearchEngine();
             var evaluation = engine.Evaluate(startState, Player.Max, 5);
 
             Assert.AreEqual(BoardEvaluator.MaxEvaluation, evaluation.Evaluation);
@@ -89,26 +91,22 @@ namespace Connect4Tests
         [TestMethod]
         public void NewGame_NoOneCanWin()
         {
-            var startState = new Connect4State(new[,]
-            {
-                {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
-                {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
-                {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
-                {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
-                {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
-                {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
-            }, Player.Max);
+            var startState = new Connect4State(Connect4TestUtils.GetEmptyBoard(), Player.Max);
 
-            var engine = GetSearchEngine();
+            var engine = Connect4TestUtils.GetSearchEngine();
             var evaluation = engine.Evaluate(startState, Player.Max, 7);
 
             Assert.IsFalse(BoardEvaluator.IsWin(((Connect4State)evaluation.StateSequence.Last()).Board, Player.Max));
             
             //Check that the our optimizations are working
-            Assert.IsTrue(evaluation.Leaves < 19000, "Too many leaves in search; Pruning dosn't seem to be working");
-            Assert.IsTrue(evaluation.IntarnalNodes < 7000, "Too many intarnal nodes in search; Pruning dosn't seem to be working");
+            Assert.IsTrue(evaluation.Leaves < 19000, "Too many leaves in search.");
+            Assert.IsTrue(evaluation.IntarnalNodes < 7000, "Too many intarnal nodes in search.");
+
+            // Too few leaves or internal nodes means that something went wrong
+            Assert.IsTrue(evaluation.Leaves > 1000, "Too few leaves in search.");
+            Assert.IsTrue(evaluation.IntarnalNodes > 1000, "Too few intarnal nodes in search.");
         }
-        
+
         [TestMethod]
         public void MaxCanWinNextMoveOrInThree_MaxWinsNextMove()
         {
@@ -150,13 +148,25 @@ namespace Connect4Tests
             Assert.AreEqual(Player.Min, ((Connect4State)evaluation.NextMove).Board[3, 2], "Min didn't block Max's win");
         }
 
-        public static SearchEngine GetSearchEngine() =>
-            new SearchEngine()
+        [TestMethod]
+        public void NewGame_CheckCancellationToken()
+        {
+            var startState = new Connect4State(Connect4TestUtils.GetEmptyBoard(), Player.Max);
+
+            var engine = Connect4TestUtils.GetSearchEngine();
+            var cancellationSource = new CancellationTokenSource();
+            var searchTask = engine.EvaluateAsync(startState, Player.Max, 20, cancellationSource.Token);
+            var cancellationTask = Task.Run(() =>
             {
-                RememberDeadEndStates = true,
-                DieEarly = true,
-                MinScore = BoardEvaluator.MinEvaluation + 1,
-                MaxScore = BoardEvaluator.MaxEvaluation -1
-            };
+                Thread.Sleep(1000);
+                cancellationSource.Cancel();
+            });
+            cancellationTask.Wait();
+            Thread.Sleep(500);
+
+            Assert.IsTrue(searchTask.IsCompleted, "Search task didn't finish fast enough after being canceled");
+        }
+
+        
     }
 }

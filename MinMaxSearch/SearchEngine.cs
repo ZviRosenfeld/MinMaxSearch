@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using MinMaxSearch.Pruners;
 
 namespace MinMaxSearch
@@ -47,7 +48,10 @@ namespace MinMaxSearch
         public SearchResult Evaluate(IState startState, Player player, int maxDepth) =>
             Evaluate(startState, player, maxDepth, CancellationToken.None);
 
-        public SearchResult Evaluate(IState startState, Player player, int maxDepth, CancellationToken cancellationToken)
+        public Task<SearchResult> EvaluateAsync(IState startState, Player player, int maxDepth, CancellationToken cancellationToken) => 
+            Task.Run(() => Evaluate(startState, player, maxDepth, cancellationToken));
+
+        private SearchResult Evaluate(IState startState, Player player, int maxDepth, CancellationToken cancellationToken)
         {
             if (PreventLoops)
                 AddPruner(new PreventLoopPruner());
