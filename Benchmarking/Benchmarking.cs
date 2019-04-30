@@ -13,7 +13,7 @@ namespace Benchmarking
         [TestCategory("Benchmarking")]
         public void BenchmarkTicTacToe()
         {
-            var engine = TicTacToeBassicTests.GetSearchEngine(10);
+            var engine = TicTacToeBassicTests.GetSearchEngine();
             var startState = new TicTacToeState(new[,]
             {
                 { Player.Empty, Player.Empty, Player.Empty},
@@ -21,14 +21,14 @@ namespace Benchmarking
                 { Player.Empty, Player.Empty, Player.Empty},
             }, Player.Max);
 
-            PrintBenchmarkData(engine, startState);
+            PrintBenchmarkData(engine, startState, 10);
         }
 
         [TestMethod]
         [TestCategory("Benchmarking")]
         public void BenchmarkConnect4()
         {
-            var engine = Connect4Tests.Connect4Tests.GetSearchEngine(10);
+            var engine = Connect4Tests.Connect4Tests.GetSearchEngine();
             var startState = new Connect4State(new[,]
             {
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
@@ -39,13 +39,13 @@ namespace Benchmarking
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
             }, Player.Max);
 
-            PrintBenchmarkData(engine, startState);
+            PrintBenchmarkData(engine, startState, 10);
         }
 
-        private void PrintBenchmarkData(SearchEngine searchEngine, IState startState)
+        private void PrintBenchmarkData(SearchEngine searchEngine, IState startState, int searchDepth)
         {
             var startTime = DateTime.Now;
-            var result = searchEngine.Evaluate(startState, Player.Max);
+            var result = searchEngine.Evaluate(startState, Player.Max, searchDepth);
             var endTime = DateTime.Now;
 
             Console.WriteLine("Time: " + (endTime - startTime));

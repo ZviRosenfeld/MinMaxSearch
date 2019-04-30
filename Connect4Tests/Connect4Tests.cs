@@ -20,8 +20,8 @@ namespace Connect4Tests
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
             }, Player.Max);
 
-            var engine = GetSearchEngine(2);
-            var evaluation = engine.Evaluate(startState, Player.Max);
+            var engine = GetSearchEngine();
+            var evaluation = engine.Evaluate(startState, Player.Max, 2);
 
             Assert.IsTrue(BoardEvaluator.IsWin(((Connect4State) evaluation.NextMove).Board, Player.Max),
                 "Should have found a wining state");
@@ -41,8 +41,8 @@ namespace Connect4Tests
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
             }, Player.Min);
 
-            var engine = GetSearchEngine(2);
-            var newState = (Connect4State)engine.Evaluate(startState, Player.Min).NextMove;
+            var engine = GetSearchEngine();
+            var newState = (Connect4State)engine.Evaluate(startState, Player.Min, 2).NextMove;
 
             Assert.AreEqual(Player.Min, newState.Board[3, 1], "Min didn't block Max's win");
         }
@@ -60,8 +60,8 @@ namespace Connect4Tests
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
             }, Player.Max);
 
-            var engine = GetSearchEngine(3);
-            var evaluation = engine.Evaluate(startState, Player.Max);
+            var engine = GetSearchEngine();
+            var evaluation = engine.Evaluate(startState, Player.Max, 3);
             
             Assert.IsTrue(BoardEvaluator.IsWin(((Connect4State) evaluation.StateSequence.Last()).Board, Player.Max), "Should have found a wining state");
         }
@@ -79,8 +79,8 @@ namespace Connect4Tests
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
             }, Player.Max);
 
-            var engine = GetSearchEngine(5);
-            var evaluation = engine.Evaluate(startState, Player.Max);
+            var engine = GetSearchEngine();
+            var evaluation = engine.Evaluate(startState, Player.Max, 5);
 
             Assert.AreEqual(BoardEvaluator.MaxEvaluation, evaluation.Evaluation);
             Assert.IsTrue(BoardEvaluator.IsWin(((Connect4State)evaluation.StateSequence.Last()).Board, Player.Max), "Should have found a wining state");
@@ -99,8 +99,8 @@ namespace Connect4Tests
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
             }, Player.Max);
 
-            var engine = GetSearchEngine(7);
-            var evaluation = engine.Evaluate(startState, Player.Max);
+            var engine = GetSearchEngine();
+            var evaluation = engine.Evaluate(startState, Player.Max, 7);
 
             Assert.IsFalse(BoardEvaluator.IsWin(((Connect4State)evaluation.StateSequence.Last()).Board, Player.Max));
             
@@ -122,8 +122,8 @@ namespace Connect4Tests
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
             }, Player.Max);
 
-            var engine = new SearchEngine(5) { FavorShortPaths = true};
-            var evaluation = engine.Evaluate(startState, Player.Max);
+            var engine = new SearchEngine() { FavorShortPaths = true};
+            var evaluation = engine.Evaluate(startState, Player.Max, 5);
 
             Assert.IsTrue(evaluation.StateSequence.Count == 1, "Max should have won in one move");
             Assert.AreEqual(Player.Max, ((Connect4State)evaluation.NextMove).Board[3, 2], "Max didn't win");
@@ -143,15 +143,15 @@ namespace Connect4Tests
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
             }, Player.Min);
 
-            var engine = new SearchEngine(5) { FavorShortPaths = true};
-            var evaluation = engine.Evaluate(startState, Player.Min);
+            var engine = new SearchEngine() { FavorShortPaths = true};
+            var evaluation = engine.Evaluate(startState, Player.Min, 5);
 
             Assert.IsTrue(evaluation.StateSequence.Count > 2, "Min should have blocked the near win");
             Assert.AreEqual(Player.Min, ((Connect4State)evaluation.NextMove).Board[3, 2], "Min didn't block Max's win");
         }
 
-        public static SearchEngine GetSearchEngine(int depth) =>
-            new SearchEngine(depth)
+        public static SearchEngine GetSearchEngine() =>
+            new SearchEngine()
             {
                 RememberDeadEndStates = true,
                 DieEarly = true,

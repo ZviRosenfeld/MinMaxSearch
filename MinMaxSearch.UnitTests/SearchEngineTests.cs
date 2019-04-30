@@ -16,8 +16,8 @@ namespace MinMaxSearch.UnitTests
             var state = A.Fake<IState>();
             A.CallTo(() => state.GetNeighbors()).Returns(new List<IState>());
 
-            var searchEngine = new SearchEngine(1);
-            searchEngine.Evaluate(state, Player.Max);
+            var searchEngine = new SearchEngine();
+            searchEngine.Evaluate(state, Player.Max, 1);
         }
 
         [TestMethod]
@@ -27,15 +27,15 @@ namespace MinMaxSearch.UnitTests
             var state = A.Fake<IState>();
             A.CallTo(() => state.GetNeighbors()).Returns(new List<IState>{state});
 
-            var searchEngine = new SearchEngine(1);
-            searchEngine.Evaluate(state, Player.Empty);
+            var searchEngine = new SearchEngine();
+            searchEngine.Evaluate(state, Player.Empty, 1);
         }
 
         [TestMethod]
         public void Evaluate_DontStopWithUnstableState()
         {
-            var searchEngine = new SearchEngine(1) {IsUnstableState = (s, d, l) => s.Evaluate(d, l) < 10};
-            var result = searchEngine.Evaluate(new IncreasingNumberState(0), Player.Max);
+            var searchEngine = new SearchEngine() {IsUnstableState = (s, d, l) => s.Evaluate(d, l) < 10};
+            var result = searchEngine.Evaluate(new IncreasingNumberState(0), Player.Max, 1);
 
             Assert.AreEqual(10, result.Evaluation, "Engine seems to have stopped before reaching a stable state");
         }
@@ -57,8 +57,8 @@ namespace MinMaxSearch.UnitTests
 
             A.CallTo(() => state1.GetNeighbors()).Returns(new List<IState> { state2 });
 
-            var searchEngine = new SearchEngine(5);
-            searchEngine.Evaluate(state1, Player.Max);
+            var searchEngine = new SearchEngine();
+            searchEngine.Evaluate(state1, Player.Max, 5);
         }
 
         [TestMethod]
@@ -81,8 +81,8 @@ namespace MinMaxSearch.UnitTests
             A.CallTo(() => state1.GetNeighbors()).Returns(new List<IState> { state3, state2 });
             A.CallTo(() => state1.ToString()).Returns("state1");
 
-            var searchEngine = new SearchEngine(5) { RememberDeadEndStates = true, FavorShortPaths = true};
-            var evaluation = searchEngine.Evaluate(state1, Player.Max);
+            var searchEngine = new SearchEngine() { RememberDeadEndStates = true, FavorShortPaths = true};
+            var evaluation = searchEngine.Evaluate(state1, Player.Max, 5);
             
             Assert.AreEqual(2, evaluation.StateSequence.Count, "StateSequence doesn't  contain all the states is should");
         }
@@ -110,8 +110,8 @@ namespace MinMaxSearch.UnitTests
             var state1 = A.Fake<IState>();
             A.CallTo(() => state1.GetNeighbors()).Returns(new List<IState> { endState1, endState2, endState3 });
 
-            var searchEngine = new SearchEngine(2) { DieEarly = true, MaxScore = 5, MinScore = 5};
-            var evaluation = searchEngine.Evaluate(state1, Player.Min);
+            var searchEngine = new SearchEngine() { DieEarly = true, MaxScore = 5, MinScore = 5};
+            var evaluation = searchEngine.Evaluate(state1, Player.Min, 2);
 
             Assert.AreEqual(endState1, evaluation.StateSequence.Last(), "Should have ended with endState1; found: " + evaluation.StateSequence.Last());
         }
@@ -119,8 +119,8 @@ namespace MinMaxSearch.UnitTests
         [TestMethod]
         public void Evaluate_CheckPreventLoopPrunerWorks()
         {
-            var searchEngine = new SearchEngine(5) {PreventLoops = true};
-            searchEngine.Evaluate(new NeverEndingState(0), Player.Max);
+            var searchEngine = new SearchEngine() {PreventLoops = true};
+            searchEngine.Evaluate(new NeverEndingState(0), Player.Max, 5);
         }
     }
 }

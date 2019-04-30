@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace MinMaxSearch
 {
     public class SearchResult
     {
-        public SearchResult(IState nextMove, double evaluation, List<IState> stateSequence, int leaves, int intarnalNodes, bool deadEnd)
+        public SearchResult(double evaluation, List<IState> stateSequence, int leaves, int intarnalNodes, bool deadEnd)
         {
-            NextMove = nextMove;
             Evaluation = evaluation;
             StateSequence = stateSequence;
             Leaves = leaves;
@@ -14,7 +14,7 @@ namespace MinMaxSearch
             DeadEnd = deadEnd;
         }
 
-        public IState NextMove { get; }
+        public IState NextMove => StateSequence.First();
         public double Evaluation { get; }
         public List<IState> StateSequence { get; }
         public int Leaves { get; }

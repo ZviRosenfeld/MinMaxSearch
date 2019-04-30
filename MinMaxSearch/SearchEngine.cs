@@ -9,7 +9,6 @@ namespace MinMaxSearch
 {
     public class SearchEngine
     {
-        private readonly int maxDepth;
         private readonly List<IPruner> pruners = new List<IPruner>();
         private readonly IDictionary<IState, SearchResult> endStates = new ConcurrentDictionary<IState, SearchResult>();
 
@@ -44,16 +43,11 @@ namespace MinMaxSearch
         public double MaxScore { get; set; } = double.MaxValue;
 
         public double MinScore { get; set; } = double.MinValue;
+        
+        public SearchResult Evaluate(IState startState, Player player, int maxDepth) =>
+            Evaluate(startState, player, maxDepth, CancellationToken.None);
 
-        public SearchEngine(int maxDepth)
-        {
-            this.maxDepth = maxDepth < 1 ? 1 : maxDepth;
-        }
-
-        public SearchResult Evaluate(IState startState, Player player) =>
-            Evaluate(startState, player, CancellationToken.None);
-
-        public SearchResult Evaluate(IState startState, Player player, CancellationToken cancellationToken)
+        public SearchResult Evaluate(IState startState, Player player, int maxDepth, CancellationToken cancellationToken)
         {
             if (PreventLoops)
                 AddPruner(new PreventLoopPruner());
@@ -66,9 +60,9 @@ namespace MinMaxSearch
 
             var searchWorker = new SearchWorker(maxDepth, this, pruners, endStates);
             var evaluation = searchWorker.Evaluate(startState, player, 0, double.MinValue, double.MaxValue, cancellationToken, new List<IState>());
-            evaluation.StateSequence.Reverse();
-            // Removeing the top node will make the result "nicer"
-            return evaluation.CloneAndRemoveTopNode();
+            evaluation.StateSequence.Reverse();           
+            evaluation.StateSequence.RemoveAt(0); // Removeing the top node will make the result "nicer"
+            return evaluation;
         }
     }
 }

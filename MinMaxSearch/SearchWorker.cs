@@ -23,13 +23,13 @@ namespace MinMaxSearch
         public SearchResult Evaluate(IState startState, Player player, int depth, double alpha, double bata, CancellationToken cancellationToken, List<IState> statesUpToNow)
         {
             if (!startState.GetNeighbors().Any())           
-                return new SearchResult(startState, startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0, true);
+                return new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0, true);
             
             if (searchEngine.RememberDeadEndStates && endStates.ContainsKey(startState))
                 return endStates[startState];
             
             if (ShouldStop(startState, depth, cancellationToken, statesUpToNow))
-                return new SearchResult(startState, startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0, false);
+                return new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0, false);
                
             statesUpToNow = new List<IState>(statesUpToNow) { startState };
             return EvaluateChildren(startState, player, depth, alpha, bata, cancellationToken, statesUpToNow);
