@@ -37,7 +37,7 @@ namespace Benchmarking
         private void PrintBenchmarkData(SearchEngine searchEngine, IState startState, int searchDepth)
         {
             var startTime = DateTime.Now;
-            var result = searchEngine.Evaluate(startState, Player.Max, searchDepth);
+            var result = searchEngine.Search(startState, Player.Max, searchDepth);
             var endTime = DateTime.Now;
 
             Console.WriteLine("Time: " + (endTime - startTime));

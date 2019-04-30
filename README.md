@@ -3,9 +3,9 @@ A MinMax Search Engine.
 MinMax search is a popular search technique used for finding the next-best move in zero-summed games such as tic-tac-toe or checkers.
 
 ## How to use
-To use this algorithm, you'll need to create a new instance of SearchEngine. Then you can call searchEngine.Evaluate(IState startState, Player player, int maxDepth) which will return an object of type SearchResult. SearchResult will contain - among other stuff - the best next move.
+To use this algorithm, you'll need to create a new instance of SearchEngine. Then you can call searchEngine.Search(IState startState, Player player, int maxDepth) which will return an object of type SearchResult. SearchResult will contain - among other stuff - the best next move.
 
-searchEngine.Evaluate expects 2 arguments:
+searchEngine.Search expects 2 arguments:
 
 **IState:** 
 this is an interface that your game-specific states will need to implement. The interface requires that you implement the following 2 methods:

@@ -12,6 +12,7 @@ namespace MinMaxSearch
     {
         private readonly List<IPruner> pruners = new List<IPruner>();
         private readonly IDictionary<IState, SearchResult> endStates = new ConcurrentDictionary<IState, SearchResult>();
+        private readonly PreventLoopPruner preventLoopPruner = new PreventLoopPruner();
 
         public void AddPruner(IPruner pruner) => pruners.Add(pruner);
 
@@ -29,7 +30,16 @@ namespace MinMaxSearch
         /// <summary>
         /// Note that this will only work if you implement Equals and GetHashValue in a meaningful way in the states. 
         /// </summary>
-        public bool PreventLoops { get; set; } = false;
+        public bool PreventLoops {
+            get => pruners.Contains(preventLoopPruner);
+            set
+            {
+                if (value && !pruners.Contains(preventLoopPruner))
+                    pruners.Add(preventLoopPruner);
+                if (!value && pruners.Contains(preventLoopPruner))
+                    pruners.Remove(preventLoopPruner);
+            }
+        }
 
         /// <summary>
         /// If two path give the same score, but one is shorter then the other - we'll take the shorter one
@@ -45,17 +55,14 @@ namespace MinMaxSearch
 
         public double MinScore { get; set; } = double.MinValue;
         
-        public SearchResult Evaluate(IState startState, Player player, int maxDepth) =>
-            Evaluate(startState, player, maxDepth, CancellationToken.None);
+        public SearchResult Search(IState startState, Player player, int maxDepth) =>
+            Search(startState, player, maxDepth, CancellationToken.None);
 
         public Task<SearchResult> EvaluateAsync(IState startState, Player player, int maxDepth, CancellationToken cancellationToken) => 
-            Task.Run(() => Evaluate(startState, player, maxDepth, cancellationToken));
-
-        private SearchResult Evaluate(IState startState, Player player, int maxDepth, CancellationToken cancellationToken)
+            Task.Run(() => Search(startState, player, maxDepth, cancellationToken));
+        
+        public SearchResult Search(IState startState, Player player, int maxDepth, CancellationToken cancellationToken)
         {
-            if (PreventLoops)
-                AddPruner(new PreventLoopPruner());
-            
             if (!startState.GetNeighbors().Any())
                 throw new NoNeighborsException(startState);
 
@@ -68,5 +75,26 @@ namespace MinMaxSearch
             evaluation.StateSequence.RemoveAt(0); // Removeing the top node will make the result "nicer"
             return evaluation;
         }
+        
+        public SearchResult IterativeSearch(IState startState, Player player, int startDepth, int maxDepth, TimeSpan timeout) =>
+            IterativeSearch(startState, player, startDepth, maxDepth, new CancellationTokenSource(timeout).Token);
+
+        public SearchResult IterativeSearch(IState startState, Player player, int startDepth, int maxDepth, CancellationToken cancellationToken)
+        {
+            if (startDepth >= maxDepth)
+                throw new Exception($"{nameof(startDepth)} (== {startDepth}) must be bigget than {nameof(maxDepth)} ( == {maxDepth})");
+
+            SearchResult bestResultSoFar = null;
+            for (int i = startDepth; i < maxDepth; i++)
+            { 
+                var result = Search(startState, player, i, cancellationToken);
+                if (!cancellationToken.IsCancellationRequested || bestResultSoFar == null)
+                    bestResultSoFar = result;
+                if (cancellationToken.IsCancellationRequested)
+                    break;
+            }
+            return bestResultSoFar;
+        }
+
     }
 }

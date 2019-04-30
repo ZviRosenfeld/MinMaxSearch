@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -23,7 +24,7 @@ namespace Connect4Tests
             }, Player.Max);
 
             var engine = Connect4TestUtils.GetSearchEngine();
-            var evaluation = engine.Evaluate(startState, Player.Max, 2);
+            var evaluation = engine.Search(startState, Player.Max, 2);
 
             Assert.IsTrue(BoardEvaluator.IsWin(((Connect4State) evaluation.NextMove).Board, Player.Max),
                 "Should have found a wining state");
@@ -44,7 +45,7 @@ namespace Connect4Tests
             }, Player.Min);
 
             var engine = Connect4TestUtils.GetSearchEngine();
-            var newState = (Connect4State)engine.Evaluate(startState, Player.Min, 2).NextMove;
+            var newState = (Connect4State)engine.Search(startState, Player.Min, 2).NextMove;
 
             Assert.AreEqual(Player.Min, newState.Board[3, 1], "Min didn't block Max's win");
         }
@@ -63,7 +64,7 @@ namespace Connect4Tests
             }, Player.Max);
 
             var engine = Connect4TestUtils.GetSearchEngine();
-            var evaluation = engine.Evaluate(startState, Player.Max, 3);
+            var evaluation = engine.Search(startState, Player.Max, 3);
             
             Assert.IsTrue(BoardEvaluator.IsWin(((Connect4State) evaluation.StateSequence.Last()).Board, Player.Max), "Should have found a wining state");
         }
@@ -82,7 +83,7 @@ namespace Connect4Tests
             }, Player.Max);
 
             var engine = Connect4TestUtils.GetSearchEngine();
-            var evaluation = engine.Evaluate(startState, Player.Max, 5);
+            var evaluation = engine.Search(startState, Player.Max, 5);
 
             Assert.AreEqual(BoardEvaluator.MaxEvaluation, evaluation.Evaluation);
             Assert.IsTrue(BoardEvaluator.IsWin(((Connect4State)evaluation.StateSequence.Last()).Board, Player.Max), "Should have found a wining state");
@@ -94,7 +95,7 @@ namespace Connect4Tests
             var startState = new Connect4State(Connect4TestUtils.GetEmptyBoard(), Player.Max);
 
             var engine = Connect4TestUtils.GetSearchEngine();
-            var evaluation = engine.Evaluate(startState, Player.Max, 7);
+            var evaluation = engine.Search(startState, Player.Max, 7);
 
             Assert.IsFalse(BoardEvaluator.IsWin(((Connect4State)evaluation.StateSequence.Last()).Board, Player.Max));
             
@@ -121,7 +122,7 @@ namespace Connect4Tests
             }, Player.Max);
 
             var engine = new SearchEngine() { FavorShortPaths = true};
-            var evaluation = engine.Evaluate(startState, Player.Max, 5);
+            var evaluation = engine.Search(startState, Player.Max, 5);
 
             Assert.IsTrue(evaluation.StateSequence.Count == 1, "Max should have won in one move");
             Assert.AreEqual(Player.Max, ((Connect4State)evaluation.NextMove).Board[3, 2], "Max didn't win");
@@ -142,7 +143,7 @@ namespace Connect4Tests
             }, Player.Min);
 
             var engine = new SearchEngine() { FavorShortPaths = true};
-            var evaluation = engine.Evaluate(startState, Player.Min, 5);
+            var evaluation = engine.Search(startState, Player.Min, 5);
 
             Assert.IsTrue(evaluation.StateSequence.Count > 2, "Min should have blocked the near win");
             Assert.AreEqual(Player.Min, ((Connect4State)evaluation.NextMove).Board[3, 2], "Min didn't block Max's win");
@@ -154,19 +155,11 @@ namespace Connect4Tests
             var startState = new Connect4State(Connect4TestUtils.GetEmptyBoard(), Player.Max);
 
             var engine = Connect4TestUtils.GetSearchEngine();
-            var cancellationSource = new CancellationTokenSource();
-            var searchTask = engine.EvaluateAsync(startState, Player.Max, 20, cancellationSource.Token);
-            var cancellationTask = Task.Run(() =>
-            {
-                Thread.Sleep(1000);
-                cancellationSource.Cancel();
-            });
-            cancellationTask.Wait();
-            Thread.Sleep(500);
+            var cancellationSource = new CancellationTokenSource(1000);
+            var searchTask = engine.EvaluateAsync(startState, Player.Max, 20, cancellationSource.Token);    
+            Thread.Sleep(1500);
 
-            Assert.IsTrue(searchTask.IsCompleted, "Search task didn't finish fast enough after being canceled");
-        }
-
-        
+            Assert.IsTrue(searchTask.IsCompleted, "Search should have complated by now");
+        }     
     }
 }
