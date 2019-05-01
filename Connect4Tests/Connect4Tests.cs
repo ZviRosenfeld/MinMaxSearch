@@ -101,11 +101,11 @@ namespace Connect4Tests
             
             //Check that the our optimizations are working
             Assert.IsTrue(evaluation.Leaves < 19000, "Too many leaves in search.");
-            Assert.IsTrue(evaluation.IntarnalNodes < 7000, "Too many intarnal nodes in search.");
+            Assert.IsTrue(evaluation.InternalNodes < 7000, "Too many intarnal nodes in search.");
 
             // Too few leaves or internal nodes means that something went wrong
             Assert.IsTrue(evaluation.Leaves > 1000, "Too few leaves in search.");
-            Assert.IsTrue(evaluation.IntarnalNodes > 1000, "Too few intarnal nodes in search.");
+            Assert.IsTrue(evaluation.InternalNodes > 1000, "Too few intarnal nodes in search.");
         }
 
         [TestMethod]

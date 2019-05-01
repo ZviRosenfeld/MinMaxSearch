@@ -110,11 +110,11 @@ namespace TicTacToeTests
             
             //Check that the our optimizations are working
             Assert.IsTrue(evaluation.Leaves < 2600, "Too many leaves in search.");
-            Assert.IsTrue(evaluation.IntarnalNodes < 2100, "Too many intarnal nodes in search.");
+            Assert.IsTrue(evaluation.InternalNodes < 2100, "Too many intarnal nodes in search.");
 
             // Too few leaves or internal nodes means that something went wrong
             Assert.IsTrue(evaluation.Leaves > 500, "Too few leaves in search.");
-            Assert.IsTrue(evaluation.IntarnalNodes > 500, "Too few intarnal nodes in search.");
+            Assert.IsTrue(evaluation.InternalNodes > 500, "Too few intarnal nodes in search.");
         }
 
         public static SearchEngine GetSearchEngine() => 

@@ -49,4 +49,7 @@ IsUnstableState is a delegate of the form Func<IState, int, List<IState>, bool>.
 You can use the method SearchEngine.AddPruner(IPruner pruner) to add pruners to the search algorithm.
 Pruners can be implemented by implementing the IPruner interface. Then, the ShouldPrune(IState state, int depth, List<IState> passedThroughStates) method will be called on every state the algorithm checks. This can provide you with a lot of customization power over the algorithm.
 
+### Benchmarking
+An optimization that will improve one search can hurt another. That's why benchmarking is so impotent. It lets you customize the search to best suite your needs.
 
+To that end, we've created the method *BanckmarkResult[] Benchmark(this SearchEngine searchEngine, IState startState, int searchDepth, int times)*. This is an extension method that will provide you with information regarding the search's performance (ran as SearchEngine.Benchmark(IState startState, int searchDepth, int times))

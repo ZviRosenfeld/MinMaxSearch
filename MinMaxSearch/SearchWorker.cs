@@ -47,7 +47,7 @@ namespace MinMaxSearch
                 var stateEvaluation = Evaluate(state, Utils.GetReversePlayer(player), depth + 1, alpha, bata, cancellationToken, statesUpToNow);
                 allChildrenAreEndStates = allChildrenAreEndStates && stateEvaluation.DeadEnd;
                 leaves += stateEvaluation.Leaves;
-                internalNodes += stateEvaluation.IntarnalNodes;
+                internalNodes += stateEvaluation.InternalNodes;
                 if (IsBetterThen(stateEvaluation.Evaluation, bestEvaluation, stateEvaluation.StateSequence.Count, bestResult?.StateSequence?.Count, player))
                 {
                     bestEvaluation = stateEvaluation.Evaluation;
