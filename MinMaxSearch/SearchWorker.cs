@@ -33,26 +33,39 @@ namespace MinMaxSearch
         private SearchResult EvaluateChildren(IState startState, Player player, int depth, double alpha, double bata,
             CancellationToken cancellationToken, List<IState> statesUpToNow)
         {
+            var results = new List<SearchResult>();
+            foreach (var state in startState.GetNeighbors())
+            {
+                var stateEvaluation = Evaluate(state, Utils.GetReversePlayer(player), depth + 1, alpha, bata,
+                    cancellationToken, statesUpToNow);
+                results.Add(stateEvaluation);
+
+                if (AlphaBataShouldPrune(alpha, bata, stateEvaluation.Evaluation, player))
+                    break;
+                if (ShouldDieEarlly(stateEvaluation.Evaluation, player, stateEvaluation.StateSequence.Count))
+                    break;
+                UpdateAlphaAndBata(ref alpha, ref bata, stateEvaluation.Evaluation, player);
+            }
+
+            return Reduce(results, player, startState);
+        }
+
+        private SearchResult Reduce(List<SearchResult> results, Player player, IState startState)
+        {
             var bestEvaluation = player == Player.Max ? double.MinValue : double.MaxValue;
             SearchResult bestResult = null;
             int leaves = 0, internalNodes = 0;
-            foreach (var state in startState.GetNeighbors())
+            foreach (var result in results)
             {
-                var stateEvaluation = Evaluate(state, Utils.GetReversePlayer(player), depth + 1, alpha, bata, cancellationToken, statesUpToNow);
-                leaves += stateEvaluation.Leaves;
-                internalNodes += stateEvaluation.InternalNodes;
-                if (IsBetterThen(stateEvaluation.Evaluation, bestEvaluation, stateEvaluation.StateSequence.Count, bestResult?.StateSequence?.Count, player))
+                leaves += result.Leaves;
+                internalNodes += result.InternalNodes;
+                if (IsBetterThen(result.Evaluation, bestEvaluation, result.StateSequence.Count, bestResult?.StateSequence?.Count, player))
                 {
-                    bestEvaluation = stateEvaluation.Evaluation;
-                    bestResult = stateEvaluation;
-                    if (AlphaBataShouldPrune(alpha, bata, stateEvaluation.Evaluation, player))
-                        break;
-                    if (ShouldDieEarlly(bestEvaluation, player, bestResult.StateSequence.Count))
-                        break;
-                    UpdateAlphaAndBata(ref alpha, ref bata, stateEvaluation.Evaluation, player);
+                    bestEvaluation = result.Evaluation;
+                    bestResult = result;
                 }
             }
-            
+
             return bestResult.CloneAndAddStateToTop(startState, leaves, internalNodes + 1);
         }
         
