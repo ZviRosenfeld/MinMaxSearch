@@ -28,10 +28,6 @@ SearchEngine can be configured with the following options:
 In some games - such as tic-tac-toe or connect 4 - loops are impossible. In others - like chess - loops can be quite common. If this flag is set to true, the program will automatically recognize loop situations and not look any deeper when they occur.
 Note that this will only work if Equals is implement in a meaningful way on your states.
 
-**RememberDeadEndStates:**
-If set to true, the engine will remember any states from which all paths lead to end-state, so that next time it won't need to calculate the whole search-tree.
-Again, note that this will only work if Equals is implement in a meaningful way on your states.
-
 **FavorShortPaths:**
 If true, the algorithm will favor short solutions over long solutions when they both result in the same score.
 If this option is off, you may experience seemingly weird behavior. Say the algorithm sees that Min can set a trap that will end in Max's defeat in six moves. Without favoring short paths, the algorithm might decide to "give up", causing Max to perform random moves, and possibly lose much sooner - even if its opponent may not have noticed the trap.

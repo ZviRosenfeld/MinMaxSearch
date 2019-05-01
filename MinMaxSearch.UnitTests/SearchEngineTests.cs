@@ -60,33 +60,7 @@ namespace MinMaxSearch.UnitTests
             var searchEngine = new SearchEngine();
             searchEngine.Search(state1, Player.Max, 5);
         }
-
-        [TestMethod]
-        public void Search_CheckThatStateSequenceIsCorrectWhenRememberDeadEndOptionIsWorking()
-        {
-            var endState = A.Fake<IState>();
-            A.CallTo(() => endState.GetNeighbors()).Returns(new List<IState>());
-            A.CallTo(() => endState.Evaluate(A<int>.Ignored, A<List<IState>>.That.IsEmpty())).Returns(10);
-            A.CallTo(() => endState.ToString()).Returns("endState");
-
-            var state2 = A.Fake<IState>();
-            A.CallTo(() => state2.GetNeighbors()).Returns(new List<IState> { endState });
-            A.CallTo(() => state2.ToString()).Returns("state2");
-
-            var state3 = A.Fake<IState>();
-            A.CallTo(() => state3.GetNeighbors()).Returns(new List<IState> { state2 });
-            A.CallTo(() => state3.ToString()).Returns("state3");
-
-            var state1 = A.Fake<IState>();
-            A.CallTo(() => state1.GetNeighbors()).Returns(new List<IState> { state3, state2 });
-            A.CallTo(() => state1.ToString()).Returns("state1");
-
-            var searchEngine = new SearchEngine() { RememberDeadEndStates = true, FavorShortPaths = true};
-            var evaluation = searchEngine.Search(state1, Player.Max, 5);
-            
-            Assert.AreEqual(2, evaluation.StateSequence.Count, "StateSequence doesn't  contain all the states is should");
-        }
-
+        
         [DataRow(Player.Max)]
         [DataRow(Player.Min)]
         [TestMethod]

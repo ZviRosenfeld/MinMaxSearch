@@ -109,8 +109,8 @@ namespace TicTacToeTests
             Assert.AreEqual(0, evaluation.StateSequence.Last().Evaluate(0, new List<IState>()), "Should have found a wining state");
             
             //Check that the our optimizations are working
-            Assert.IsTrue(evaluation.Leaves < 2600, "Too many leaves in search.");
-            Assert.IsTrue(evaluation.InternalNodes < 2100, "Too many intarnal nodes in search.");
+            Assert.IsTrue(evaluation.Leaves < 7500, "Too many leaves in search.");
+            Assert.IsTrue(evaluation.InternalNodes < 11000, "Too many intarnal nodes in search.");
 
             // Too few leaves or internal nodes means that something went wrong
             Assert.IsTrue(evaluation.Leaves > 500, "Too few leaves in search.");
@@ -120,7 +120,6 @@ namespace TicTacToeTests
         public static SearchEngine GetSearchEngine() => 
             new SearchEngine()
             {
-                RememberDeadEndStates = true,
                 DieEarly = true,
                 MinScore = -0.5,
                 MaxScore = 0.5

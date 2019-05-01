@@ -11,7 +11,6 @@ namespace MinMaxSearch
     public class SearchEngine
     {
         private readonly List<IPruner> pruners = new List<IPruner>();
-        private readonly IDictionary<IState, SearchResult> endStates = new ConcurrentDictionary<IState, SearchResult>();
         private readonly PreventLoopPruner preventLoopPruner = new PreventLoopPruner();
 
         public void AddPruner(IPruner pruner) => pruners.Add(pruner);
@@ -21,12 +20,6 @@ namespace MinMaxSearch
         /// </summary>
         public Func<IState, int, List<IState>, bool> IsUnstableState { get; set; } = ((s, d, l) => false);
         
-        /// <summary>
-        /// If true, the engine will remember when a state leades to an endState and - when encountering that state again - used the stored evaluation. 
-        /// Note that this will only work if you implement Equals and GetHashValue in a meaningful way in the states. 
-        /// </summary>
-        public bool RememberDeadEndStates { get; set; } = false;
-
         /// <summary>
         /// Note that this will only work if you implement Equals and GetHashValue in a meaningful way in the states. 
         /// </summary>
@@ -69,7 +62,7 @@ namespace MinMaxSearch
             if (player == Player.Empty)
                 throw new EmptyPlayerException(nameof(player) + " can't be " + nameof(Player.Empty));
 
-            var searchWorker = new SearchWorker(maxDepth, this, pruners, endStates);
+            var searchWorker = new SearchWorker(maxDepth, this, pruners);
             var evaluation = searchWorker.Evaluate(startState, player, 0, double.MinValue, double.MaxValue, cancellationToken, new List<IState>());
             evaluation.StateSequence.Reverse();           
             evaluation.StateSequence.RemoveAt(0); // Removeing the top node will make the result "nicer"

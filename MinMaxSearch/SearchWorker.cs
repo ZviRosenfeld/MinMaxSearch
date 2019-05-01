@@ -8,25 +8,20 @@ namespace MinMaxSearch
     class SearchWorker
     {
         private readonly int maxDepth;
-        private readonly IDictionary<IState, SearchResult> endStates;
         private readonly SearchEngine searchEngine;
         private readonly List<IPruner> pruners;
 
-        public SearchWorker(int maxDepth, SearchEngine searchEngine, List<IPruner> pruners, IDictionary<IState, SearchResult> endStates)
+        public SearchWorker(int maxDepth, SearchEngine searchEngine, List<IPruner> pruners)
         {
             this.maxDepth = maxDepth;
             this.searchEngine = searchEngine;
             this.pruners = pruners;
-            this.endStates = endStates;
         }
         
         public SearchResult Evaluate(IState startState, Player player, int depth, double alpha, double bata, CancellationToken cancellationToken, List<IState> statesUpToNow)
         {
             if (!startState.GetNeighbors().Any())           
                 return new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0, true);
-            
-            if (searchEngine.RememberDeadEndStates && endStates.ContainsKey(startState))
-                return endStates[startState];
             
             if (ShouldStop(startState, depth, cancellationToken, statesUpToNow))
                 return new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0, false);
@@ -59,10 +54,7 @@ namespace MinMaxSearch
                     UpdateAlphaAndBata(ref alpha, ref bata, stateEvaluation.Evaluation, player);
                 }
             }
-
-            if (allChildrenAreEndStates && searchEngine.RememberDeadEndStates)
-                 endStates[startState] = bestResult.CloneAndAddStateToTop(startState, true, 1, 0);
-
+            
             return bestResult.CloneAndAddStateToTop(startState, allChildrenAreEndStates, leaves, internalNodes + 1);
         }
         

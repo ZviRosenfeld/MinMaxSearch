@@ -14,7 +14,7 @@ namespace Connect4Tests
             var engine = Connect4TestUtils.GetSearchEngine();
             var startState = new Connect4State(Connect4TestUtils.GetEmptyBoard(), Player.Max);
 
-            var results = engine.Benchmark(startState, 9, 2);
+            var results = engine.Benchmark(startState, 11, 2);
             results.Print();
         }
     }
