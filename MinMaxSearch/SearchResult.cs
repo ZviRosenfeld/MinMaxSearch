@@ -5,13 +5,12 @@ namespace MinMaxSearch
 {
     public class SearchResult
     {
-        public SearchResult(double evaluation, List<IState> stateSequence, int leaves, int internalNodes, bool deadEnd)
+        public SearchResult(double evaluation, List<IState> stateSequence, int leaves, int internalNodes)
         {
             Evaluation = evaluation;
             StateSequence = stateSequence;
             Leaves = leaves;
             InternalNodes = internalNodes;
-            DeadEnd = deadEnd;
         }
 
         public IState NextMove => StateSequence.First();
@@ -19,6 +18,5 @@ namespace MinMaxSearch
         public List<IState> StateSequence { get; }
         public int Leaves { get; }
         public int InternalNodes { get; }
-        public bool DeadEnd { get; }
     }
 }
