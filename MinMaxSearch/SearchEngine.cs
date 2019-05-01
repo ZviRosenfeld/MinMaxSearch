@@ -47,11 +47,20 @@ namespace MinMaxSearch
         public double MaxScore { get; set; } = double.MaxValue;
 
         public double MinScore { get; set; } = double.MinValue;
-        
+
+        private int maxDegreeOfParallelism = 1;
+        public int MaxDegreeOfParallelism
+        {
+            get => maxDegreeOfParallelism;
+            set => maxDegreeOfParallelism = value > 0
+                ? value
+                : throw new BadDegreeOfParallelismException("DegreeOfParallelism must be at least one");
+        }
+
         public SearchResult Search(IState startState, Player player, int maxDepth) =>
             Search(startState, player, maxDepth, CancellationToken.None);
 
-        public Task<SearchResult> EvaluateAsync(IState startState, Player player, int maxDepth, CancellationToken cancellationToken) => 
+        public Task<SearchResult> SearchAsync(IState startState, Player player, int maxDepth, CancellationToken cancellationToken) => 
             Task.Run(() => Search(startState, player, maxDepth, cancellationToken));
         
         public SearchResult Search(IState startState, Player player, int maxDepth, CancellationToken cancellationToken)

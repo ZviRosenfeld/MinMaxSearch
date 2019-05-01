@@ -32,16 +32,33 @@ namespace MinMaxSearch.UnitTests
         }
 
         [TestMethod]
-        public void Search_DontStopWithUnstableState()
+        [ExpectedException(typeof(BadDegreeOfParallelismException))]
+        public void Search_StartWithZeroDegreeOfParallelism_ExceptionThrown()
         {
-            var searchEngine = new SearchEngine() {IsUnstableState = (s, d, l) => s.Evaluate(d, l) < 10};
+            var state = A.Fake<IState>();
+            A.CallTo(() => state.GetNeighbors()).Returns(new List<IState> { state });
+
+            var searchEngine = new SearchEngine() { MaxDegreeOfParallelism = 0};
+            searchEngine.Search(state, Player.Min, 1);
+        }
+
+        [DataRow(1)]
+        [DataRow(2)]
+        [DataRow(8)]
+        [TestMethod]
+        public void Search_DontStopWithUnstableState(int degreeOfParallelism)
+        {
+            var searchEngine = new SearchEngine() {IsUnstableState = (s, d, l) => s.Evaluate(d, l) < 10, MaxDegreeOfParallelism = degreeOfParallelism};
             var result = searchEngine.Search(new IncreasingNumberState(0), Player.Max, 1);
 
             Assert.AreEqual(10, result.Evaluation, "Engine seems to have stopped before reaching a stable state");
         }
-        
+
+        [DataRow(1)]
+        [DataRow(2)]
+        [DataRow(8)]
         [TestMethod]
-        public void Search_CheckThatRecordPassThroughStatesOptionIsWorking()
+        public void Search_CheckThatRecordPassThroughStatesOptionIsWorking(int degreeOfParallelism)
         {
             var state2 = A.Fake<IState>();
             var state1 = A.Fake<IState>();
@@ -57,14 +74,15 @@ namespace MinMaxSearch.UnitTests
 
             A.CallTo(() => state1.GetNeighbors()).Returns(new List<IState> { state2 });
 
-            var searchEngine = new SearchEngine();
+            var searchEngine = new SearchEngine {MaxDegreeOfParallelism = degreeOfParallelism};
             searchEngine.Search(state1, Player.Max, 5);
         }
         
-        [DataRow(Player.Max)]
-        [DataRow(Player.Min)]
+        [DataRow(Player.Max, 1)]
+        [DataRow(Player.Min, 2)]
+        [DataRow(Player.Min, 8)]
         [TestMethod]
-        public void Search_DieEarllyOptionWorks(Player player)
+        public void Search_DieEarllyOptionWorks(Player player, int degreeOfParallelism)
         {
             var endState1 = A.Fake<IState>();
             A.CallTo(() => endState1.GetNeighbors()).Returns(new List<IState>());
@@ -84,24 +102,27 @@ namespace MinMaxSearch.UnitTests
             var state1 = A.Fake<IState>();
             A.CallTo(() => state1.GetNeighbors()).Returns(new List<IState> { endState1, endState2, endState3 });
 
-            var searchEngine = new SearchEngine() { DieEarly = true, MaxScore = 5, MinScore = 5};
+            var searchEngine = new SearchEngine() { DieEarly = true, MaxScore = 5, MinScore = 5, MaxDegreeOfParallelism = degreeOfParallelism};
             var evaluation = searchEngine.Search(state1, Player.Min, 2);
 
             Assert.AreEqual(endState1, evaluation.StateSequence.Last(), "Should have ended with endState1; found: " + evaluation.StateSequence.Last());
         }
 
+        [DataRow(1)]
+        [DataRow(2)]
+        [DataRow(8)]
         [TestMethod]
-        public void Search_CheckPreventLoopPrunerWorks()
+        public void Search_CheckPreventLoopPrunerWorks(int degreeOfParallelism)
         {
-            var searchEngine = new SearchEngine() {PreventLoops = true};
+            var searchEngine = new SearchEngine() {PreventLoops = true, MaxDegreeOfParallelism = degreeOfParallelism};
             searchEngine.Search(new ThrowExceptionAtDepthThreeState(0), Player.Max, 5);
         }
-
+        
         [TestMethod]
         [ExpectedException(typeof(Exception), "Shouldn't have gotten so far into the search")]
         public void Search_CheckThatAfterSettingPreventLoopsToTrueItCanBeTurnedBackToFalse()
         {
-            var searchEngine = new SearchEngine() { PreventLoops = true };
+            var searchEngine = new SearchEngine() { PreventLoops = true};
             searchEngine.PreventLoops = false;
             searchEngine.Search(new ThrowExceptionAtDepthThreeState(0), Player.Max, 5);
         }

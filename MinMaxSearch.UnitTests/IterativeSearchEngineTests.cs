@@ -16,21 +16,27 @@ namespace MinMaxSearch.UnitTests
             searchEngine.IterativeSearch(new IncreasingNumberState(1), Player.Max, 2, 2, CancellationToken.None);
         }
 
+        [DataRow(1)]
+        [DataRow(2)]
+        [DataRow(8)]
         [TestMethod]
-        public void IterativeSearch_SearchCanceldBeforeFirstSearchFinished_DontReturnNullResult()
+        public void IterativeSearch_SearchCanceldBeforeFirstSearchFinished_DontReturnNullResult(int degreeOfParallelism)
         {
             var cancellationSource = new CancellationTokenSource();
             cancellationSource.Cancel();
-            var searchEngine = new SearchEngine();
+            var searchEngine = new SearchEngine {MaxDegreeOfParallelism = degreeOfParallelism};
             var result = searchEngine.IterativeSearch(new IncreasingNumberState(1), Player.Max, 1, 2, cancellationSource.Token);
             Assert.IsNotNull(result, "We should never return a null result");
         }
 
+        [DataRow(1)]
+        [DataRow(2)]
+        [DataRow(8)]
         [TestMethod]
-        public void IterativeSearch_SearchCancled_WeDontContinueLookingAfterSearchCancled()
+        public void IterativeSearch_SearchCancled_WeDontContinueLookingAfterSearchCancled(int degreeOfParallelism)
         {
             var cancellationSource = new CancellationTokenSource(100);
-            var searchEngine = new SearchEngine();
+            var searchEngine = new SearchEngine() {MaxDegreeOfParallelism = degreeOfParallelism};
             var result = Task.Run(() => searchEngine.IterativeSearch(new CancelAtValue4State(1, cancellationSource), Player.Max, 1, int.MaxValue, cancellationSource.Token));
             Thread.Sleep(100);
 

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using MinMaxSearch.Pruners;
 
 namespace MinMaxSearch
@@ -10,12 +11,14 @@ namespace MinMaxSearch
         private readonly int maxDepth;
         private readonly SearchEngine searchEngine;
         private readonly List<IPruner> pruners;
+        private readonly ThreadManager threadManager;
 
         public SearchWorker(int maxDepth, SearchEngine searchEngine, List<IPruner> pruners)
         {
             this.maxDepth = maxDepth;
             this.searchEngine = searchEngine;
             this.pruners = pruners;
+            threadManager = new ThreadManager(searchEngine.MaxDegreeOfParallelism);
         }
         
         public SearchResult Evaluate(IState startState, Player player, int depth, double alpha, double bata, CancellationToken cancellationToken, List<IState> statesUpToNow)
@@ -33,36 +36,41 @@ namespace MinMaxSearch
         private SearchResult EvaluateChildren(IState startState, Player player, int depth, double alpha, double bata,
             CancellationToken cancellationToken, List<IState> statesUpToNow)
         {
-            var results = new List<SearchResult>();
+            var results = new List<Task<SearchResult>>();
             foreach (var state in startState.GetNeighbors())
             {
-                var stateEvaluation = Evaluate(state, Utils.GetReversePlayer(player), depth + 1, alpha, bata,
-                    cancellationToken, statesUpToNow);
-                results.Add(stateEvaluation);
+                var taskResult = threadManager.Invoke(() => Evaluate(state, Utils.GetReversePlayer(player),
+                    depth + 1, alpha, bata, cancellationToken, statesUpToNow));
+                results.Add(taskResult);
 
-                if (AlphaBataShouldPrune(alpha, bata, stateEvaluation.Evaluation, player))
-                    break;
-                if (ShouldDieEarlly(stateEvaluation.Evaluation, player, stateEvaluation.StateSequence.Count))
-                    break;
-                UpdateAlphaAndBata(ref alpha, ref bata, stateEvaluation.Evaluation, player);
+                if (taskResult.IsCompleted)
+                {
+                    var stateEvaluation = taskResult.Result;
+                    if (AlphaBataShouldPrune(alpha, bata, stateEvaluation.Evaluation, player))
+                        break;
+                    if (ShouldDieEarlly(stateEvaluation.Evaluation, player, stateEvaluation.StateSequence.Count))
+                        break;
+                    UpdateAlphaAndBata(ref alpha, ref bata, stateEvaluation.Evaluation, player);
+                }
             }
 
             return Reduce(results, player, startState);
         }
 
-        private SearchResult Reduce(List<SearchResult> results, Player player, IState startState)
+        private SearchResult Reduce(List<Task<SearchResult>> results, Player player, IState startState)
         {
             var bestEvaluation = player == Player.Max ? double.MinValue : double.MaxValue;
             SearchResult bestResult = null;
             int leaves = 0, internalNodes = 0;
             foreach (var result in results)
             {
-                leaves += result.Leaves;
-                internalNodes += result.InternalNodes;
-                if (IsBetterThen(result.Evaluation, bestEvaluation, result.StateSequence.Count, bestResult?.StateSequence?.Count, player))
+                var actualResult = result.Result;
+                leaves += actualResult.Leaves;
+                internalNodes += actualResult.InternalNodes;
+                if (IsBetterThen(actualResult.Evaluation, bestEvaluation, actualResult.StateSequence.Count, bestResult?.StateSequence?.Count, player))
                 {
-                    bestEvaluation = result.Evaluation;
-                    bestResult = result;
+                    bestEvaluation = actualResult.Evaluation;
+                    bestResult = actualResult;
                 }
             }
 

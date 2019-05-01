@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MinMaxSearch;
 using MinMaxSearch.Banckmarking;
 
@@ -11,7 +12,15 @@ namespace TicTacToeTests
         [TestCategory("Benchmarking")]
         public void BenchmarkTicTacToe()
         {
-            var engine = TicTacToeBassicTests.GetSearchEngine();
+            BenchmarkWithDegreeOfParallelism(1);
+            BenchmarkWithDegreeOfParallelism(2);
+            BenchmarkWithDegreeOfParallelism(8);
+        }
+
+        private void BenchmarkWithDegreeOfParallelism(int degreeOfParallelism)
+        {
+            Console.WriteLine("Running with degreeOfParallelism: " + degreeOfParallelism);
+            var engine = TicTacToeBassicTests.GetSearchEngine(degreeOfParallelism);
             var startState = new TicTacToeState(new[,]
             {
                 { Player.Empty, Player.Empty, Player.Empty},
@@ -19,7 +28,7 @@ namespace TicTacToeTests
                 { Player.Empty, Player.Empty, Player.Empty},
             }, Player.Max);
 
-            var results = engine.Benchmark(startState, 10, 2);
+            var results = engine.Benchmark(startState, 10, 1);
             results.Print();
         }
     }
