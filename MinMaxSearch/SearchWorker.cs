@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -37,19 +38,22 @@ namespace MinMaxSearch
             CancellationToken cancellationToken, List<IState> statesUpToNow)
         {
             var results = new List<Task<SearchResult>>();
+            var cancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             foreach (var state in startState.GetNeighbors())
             {
                 var taskResult = threadManager.Invoke(() => Evaluate(state, Utils.GetReversePlayer(player),
-                    depth + 1, alpha, bata, cancellationToken, statesUpToNow), cancellationToken);
+                    depth + 1, alpha, bata, cancellationSource.Token, statesUpToNow), cancellationToken);
                 results.Add(taskResult);
 
-                if (taskResult.IsCompleted && taskResult.Status != TaskStatus.Canceled)
+                if (taskResult.Status == TaskStatus.RanToCompletion)
                 {
                     var stateEvaluation = taskResult.Result;
-                    if (AlphaBataShouldPrune(alpha, bata, stateEvaluation.Evaluation, player))
+                    if (AlphaBataShouldPrune(alpha, bata, stateEvaluation.Evaluation, player) ||
+                        ShouldDieEarlly(stateEvaluation.Evaluation, player, stateEvaluation.StateSequence.Count))
+                    {
+                        cancellationSource.Cancel();
                         break;
-                    if (ShouldDieEarlly(stateEvaluation.Evaluation, player, stateEvaluation.StateSequence.Count))
-                        break;
+                    }
                     UpdateAlphaAndBata(ref alpha, ref bata, stateEvaluation.Evaluation, player);
                 }
             }
@@ -65,15 +69,23 @@ namespace MinMaxSearch
             int leaves = 0, internalNodes = 0;
             foreach (var result in results)
             {
-                if (result.Status == TaskStatus.Canceled) continue;
-                
-                var actualResult = result.Result;
-                leaves += actualResult.Leaves;
-                internalNodes += actualResult.InternalNodes;
-                if (IsBetterThen(actualResult.Evaluation, bestEvaluation, actualResult.StateSequence.Count, bestResult?.StateSequence?.Count, player))
+                try
                 {
-                    bestEvaluation = actualResult.Evaluation;
-                    bestResult = actualResult;
+                    if (result.IsCanceled) continue;
+
+                    var actualResult = result.Result;
+                    leaves += actualResult.Leaves;
+                    internalNodes += actualResult.InternalNodes;
+                    if (IsBetterThen(actualResult.Evaluation, bestEvaluation, actualResult.StateSequence.Count,
+                        bestResult?.StateSequence?.Count, player))
+                    {
+                        bestEvaluation = actualResult.Evaluation;
+                        bestResult = actualResult;
+                    }
+                }
+                catch (AggregateException)
+                {
+                    // Do nothing - this can happen and if un-needed tasks were canceled
                 }
             }
 
