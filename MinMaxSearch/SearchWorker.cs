@@ -43,7 +43,7 @@ namespace MinMaxSearch
                     depth + 1, alpha, bata, cancellationToken, statesUpToNow), cancellationToken);
                 results.Add(taskResult);
 
-                if (taskResult.IsCompleted)
+                if (taskResult.IsCompleted && taskResult.Status != TaskStatus.Canceled)
                 {
                     var stateEvaluation = taskResult.Result;
                     if (AlphaBataShouldPrune(alpha, bata, stateEvaluation.Evaluation, player))
@@ -54,7 +54,8 @@ namespace MinMaxSearch
                 }
             }
 
-            return Reduce(results, player, startState);
+            return Reduce(results, player, startState) ?? new SearchResult(startState.Evaluate(depth, statesUpToNow),
+                       new List<IState> {startState}, 1, 0);
         }
 
         private SearchResult Reduce(List<Task<SearchResult>> results, Player player, IState startState)
@@ -64,6 +65,8 @@ namespace MinMaxSearch
             int leaves = 0, internalNodes = 0;
             foreach (var result in results)
             {
+                if (result.Status == TaskStatus.Canceled) continue;
+                
                 var actualResult = result.Result;
                 leaves += actualResult.Leaves;
                 internalNodes += actualResult.InternalNodes;
@@ -74,7 +77,7 @@ namespace MinMaxSearch
                 }
             }
 
-            return bestResult.CloneAndAddStateToTop(startState, leaves, internalNodes + 1);
+            return bestResult?.CloneAndAddStateToTop(startState, leaves, internalNodes + 1);
         }
         
         private bool ShouldStop(IState state, int depth, CancellationToken cancellationToken, List<IState> passedStates)

@@ -74,7 +74,7 @@ namespace MinMaxSearch
             var searchWorker = new SearchWorker(maxDepth, this, pruners);
             var evaluation = searchWorker.Evaluate(startState, player, 0, double.MinValue, double.MaxValue, cancellationToken, new List<IState>());
             evaluation.StateSequence.Reverse();           
-            evaluation.StateSequence.RemoveAt(0); // Removeing the top node will make the result "nicer"
+            evaluation.StateSequence.RemoveAt(0); // Removing the top node will make the result "nicer"
             return evaluation;
         }
         

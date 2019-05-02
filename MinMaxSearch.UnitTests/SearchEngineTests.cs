@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using FakeItEasy;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -58,7 +59,7 @@ namespace MinMaxSearch.UnitTests
         [DataRow(2)]
         [DataRow(8)]
         [TestMethod]
-        public void Search_CheckThatRecordPassThroughStatesOptionIsWorking(int degreeOfParallelism)
+        public void Search_CheckThatRecordPassThroughStatesIsWorking(int degreeOfParallelism)
         {
             var state2 = A.Fake<IState>();
             var state1 = A.Fake<IState>();
@@ -125,6 +126,40 @@ namespace MinMaxSearch.UnitTests
             var searchEngine = new SearchEngine() { PreventLoops = true};
             searchEngine.PreventLoops = false;
             searchEngine.Search(new ThrowExceptionAtDepthThreeState(0), Player.Max, 5);
+        }
+
+        [DataRow(1)]
+        [DataRow(2)]
+        [DataRow(8)]
+        [TestMethod]
+        public void Search_TaskCanceld_DontContinueSearching(int degreeOfParallelism)
+        {
+            var cancellationSource = new CancellationTokenSource();
+
+            var state1 = A.Fake<IState>();
+            var state2 = A.Fake<IState>();
+            var state3 = A.Fake<IState>();
+            A.CallTo(() => state1.GetNeighbors()).Returns(new List<IState> { state2 });
+            A.CallTo(() => state2.GetNeighbors()).ReturnsLazily(() =>
+            {
+                cancellationSource.Cancel();
+                return new List<IState> {state3};
+            });
+            A.CallTo(() => state3.GetNeighbors()).Returns(new List<IState>());
+
+            A.CallTo(() => state1.Evaluate(A<int>.Ignored, A<List<IState>>._)).Returns(1);
+            A.CallTo(() => state2.Evaluate(A<int>.Ignored, A<List<IState>>._)).Returns(2);
+            A.CallTo(() => state3.Evaluate(A<int>.Ignored, A<List<IState>>._)).Returns(3);
+
+            A.CallTo(() => state1.ToString()).Returns("State1");
+            A.CallTo(() => state2.ToString()).Returns("State2");
+            A.CallTo(() => state3.ToString()).Returns("State3");
+
+            var searchEngine = new SearchEngine() { MaxDegreeOfParallelism = degreeOfParallelism };
+            var result = searchEngine.Search(state1, Player.Min, 5, cancellationSource.Token);
+
+            Assert.AreEqual(2, result.Evaluation);
+            Assert.AreEqual(1, result.StateSequence.Count, "We shouldn't have gotten to state3");
         }
     }
 }
