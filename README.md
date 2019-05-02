@@ -2,19 +2,23 @@
 A MinMax Search Engine.
 MinMax search is a popular search technique used for finding the next-best move in zero-summed games such as tic-tac-toe or checkers.
 
+##Download
+You can find MinMaxSearch library on nuget.org via package name MinMaxSearch.
+
 ## How to use
-To use this algorithm, you'll need to create a new instance of SearchEngine. Then you can call searchEngine.Search(IState startState, Player player, int maxDepth) which will return an object of type SearchResult. SearchResult will contain - among other stuff - the best next move.
+To use this algorithm, you'll need to create a new instance of SearchEngine. 
+SearchEngine has a number of Search methods that expect different parameters. Most of the parameters are straight-forward. There are 2 however, which I'd like to elaborate on.
 
-searchEngine.Search expects 2 arguments:
+**IState:**
 
-**IState:** 
 this is an interface that your game-specific states will need to implement. The interface requires that you implement the following 2 methods:
 1) IEnumerable<IState> GetNeighbors(); - returns a list of the state's neighbors. *Note that a win state shouldn't return any neighbors*.
 2) double Evaluate(int depth, List<IState> passedThroughStates); - returns the state's evaluation (how good it is).
 
-In addition, we recommend that your states also implement object's Equals and GetHashCode methods, as many of the algorithm optimizations rely on these methods being implemented in a meaningful way.
+In addition, I recommend that your states also implement object's Equals and GetHashCode methods, as many of the algorithm optimizations rely on these methods being implemented in a meaningful way.
 
 **Player:**
+
 The algorithm assumes the existence of 2 players: Player.Max and Player.Min (Player is an enum in the code).
 Max is the player trying to get the best score, while Min is the player trying to get the worst score. You can choose which player you want to search for.
 
