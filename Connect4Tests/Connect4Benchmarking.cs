@@ -9,12 +9,14 @@ namespace Connect4Tests
     [TestCategory("Benchmarking")]
     public class Connect4Benchmarking
     {
+        private const int SearchDepth = 11;
+
         [TestMethod]
         public void BenchmarkConnect4()
         {
             BenchmarkWithDegreeOfParallelism(1);
             BenchmarkWithDegreeOfParallelism(2);
-            BenchmarkWithDegreeOfParallelism(4);
+            BenchmarkWithDegreeOfParallelism(8);
         }
 
         private void BenchmarkWithDegreeOfParallelism(int degreeOfParallelism)
@@ -23,8 +25,8 @@ namespace Connect4Tests
             var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism);
             var startState = new Connect4State(Connect4TestUtils.GetEmptyBoard(), Player.Max);
 
-            var results = engine.Benchmark(startState, 11, 1);
-            results.Print();
+            var results = engine.Benchmark(startState, SearchDepth);
+            Console.WriteLine(results.ToString());
         }
     }
 }

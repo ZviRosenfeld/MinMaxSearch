@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -57,6 +56,8 @@ namespace MinMaxSearch
                 : throw new BadDegreeOfParallelismException("DegreeOfParallelism must be at least one");
         }
 
+        public TimeSpan? TimeOut { get; set; } = null;
+
         public SearchResult Search(IState startState, Player player, int maxDepth) =>
             Search(startState, player, maxDepth, CancellationToken.None);
 
@@ -65,24 +66,24 @@ namespace MinMaxSearch
         
         public SearchResult Search(IState startState, Player player, int maxDepth, CancellationToken cancellationToken)
         {
-            Console.WriteLine("Starting at " + DateTime.Now.TimeOfDay);
+            using (var cancellationTimer = new CancellationTimer(TimeOut))
+            {
+                cancellationToken = cancellationTimer.GetCancellationToken(cancellationToken);
 
-            if (!startState.GetNeighbors().Any())
-                throw new NoNeighborsException(startState);
+                if (!startState.GetNeighbors().Any())
+                    throw new NoNeighborsException(startState);
 
-            if (player == Player.Empty)
-                throw new EmptyPlayerException(nameof(player) + " can't be " + nameof(Player.Empty));
+                if (player == Player.Empty)
+                    throw new EmptyPlayerException(nameof(player) + " can't be " + nameof(Player.Empty));
 
-            var searchWorker = new SearchWorker(maxDepth, this, pruners);
-            var evaluation = searchWorker.Evaluate(startState, player, 0, double.MinValue, double.MaxValue, cancellationToken, new List<IState>());
-            evaluation.StateSequence.Reverse();           
-            evaluation.StateSequence.RemoveAt(0); // Removing the top node will make the result "nicer"
-            return evaluation;
+                var searchWorker = new SearchWorker(maxDepth, this, pruners);
+                var evaluation = searchWorker.Evaluate(startState, player, 0, double.MinValue, double.MaxValue, cancellationToken, new List<IState>());
+                evaluation.StateSequence.Reverse();
+                evaluation.StateSequence.RemoveAt(0); // Removing the top node will make the result "nicer"
+                return evaluation;
+            }
         }
         
-        public SearchResult IterativeSearch(IState startState, Player player, int startDepth, int maxDepth, TimeSpan timeout) =>
-            IterativeSearch(startState, player, startDepth, maxDepth, new CancellationTokenSource(timeout).Token);
-
         public SearchResult IterativeSearch(IState startState, Player player, int startDepth, int maxDepth, CancellationToken cancellationToken)
         {
             if (startDepth >= maxDepth)

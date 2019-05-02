@@ -22,7 +22,9 @@ Max is the player trying to get the best score, while Min is the player trying t
 The project contains unit tests with states for the games tic-tac-toe and connect 4. You can refer to them for examples.
 
 ### CancellationToken
-Many of the search methods can accept CancellationTokens. Please note that: A) a canceled search will still rerun the best result it has found so far, and B) canceling a long search with a high degree of parallelism may take some time.
+Many of the search methods can accept CancellationTokens. Please note that a canceled search will still rerun the best result it has found so far.
+
+*Please don't use the cancellationToken's CancelAfter option.* Instead, set the SearchEngine has a TimeOut field.
 
 ### SearchEngine options:
 SearchEngine can be configured with the following options:
@@ -37,8 +39,6 @@ If this option is off, you may experience seemingly weird behavior. Say the algo
 
 **MaxDegreeOfParallelism**
 Note that a higher degree of parallelism doesn't necessarily equal a faster search. You should probably do some benchmarking to find the degree of parallelism best suited for your problem.
-Another thing to note is that with high degrees of parallelism long searches may take some time to stop after being canceled with a cancellationToken.
-As a rule of thumb, a degree of parallelism equal to the neighbors of your starting state will probably result in the best performance.
 
 **DieEarly:**
 If this option is set to true, the algorithm will rerun as soon as it finds a score bigger then SearchEngine.MaxScore for Max or SearchEngine.MinScore for Min.
