@@ -61,10 +61,12 @@ namespace MinMaxSearch
             Search(startState, player, maxDepth, CancellationToken.None);
 
         public Task<SearchResult> SearchAsync(IState startState, Player player, int maxDepth, CancellationToken cancellationToken) => 
-            Task.Run(() => Search(startState, player, maxDepth, cancellationToken), cancellationToken);
+            Task.Run(() => Search(startState, player, maxDepth, cancellationToken));
         
         public SearchResult Search(IState startState, Player player, int maxDepth, CancellationToken cancellationToken)
         {
+            Console.WriteLine("Starting at " + DateTime.Now.TimeOfDay);
+
             if (!startState.GetNeighbors().Any())
                 throw new NoNeighborsException(startState);
 

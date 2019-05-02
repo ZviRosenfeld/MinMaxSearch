@@ -23,7 +23,7 @@ namespace MinMaxSearch.UnitTests
             var manager = new ThreadManager(1);
 
             for (int i = 0; i < 3; i++)
-                results.Add(manager.Invoke(slowAction, CancellationToken.None));
+                results.Add(manager.Invoke(slowAction));
 
             foreach (var result in results)
                 Assert.IsTrue(result.IsCompleted, "All tasks should have finished");
@@ -37,7 +37,7 @@ namespace MinMaxSearch.UnitTests
             var manager = new ThreadManager(degreeOfParallelism);
 
             for (int i = 0; i < degreeOfParallelism - 1; i++)
-                results.Add(manager.Invoke(slowAction, CancellationToken.None));
+                results.Add(manager.Invoke(slowAction));
 
             foreach (var result in results)
                 Assert.IsFalse(result.IsCompleted, "The tasks shouldn't have finished yet");
@@ -54,7 +54,7 @@ namespace MinMaxSearch.UnitTests
             Task.Run(() =>
             {
                 for (int i = 0; i < 50; i++)
-                    results.Add(manager.Invoke(slowAction, CancellationToken.None));
+                    results.Add(manager.Invoke(slowAction));
             });
             Thread.Sleep(100);
 

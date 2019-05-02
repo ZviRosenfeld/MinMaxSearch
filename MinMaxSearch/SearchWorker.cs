@@ -26,10 +26,10 @@ namespace MinMaxSearch
         {
             if (!startState.GetNeighbors().Any())           
                 return new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0);
-            
+
             if (ShouldStop(startState, depth, cancellationToken, statesUpToNow))
                 return new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0);
-               
+            
             statesUpToNow = new List<IState>(statesUpToNow) { startState };
             return EvaluateChildren(startState, player, depth, alpha, bata, cancellationToken, statesUpToNow);
         }
@@ -42,7 +42,7 @@ namespace MinMaxSearch
             foreach (var state in startState.GetNeighbors())
             {
                 var taskResult = threadManager.Invoke(() => Evaluate(state, Utils.GetReversePlayer(player),
-                    depth + 1, alpha, bata, cancellationSource.Token, statesUpToNow), cancellationToken);
+                    depth + 1, alpha, bata, cancellationSource.Token, statesUpToNow));
                 results.Add(taskResult);
 
                 if (taskResult.Status == TaskStatus.RanToCompletion)

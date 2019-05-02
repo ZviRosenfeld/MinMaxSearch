@@ -173,7 +173,6 @@ namespace Connect4Tests
 
         [DataRow(1)]
         [DataRow(2)]
-        [DataRow(8)]
         [TestMethod]
         public void NewGame_CheckCancellationToken(int degreeOfParallelism)
         {
@@ -181,10 +180,11 @@ namespace Connect4Tests
 
             var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism);
             var cancellationSource = new CancellationTokenSource(1000);
-            var searchTask = engine.SearchAsync(startState, Player.Max, 20, cancellationSource.Token);    
+            var searchTask = engine.SearchAsync(startState, Player.Max, 20, cancellationSource.Token);
             Thread.Sleep(2000);
 
             Assert.IsTrue(searchTask.IsCompleted, "Search should have complated by now");
+            var t = searchTask.Result; // Check that we can get a result even if the search was terminated
         }     
     }
 }
