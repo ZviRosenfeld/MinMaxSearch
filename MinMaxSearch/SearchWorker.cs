@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using MinMaxSearch.Pruners;
 
 namespace MinMaxSearch
@@ -10,22 +12,24 @@ namespace MinMaxSearch
         private readonly int maxDepth;
         private readonly SearchEngine searchEngine;
         private readonly List<IPruner> pruners;
+        private readonly ThreadManager threadManager;
 
         public SearchWorker(int maxDepth, SearchEngine searchEngine, List<IPruner> pruners)
         {
             this.maxDepth = maxDepth;
             this.searchEngine = searchEngine;
             this.pruners = pruners;
+            threadManager = new ThreadManager(searchEngine.MaxDegreeOfParallelism);
         }
         
         public SearchResult Evaluate(IState startState, Player player, int depth, double alpha, double bata, CancellationToken cancellationToken, List<IState> statesUpToNow)
         {
             if (!startState.GetNeighbors().Any())           
                 return new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0);
-            
+
             if (ShouldStop(startState, depth, cancellationToken, statesUpToNow))
                 return new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0);
-               
+            
             statesUpToNow = new List<IState>(statesUpToNow) { startState };
             return EvaluateChildren(startState, player, depth, alpha, bata, cancellationToken, statesUpToNow);
         }
@@ -33,27 +37,59 @@ namespace MinMaxSearch
         private SearchResult EvaluateChildren(IState startState, Player player, int depth, double alpha, double bata,
             CancellationToken cancellationToken, List<IState> statesUpToNow)
         {
-            var bestEvaluation = player == Player.Max ? double.MinValue : double.MaxValue;
-            SearchResult bestResult = null;
-            int leaves = 0, internalNodes = 0;
+            var results = new List<Task<SearchResult>>();
+            var cancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             foreach (var state in startState.GetNeighbors())
             {
-                var stateEvaluation = Evaluate(state, Utils.GetReversePlayer(player), depth + 1, alpha, bata, cancellationToken, statesUpToNow);
-                leaves += stateEvaluation.Leaves;
-                internalNodes += stateEvaluation.InternalNodes;
-                if (IsBetterThen(stateEvaluation.Evaluation, bestEvaluation, stateEvaluation.StateSequence.Count, bestResult?.StateSequence?.Count, player))
+                var taskResult = threadManager.Invoke(() => Evaluate(state, Utils.GetReversePlayer(player),
+                    depth + 1, alpha, bata, cancellationSource.Token, statesUpToNow));
+                results.Add(taskResult);
+
+                if (taskResult.Status == TaskStatus.RanToCompletion)
                 {
-                    bestEvaluation = stateEvaluation.Evaluation;
-                    bestResult = stateEvaluation;
-                    if (AlphaBataShouldPrune(alpha, bata, stateEvaluation.Evaluation, player))
+                    var stateEvaluation = taskResult.Result;
+                    if (AlphaBataShouldPrune(alpha, bata, stateEvaluation.Evaluation, player) ||
+                        ShouldDieEarlly(stateEvaluation.Evaluation, player, stateEvaluation.StateSequence.Count))
+                    {
+                        cancellationSource.Cancel();
                         break;
-                    if (ShouldDieEarlly(bestEvaluation, player, bestResult.StateSequence.Count))
-                        break;
+                    }
                     UpdateAlphaAndBata(ref alpha, ref bata, stateEvaluation.Evaluation, player);
                 }
             }
-            
-            return bestResult.CloneAndAddStateToTop(startState, leaves, internalNodes + 1);
+
+            return Reduce(results, player, startState) ?? new SearchResult(startState.Evaluate(depth, statesUpToNow),
+                       new List<IState> {startState}, 1, 0);
+        }
+
+        private SearchResult Reduce(List<Task<SearchResult>> results, Player player, IState startState)
+        {
+            var bestEvaluation = player == Player.Max ? double.MinValue : double.MaxValue;
+            SearchResult bestResult = null;
+            int leaves = 0, internalNodes = 0;
+            foreach (var result in results)
+            {
+                try
+                {
+                    if (result.IsCanceled) continue;
+
+                    var actualResult = result.Result;
+                    leaves += actualResult.Leaves;
+                    internalNodes += actualResult.InternalNodes;
+                    if (IsBetterThen(actualResult.Evaluation, bestEvaluation, actualResult.StateSequence.Count,
+                        bestResult?.StateSequence?.Count, player))
+                    {
+                        bestEvaluation = actualResult.Evaluation;
+                        bestResult = actualResult;
+                    }
+                }
+                catch (AggregateException)
+                {
+                    // Do nothing - this can happen and if un-needed tasks were canceled
+                }
+            }
+
+            return bestResult?.CloneAndAddStateToTop(startState, leaves, internalNodes + 1);
         }
         
         private bool ShouldStop(IState state, int depth, CancellationToken cancellationToken, List<IState> passedStates)

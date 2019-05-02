@@ -15,4 +15,11 @@ namespace MinMaxSearch
         {
         }
     }
+
+    public class BadDegreeOfParallelismException : ApplicationException
+    {
+        public BadDegreeOfParallelismException(string message) : base(message)
+        {
+        }
+    }
 }

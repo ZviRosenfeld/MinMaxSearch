@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace MinMaxSearch.Banckmarking
+namespace MinMaxSearch.Benckmarking
 {
     public class BenckmarkResult
     {
