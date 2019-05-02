@@ -1,15 +1,15 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MinMaxSearch;
-using MinMaxSearch.Banckmarking;
+using MinMaxSearch.Benckmarking;
 using System;
 
 namespace Connect4Tests
 {
     [TestClass]
+    [TestCategory("Benchmarking")]
     public class Connect4Benchmarking
     {
         [TestMethod]
-        [TestCategory("Benchmarking")]
         public void BenchmarkConnect4()
         {
             BenchmarkWithDegreeOfParallelism(1);

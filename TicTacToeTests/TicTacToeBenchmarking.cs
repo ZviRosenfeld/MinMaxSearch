@@ -1,15 +1,15 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MinMaxSearch;
-using MinMaxSearch.Banckmarking;
+using MinMaxSearch.Benckmarking;
 
 namespace TicTacToeTests
 {
     [TestClass]
+    [TestCategory("Benchmarking")]
     public class TicTacToeBenchmarking
     {
         [TestMethod]
-        [TestCategory("Benchmarking")]
         public void BenchmarkTicTacToe()
         {
             BenchmarkWithDegreeOfParallelism(1);

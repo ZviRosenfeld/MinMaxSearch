@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace MinMaxSearch
 {
-    class ThreadManager
+    public class ThreadManager
     {
         private readonly object threadLock = new object();
         private int threadsRunning = 1;
@@ -15,28 +15,30 @@ namespace MinMaxSearch
             this.maxDegreeOfParallelism = maxDegreeOfParallelism;
         }
 
-        public Task<T> Invoke<T>(Func<T> action, CancellationToken cancellationToken)
+        public Task<T> Invoke<T>(Func<T> func, CancellationToken cancellationToken)
         {
+            bool startNewThread;
             lock (threadLock)
             {
-                if (threadsRunning < maxDegreeOfParallelism)
-                {
-                    threadsRunning++;
-                    return Task.Run(() =>
-                    {
-                        try
-                        {
-                            return action();
-                        }
-                        finally
-                        {
-                            threadsRunning--;
-                        }
-                    }, cancellationToken);
-                }
+                startNewThread = threadsRunning < maxDegreeOfParallelism;
             }
-            var result = action();
-            return Task.FromResult(result);
+
+            if (startNewThread)
+            {
+                Interlocked.Increment(ref threadsRunning);
+                return Task.Run(() =>
+                {
+                    try
+                    {
+                        return func();
+                    }
+                    finally
+                    {
+                        Interlocked.Decrement(ref threadsRunning);
+                    }
+                }, cancellationToken);
+            }
+            return Task.FromResult(func());
         }
     }
 }

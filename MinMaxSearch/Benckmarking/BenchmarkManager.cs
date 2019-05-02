@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MinMaxSearch.Banckmarking
+namespace MinMaxSearch.Benckmarking
 {
     public static class BenchmarkManager
     {
