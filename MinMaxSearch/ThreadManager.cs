@@ -17,7 +17,7 @@ namespace MinMaxSearch
             this.maxDegreeOfParallelism = maxDegreeOfParallelism;
         }
 
-        public Task<T> Invoke<T>(Func<T> action)
+        public Task<T> Invoke<T>(Func<T> action, CancellationToken cancellationToken)
         {
             lock (threadLock)
             {
@@ -34,7 +34,7 @@ namespace MinMaxSearch
                         {
                             threadsRunning--;
                         }
-                    });
+                    }, cancellationToken);
                 }
             }
             var result = action();

@@ -40,7 +40,7 @@ namespace MinMaxSearch
             foreach (var state in startState.GetNeighbors())
             {
                 var taskResult = threadManager.Invoke(() => Evaluate(state, Utils.GetReversePlayer(player),
-                    depth + 1, alpha, bata, cancellationToken, statesUpToNow));
+                    depth + 1, alpha, bata, cancellationToken, statesUpToNow), cancellationToken);
                 results.Add(taskResult);
 
                 if (taskResult.IsCompleted)

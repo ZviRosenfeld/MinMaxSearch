@@ -61,7 +61,7 @@ namespace MinMaxSearch
             Search(startState, player, maxDepth, CancellationToken.None);
 
         public Task<SearchResult> SearchAsync(IState startState, Player player, int maxDepth, CancellationToken cancellationToken) => 
-            Task.Run(() => Search(startState, player, maxDepth, cancellationToken));
+            Task.Run(() => Search(startState, player, maxDepth, cancellationToken), cancellationToken);
         
         public SearchResult Search(IState startState, Player player, int maxDepth, CancellationToken cancellationToken)
         {
