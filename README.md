@@ -26,7 +26,7 @@ The project contains unit tests with states for the games tic-tac-toe and connec
 ### CancellationToken
 Many of the search methods can accept CancellationTokens. Please note that a canceled search will still rerun the best result it has found so far.
 
-*Please don't use the cancellationToken's CancelAfter or delay options.* Instead, set the SearchEngine has a TimeOut field.
+*Please don't use the cancellationToken's CancelAfter or delay options.* Instead, set the SearchEngine's TimeOut field.
 
 ### SearchEngine options:
 SearchEngine can be configured with the following options:
@@ -42,7 +42,7 @@ If this option is off, you may experience seemingly weird behavior. Say the algo
 **MaxDegreeOfParallelism**
 Note that a higher degree of parallelism doesn't necessarily equal a faster search. You should probably do some benchmarking to find the degree of parallelism best suited for your problem.
 
-**TimeOut**
+**TimeOut:**
 If you set this to a value, the search will automatically cancel once the timeout is exceeded.
 
 **DieEarly:**
