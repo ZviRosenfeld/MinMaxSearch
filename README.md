@@ -7,18 +7,16 @@ You can find MinMaxSearch library on nuget.org via package name MinMaxSearch.
 
 ## How to Use
 To use this algorithm, you'll need to create a new instance of SearchEngine. 
-SearchEngine has a number of Search methods that expect different parameters. Most of the parameters are straight-forward. There are 2 however, which I'd like to elaborate on.
+SearchEngine has a number of Search methods that expect different parameters. Most of the parameters are straight-forward. I'd like to elaborate on the IState.
 
 **IState:**
 this is an interface that your game-specific states will need to implement. The interface requires that you implement the following 2 methods:
 1) IEnumerable<IState> GetNeighbors(); - returns a list of the state's neighbors. *Note that a win state shouldn't return any neighbors*.
 2) double Evaluate(int depth, List<IState> passedThroughStates); - returns the state's evaluation (how good it is).
+3) Player Turn - values can be Player.Max and Player.Min (Player is an enum in the code). Max is the player trying to get the best score, while Min is the player trying to get the worst score.
+While most in most games, turns will alternate between Max and Min, you can really implement any order you want.
 
 In addition, I recommend that your states also implement object's Equals and GetHashCode methods, as many of the algorithm optimizations rely on these methods being implemented in a meaningful way.
-
-**Player:**
-The algorithm assumes the existence of 2 players: Player.Max and Player.Min (Player is an enum in the code).
-Max is the player trying to get the best score, while Min is the player trying to get the worst score. You can choose which player you want to search for.
 
 ### Examples
 Following are a few snippets take from the project's unit tests. You can refer to the [Connnect4 Tests](Connect4Tests/Connect4Tests.cs) or the [Tic-tac-toe Tests](TicTacToeTests/TicTacToeBassicTests.cs) for more examples.
@@ -28,7 +26,7 @@ example1:
 var startState = new TicTacToeState();
 var searchDepth = 5;
 var engine = new SearchEngine();
-var searchResult = engine.Search(startState, Player.Max, searchDepth);
+var searchResult = engine.Search(startState, searchDepth);
 ```
 
 example2:
@@ -41,7 +39,7 @@ var engine =  new SearchEngine()
     MaxDegreeOfParallelism = 2,
     FavorShortPaths = true
 };
-var searchResult = engine.Search(startState, Player.Max, searchDepth, cancellationToken);
+var searchResult = engine.Search(startState, searchDepth, cancellationToken);
 ```
 
 ### SearchEngine options:
