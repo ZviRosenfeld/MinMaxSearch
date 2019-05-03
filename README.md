@@ -21,7 +21,27 @@ The algorithm assumes the existence of 2 players: Player.Max and Player.Min (Pla
 Max is the player trying to get the best score, while Min is the player trying to get the worst score. You can choose which player you want to search for.
 
 ### Examples
-The project contains unit tests with states for the games tic-tac-toe and connect 4. You can refer to them for examples.
+Following are a few snippets take from the project's unit tests. You can refer to the [Connnect4 Tests] (Connect4Tests/Connect4Tests.cs) or the [Tic-tac-toe Tests] (TicTacToeTests/TicTacToeBassicTests.cs) for more examples.
+
+```
+var startState = new TicTacToeState();
+var searchDepth = 5;
+var engine = new SearchEngine();
+var searchResult = engine.Search(startState, Player.Max, searchDepth);
+```
+
+```
+var startState = new Connect4State();
+var searchDepth = 5;
+var cancellationToken = new CancellationTokenSource();
+var engine =  new SearchEngine()
+{
+    MaxDegreeOfParallelism = 2,
+    TimeOut = TimeSpan.FromMinutes(1),
+    FavorShortPaths = true
+};
+var searchResult = engine.Search(startState, Player.Max, searchDepth, cancellationToken);
+```
 
 ### CancellationToken
 Many of the search methods can accept CancellationTokens. Please note that a canceled search will still rerun the best result it has found so far.
