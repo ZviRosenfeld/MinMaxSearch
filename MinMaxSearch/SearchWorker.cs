@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,8 +21,11 @@ namespace MinMaxSearch
             threadManager = new ThreadManager(searchEngine.MaxDegreeOfParallelism);
         }
         
-        public SearchResult Evaluate(IState startState, Player player, int depth, double alpha, double bata, CancellationToken cancellationToken, List<IState> statesUpToNow)
+        public SearchResult Evaluate(IState startState, int depth, double alpha, double bata, CancellationToken cancellationToken, List<IState> statesUpToNow)
         {
+            if (startState.Turn == Player.Empty)
+                throw new EmptyPlayerException(nameof(startState.Turn) + " can't be " + nameof(Player.Empty));
+            
             if (!startState.GetNeighbors().Any())           
                 return new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0);
 
@@ -31,18 +33,19 @@ namespace MinMaxSearch
                 return new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0);
             
             statesUpToNow = new List<IState>(statesUpToNow) { startState };
-            return EvaluateChildren(startState, player, depth, alpha, bata, cancellationToken, statesUpToNow);
+            return EvaluateChildren(startState, depth, alpha, bata, cancellationToken, statesUpToNow);
         }
 
-        private SearchResult EvaluateChildren(IState startState, Player player, int depth, double alpha, double bata,
+        private SearchResult EvaluateChildren(IState startState, int depth, double alpha, double bata,
             CancellationToken cancellationToken, List<IState> statesUpToNow)
         {
+            var player = startState.Turn;
             var results = new List<Task<SearchResult>>();
             var cancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             foreach (var state in startState.GetNeighbors())
             {
-                var taskResult = threadManager.Invoke(() => Evaluate(state, Utils.GetReversePlayer(player),
-                    depth + 1, alpha, bata, cancellationSource.Token, statesUpToNow));
+                var taskResult = threadManager.Invoke(() =>
+                    Evaluate(state, depth + 1, alpha, bata, cancellationSource.Token, statesUpToNow));
                 results.Add(taskResult);
 
                 if (taskResult.Status == TaskStatus.RanToCompletion)
@@ -113,9 +116,15 @@ namespace MinMaxSearch
         private bool IsBetterThen(double firstValue, double secondValue, int firstPathLength, int? secondPathLength, Player player)
         {
             if (searchEngine.FavorShortPaths && firstValue == secondValue)
-                return ((int) player) * firstPathLength < ((int) player) * secondPathLength;
-
-            return ((int) player) * firstValue > ((int) player) * secondValue;
+            {
+                if (player == Player.Min)
+                    return firstPathLength > secondPathLength;
+                return firstPathLength < secondPathLength;
+            }
+                
+            if (player == Player.Min)
+                return firstValue < secondValue;
+            return firstValue > secondValue;
         }
 
         private bool AlphaBataShouldPrune(double alpha, double bata, double evaluation, Player player)

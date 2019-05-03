@@ -13,7 +13,7 @@ namespace MinMaxSearch.UnitTests
         public void IterativeSearch_StartDepthEqualThenMaxDepth_ThrowException()
         {
             var searchEngine = new SearchEngine();
-            searchEngine.IterativeSearch(new IncreasingNumberState(1), Player.Max, 2, 2, CancellationToken.None);
+            searchEngine.IterativeSearch(new IncreasingNumberState(1, Player.Max), 2, 2, CancellationToken.None);
         }
 
         [DataRow(1)]
@@ -25,7 +25,7 @@ namespace MinMaxSearch.UnitTests
             var cancellationSource = new CancellationTokenSource();
             cancellationSource.Cancel();
             var searchEngine = new SearchEngine {MaxDegreeOfParallelism = degreeOfParallelism};
-            var result = searchEngine.IterativeSearch(new IncreasingNumberState(1), Player.Max, 1, 2, cancellationSource.Token);
+            var result = searchEngine.IterativeSearch(new IncreasingNumberState(1, Player.Max), 1, 2, cancellationSource.Token);
             Assert.IsNotNull(result, "We should never return a null result");
         }
 
@@ -37,7 +37,7 @@ namespace MinMaxSearch.UnitTests
         {
             var cancellationSource = new CancellationTokenSource(100);
             var searchEngine = new SearchEngine() {MaxDegreeOfParallelism = degreeOfParallelism};
-            var result = Task.Run(() => searchEngine.IterativeSearch(new CancelAtValue4State(1, cancellationSource), Player.Max, 1, int.MaxValue, cancellationSource.Token));
+            var result = Task.Run(() => searchEngine.IterativeSearch(new CancelAtValue4State(1, cancellationSource, Player.Max), 1, int.MaxValue, cancellationSource.Token));
             Thread.Sleep(100);
 
             Assert.IsTrue(result.IsCompleted, "Search should have complated by now");

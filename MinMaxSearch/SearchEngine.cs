@@ -58,13 +58,13 @@ namespace MinMaxSearch
 
         public TimeSpan? TimeOut { get; set; } = null;
 
-        public SearchResult Search(IState startState, Player player, int maxDepth) =>
-            Search(startState, player, maxDepth, CancellationToken.None);
+        public SearchResult Search(IState startState, int maxDepth) =>
+            Search(startState, maxDepth, CancellationToken.None);
 
-        public Task<SearchResult> SearchAsync(IState startState, Player player, int maxDepth, CancellationToken cancellationToken) => 
-            Task.Run(() => Search(startState, player, maxDepth, cancellationToken));
+        public Task<SearchResult> SearchAsync(IState startState, int maxDepth, CancellationToken cancellationToken) => 
+            Task.Run(() => Search(startState, maxDepth, cancellationToken));
         
-        public SearchResult Search(IState startState, Player player, int maxDepth, CancellationToken cancellationToken)
+        public SearchResult Search(IState startState, int maxDepth, CancellationToken cancellationToken)
         {
             using (var cancellationTimer = new CancellationTimer(TimeOut))
             {
@@ -72,19 +72,16 @@ namespace MinMaxSearch
 
                 if (!startState.GetNeighbors().Any())
                     throw new NoNeighborsException(startState);
-
-                if (player == Player.Empty)
-                    throw new EmptyPlayerException(nameof(player) + " can't be " + nameof(Player.Empty));
-
+                
                 var searchWorker = new SearchWorker(maxDepth, this, pruners);
-                var evaluation = searchWorker.Evaluate(startState, player, 0, double.MinValue, double.MaxValue, cancellationToken, new List<IState>());
+                var evaluation = searchWorker.Evaluate(startState, 0, double.MinValue, double.MaxValue, cancellationToken, new List<IState>());
                 evaluation.StateSequence.Reverse();
                 evaluation.StateSequence.RemoveAt(0); // Removing the top node will make the result "nicer"
                 return evaluation;
             }
         }
         
-        public SearchResult IterativeSearch(IState startState, Player player, int startDepth, int maxDepth, CancellationToken cancellationToken)
+        public SearchResult IterativeSearch(IState startState, int startDepth, int maxDepth, CancellationToken cancellationToken)
         {
             if (startDepth >= maxDepth)
                 throw new Exception($"{nameof(startDepth)} (== {startDepth}) must be bigget than {nameof(maxDepth)} ( == {maxDepth})");
@@ -92,7 +89,7 @@ namespace MinMaxSearch
             SearchResult bestResultSoFar = null;
             for (int i = startDepth; i < maxDepth; i++)
             { 
-                var result = Search(startState, player, i, cancellationToken);
+                var result = Search(startState, i, cancellationToken);
                 if (!cancellationToken.IsCancellationRequested || bestResultSoFar == null)
                     bestResultSoFar = result;
                 if (cancellationToken.IsCancellationRequested)

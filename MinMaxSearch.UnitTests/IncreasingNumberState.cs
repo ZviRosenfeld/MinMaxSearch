@@ -6,14 +6,16 @@ namespace MinMaxSearch.UnitTests
     {
         private readonly int value;
 
-        public IncreasingNumberState(int value)
+        public IncreasingNumberState(int value, Player turn)
         {
             this.value = value;
+            Turn = turn;
         }
 
         public IEnumerable<IState> GetNeighbors() =>
-            new List<IncreasingNumberState>{ new IncreasingNumberState(value + 1), new IncreasingNumberState(value + 2)};
+            new List<IncreasingNumberState>{ new IncreasingNumberState(value + 1, Utils.GetReversePlayer(Turn)), new IncreasingNumberState(value + 2, Utils.GetReversePlayer(Turn))};
 
         public double Evaluate(int depth, List<IState> passedThroughStates) => value;
+        public Player Turn { get; }
     }
 }

@@ -76,6 +76,9 @@ namespace TicTacToeTests
             if (!(obj is TicTacToeState ticTacToeState))
                 return false;
 
+            if (Turn != ticTacToeState.Turn)
+                return false;
+
             for (var i = 0; i < 3; i++)
             for (var j = 0; j < 3; j++)
                 if (Board[i, j] != ticTacToeState.Board[i, j])
@@ -92,7 +95,7 @@ namespace TicTacToeTests
             for (var j = 0; j < 3; j++)
                 sum = GetValue(Board[i, j]) * (int) Math.Pow(3, i + j * 3);
 
-            return sum;
+            return sum + (int)Turn * (int) Math.Pow(3, 9);
         }
 
         private int GetValue(Player player)
