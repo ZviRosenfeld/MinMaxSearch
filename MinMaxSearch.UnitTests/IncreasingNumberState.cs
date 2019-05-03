@@ -2,7 +2,7 @@
 
 namespace MinMaxSearch.UnitTests
 {
-    class IncreasingNumberState : IState
+    class IncreasingNumberState : IDeterministicState
     {
         private readonly int value;
 

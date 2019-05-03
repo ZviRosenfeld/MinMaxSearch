@@ -64,7 +64,8 @@ namespace TicTacToeTests
             var evaluation = engine.Search(startState, 3);
 
             Assert.AreEqual(Player.Max, ((TicTacToeState)evaluation.NextMove).Board[2, 2]);
-            Assert.AreEqual(TicTacToeState.MaxValue, evaluation.StateSequence.Last().Evaluate(0, new List<IState>()), "Should have found a wining state");
+            var lastMove = (IDeterministicState)evaluation.StateSequence.Last();
+            Assert.AreEqual(TicTacToeState.MaxValue, lastMove.Evaluate(0, new List<IState>()), "Should have found a wining state");
         }
 
         [DataRow(1)]
@@ -84,7 +85,8 @@ namespace TicTacToeTests
             var evaluation = engine.Search(startState, 5);
 
             Assert.AreEqual(TicTacToeState.MaxValue, evaluation.Evaluation);
-            Assert.AreEqual(TicTacToeState.MaxValue, evaluation.StateSequence.Last().Evaluate(0, new List<IState>()), "Should have found a wining state");
+            var lastMove = (IDeterministicState) evaluation.StateSequence.Last();
+            Assert.AreEqual(TicTacToeState.MaxValue, lastMove.Evaluate(0, new List<IState>()), "Should have found a wining state");
         }
 
         [DataRow(1)]
@@ -104,7 +106,8 @@ namespace TicTacToeTests
             var evaluation = engine.Search(startState, 5);
 
             Assert.AreEqual(TicTacToeState.MinValue, evaluation.Evaluation);
-            Assert.AreEqual(TicTacToeState.MinValue, evaluation.StateSequence.Last().Evaluate(0, new List<IState>()), "Should have found a wining state");
+            var lastMove = (IDeterministicState)evaluation.StateSequence.Last();
+            Assert.AreEqual(TicTacToeState.MinValue, lastMove.Evaluate(0, new List<IState>()), "Should have found a wining state");
         }
 
         [DataRow(1)]
@@ -124,7 +127,8 @@ namespace TicTacToeTests
             var evaluation = engine.Search(startState, 10);
 
             Assert.AreEqual(0, evaluation.Evaluation);
-            Assert.AreEqual(0, evaluation.StateSequence.Last().Evaluate(0, new List<IState>()), "Should have found a wining state");
+            var lastMove = (IDeterministicState)evaluation.StateSequence.Last();
+            Assert.AreEqual(0, lastMove.Evaluate(0, new List<IState>()), "Should have found a wining state");
 
             if (degreeOfParallelism == 1)
             {

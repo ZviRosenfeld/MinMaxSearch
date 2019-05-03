@@ -13,7 +13,7 @@ namespace MinMaxSearch
             InternalNodes = internalNodes;
         }
 
-        public IState NextMove => StateSequence.First();
+        public IDeterministicState NextMove => (IDeterministicState) StateSequence.First(s => s is IDeterministicState);
         public double Evaluation { get; }
         public List<IState> StateSequence { get; }
         public int Leaves { get; }

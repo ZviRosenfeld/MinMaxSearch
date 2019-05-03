@@ -5,7 +5,7 @@ using MinMaxSearch;
 
 namespace Connect4Tests
 {
-    public class Connect4State : IState
+    public class Connect4State : IDeterministicState
     {
         public const int BoardSize = 6;
 
@@ -21,7 +21,7 @@ namespace Connect4Tests
         public IEnumerable<IState> GetNeighbors()
         {
             if (BoardEvaluator.IsWin(Board, Utils.GetReversePlayer(Turn)))
-                return new List<IState>();
+                return new List<IDeterministicState>();
 
             var result = new List<Connect4State>();
             for (int i = 0; i < BoardSize; i++)

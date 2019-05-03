@@ -4,7 +4,7 @@ namespace MinMaxSearch
 {
     public class NoNeighborsException : ApplicationException
     {
-        public NoNeighborsException(IState startState) : base("start state has no nighbors " + startState)
+        public NoNeighborsException(IDeterministicState startState) : base("start state has no nighbors " + startState)
         {
         }
     }

@@ -21,7 +21,7 @@ namespace MinMaxSearch
             threadManager = new ThreadManager(searchEngine.MaxDegreeOfParallelism);
         }
         
-        public SearchResult Evaluate(IState startState, int depth, double alpha, double bata, CancellationToken cancellationToken, List<IState> statesUpToNow)
+        public SearchResult Evaluate(IDeterministicState startState, int depth, double alpha, double bata, CancellationToken cancellationToken, List<IState> statesUpToNow)
         {
             if (startState.Turn == Player.Empty)
                 throw new EmptyPlayerException(nameof(startState.Turn) + " can't be " + nameof(Player.Empty));
@@ -36,7 +36,13 @@ namespace MinMaxSearch
             return EvaluateChildren(startState, depth, alpha, bata, cancellationToken, statesUpToNow);
         }
 
-        private SearchResult EvaluateChildren(IState startState, int depth, double alpha, double bata,
+        public SearchResult Evaluate(IState startState, int depth, double alpha, double bata,
+            CancellationToken cancellationToken, List<IState> statesUpToNow)
+        {
+            return Evaluate((IDeterministicState) startState, depth, alpha, bata, cancellationToken, statesUpToNow);
+        }
+
+        private SearchResult EvaluateChildren(IDeterministicState startState, int depth, double alpha, double bata,
             CancellationToken cancellationToken, List<IState> statesUpToNow)
         {
             var player = startState.Turn;
@@ -61,11 +67,10 @@ namespace MinMaxSearch
                 }
             }
 
-            return Reduce(results, player, startState) ?? new SearchResult(startState.Evaluate(depth, statesUpToNow),
-                       new List<IState> {startState}, 1, 0);
+            return Reduce(results, player, startState) ?? new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0);
         }
 
-        private SearchResult Reduce(List<Task<SearchResult>> results, Player player, IState startState)
+        private SearchResult Reduce(List<Task<SearchResult>> results, Player player, IDeterministicState startState)
         {
             var bestEvaluation = player == Player.Max ? double.MinValue : double.MaxValue;
             SearchResult bestResult = null;
@@ -86,7 +91,7 @@ namespace MinMaxSearch
             return bestResult?.CloneAndAddStateToTop(startState, leaves, internalNodes + 1);
         }
         
-        private bool ShouldStop(IState state, int depth, CancellationToken cancellationToken, List<IState> passedStates)
+        private bool ShouldStop(IDeterministicState state, int depth, CancellationToken cancellationToken, List<IState> passedStates)
         {
             if (depth >= maxDepth && !searchEngine.IsUnstableState(state, depth, passedStates))
                 return true;

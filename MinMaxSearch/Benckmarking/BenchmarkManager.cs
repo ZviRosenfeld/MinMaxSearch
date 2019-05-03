@@ -6,7 +6,7 @@ namespace MinMaxSearch.Benckmarking
 {
     public static class BenchmarkManager
     {
-        public static BenckmarkResult Benchmark(this SearchEngine searchEngine, IState startState, int searchDepth)
+        public static BenckmarkResult Benchmark(this SearchEngine searchEngine, IDeterministicState startState, int searchDepth)
         {
             var startTime = DateTime.Now;
             var result = searchEngine.Search(startState, searchDepth);

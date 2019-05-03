@@ -7,6 +7,6 @@ namespace MinMaxSearch.Pruners
     /// </summary>
     public interface IPruner
     {
-        bool ShouldPrune(IState state, int depth, List<IState> passedThroughStates);
+        bool ShouldPrune(IDeterministicState state, int depth, List<IState> passedThroughStates);
     }
 }

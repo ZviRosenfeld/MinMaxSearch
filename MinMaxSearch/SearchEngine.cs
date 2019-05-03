@@ -17,7 +17,7 @@ namespace MinMaxSearch
         /// <summary>
         /// At unstable states, we'll continue searching even after we've hit the maxDepth limit
         /// </summary>
-        public Func<IState, int, List<IState>, bool> IsUnstableState { get; set; } = ((s, d, l) => false);
+        public Func<IDeterministicState, int, List<IState>, bool> IsUnstableState { get; set; } = ((s, d, l) => false);
         
         /// <summary>
         /// Note that this will only work if you implement Equals and GetHashValue in a meaningful way in the states. 
@@ -56,13 +56,13 @@ namespace MinMaxSearch
                 : throw new BadDegreeOfParallelismException("DegreeOfParallelism must be at least one");
         }
         
-        public SearchResult Search(IState startState, int maxDepth) =>
+        public SearchResult Search(IDeterministicState startState, int maxDepth) =>
             Search(startState, maxDepth, CancellationToken.None);
 
-        public Task<SearchResult> SearchAsync(IState startState, int maxDepth, CancellationToken cancellationToken) => 
+        public Task<SearchResult> SearchAsync(IDeterministicState startState, int maxDepth, CancellationToken cancellationToken) => 
             Task.Run(() => Search(startState, maxDepth, cancellationToken));
 
-        public SearchResult Search(IState startState, int maxDepth, CancellationToken cancellationToken)
+        public SearchResult Search(IDeterministicState startState, int maxDepth, CancellationToken cancellationToken)
         {
             if (!startState.GetNeighbors().Any())
                 throw new NoNeighborsException(startState);
@@ -74,7 +74,7 @@ namespace MinMaxSearch
             return evaluation;
         }
 
-        public SearchResult IterativeSearch(IState startState, int startDepth, int maxDepth, CancellationToken cancellationToken)
+        public SearchResult IterativeSearch(IDeterministicState startState, int startDepth, int maxDepth, CancellationToken cancellationToken)
         {
             if (startDepth >= maxDepth)
                 throw new Exception($"{nameof(startDepth)} (== {startDepth}) must be bigget than {nameof(maxDepth)} ( == {maxDepth})");

@@ -14,8 +14,8 @@ namespace MinMaxSearch.UnitTests
         [ExpectedException(typeof(NoNeighborsException))]
         public void Search_StartStateHasNoNeighbors_ExceptionThrown()
         {
-            var state = A.Fake<IState>();
-            A.CallTo(() => state.GetNeighbors()).Returns(new List<IState>());
+            var state = A.Fake<IDeterministicState>();
+            A.CallTo(() => state.GetNeighbors()).Returns(new List<IDeterministicState>());
             A.CallTo(() => state.Turn).Returns(Player.Empty);
 
             var searchEngine = new SearchEngine();
@@ -26,8 +26,8 @@ namespace MinMaxSearch.UnitTests
         [ExpectedException(typeof(EmptyPlayerException))]
         public void Search_StartEmptyPlayer_ExceptionThrown()
         {
-            var state = A.Fake<IState>();
-            A.CallTo(() => state.GetNeighbors()).Returns(new List<IState>{state});
+            var state = A.Fake<IDeterministicState>();
+            A.CallTo(() => state.GetNeighbors()).Returns(new List<IDeterministicState>{state});
             A.CallTo(() => state.Turn).Returns(Player.Empty);
 
             var searchEngine = new SearchEngine();
@@ -38,12 +38,12 @@ namespace MinMaxSearch.UnitTests
         [ExpectedException(typeof(EmptyPlayerException))]
         public void Search_EmptyPlayerStateInSearch_ExceptionThrown()
         {
-            var state = A.Fake<IState>();
-            A.CallTo(() => state.GetNeighbors()).Returns(new List<IState> { state });
+            var state = A.Fake<IDeterministicState>();
+            A.CallTo(() => state.GetNeighbors()).Returns(new List<IDeterministicState> { state });
             A.CallTo(() => state.Turn).Returns(Player.Empty);
 
-            var startState = A.Fake<IState>();
-            A.CallTo(() => startState.GetNeighbors()).Returns(new List<IState> { state });
+            var startState = A.Fake<IDeterministicState>();
+            A.CallTo(() => startState.GetNeighbors()).Returns(new List<IDeterministicState> { state });
             A.CallTo(() => startState.Turn).Returns(Player.Min);
 
             var searchEngine = new SearchEngine();
@@ -54,8 +54,8 @@ namespace MinMaxSearch.UnitTests
         [ExpectedException(typeof(BadDegreeOfParallelismException))]
         public void Search_StartWithZeroDegreeOfParallelism_ExceptionThrown()
         {
-            var state = A.Fake<IState>();
-            A.CallTo(() => state.GetNeighbors()).Returns(new List<IState> { state });
+            var state = A.Fake<IDeterministicState>();
+            A.CallTo(() => state.GetNeighbors()).Returns(new List<IDeterministicState> { state });
             A.CallTo(() => state.Turn).Returns(Player.Empty);
 
             var searchEngine = new SearchEngine() { MaxDegreeOfParallelism = 0};
@@ -80,9 +80,9 @@ namespace MinMaxSearch.UnitTests
         [TestMethod]
         public void Search_CheckThatRecordPassThroughStatesIsWorking(int degreeOfParallelism)
         {
-            var state2 = A.Fake<IState>();
-            var state1 = A.Fake<IState>();
-            A.CallTo(() => state2.GetNeighbors()).Returns(new List<IState>());
+            var state2 = A.Fake<IDeterministicState>();
+            var state1 = A.Fake<IDeterministicState>();
+            A.CallTo(() => state2.GetNeighbors()).Returns(new List<IDeterministicState>());
             A.CallTo(() => state2.Evaluate(A<int>.Ignored, A<List<IState>>.That.IsEmpty()))
                 .Throws(new Exception("passedStats list should have been empty"));
             A.CallTo(() => state2.Evaluate(A<int>.Ignored, A<List<IState>>._))
@@ -92,7 +92,7 @@ namespace MinMaxSearch.UnitTests
                     Assert.IsTrue(l.Contains(state1), "passThroughStates should contain state1");
                 });
 
-            A.CallTo(() => state1.GetNeighbors()).Returns(new List<IState> { state2 });
+            A.CallTo(() => state1.GetNeighbors()).Returns(new List<IDeterministicState> { state2 });
 
             A.CallTo(() => state1.Turn).Returns(Player.Max);
             A.CallTo(() => state2.Turn).Returns(Player.Min);
@@ -107,22 +107,22 @@ namespace MinMaxSearch.UnitTests
         [TestMethod]
         public void Search_DieEarllyOptionWorks(int degreeOfParallelism)
         {
-            var endState1 = A.Fake<IState>();
+            var endState1 = A.Fake<IDeterministicState>();
             A.CallTo(() => endState1.GetNeighbors()).Returns(new List<IState>());
             A.CallTo(() => endState1.Evaluate(A<int>.Ignored, A<List<IState>>._)).Returns(10);
             A.CallTo(() => endState1.ToString()).Returns("endState1");
 
-            var endState2 = A.Fake<IState>();
+            var endState2 = A.Fake<IDeterministicState>();
             A.CallTo(() => endState2.GetNeighbors()).Returns(new List<IState>());
             A.CallTo(() => endState2.Evaluate(A<int>.Ignored, A<List<IState>>._)).Returns(15);
             A.CallTo(() => endState2.ToString()).Returns("endState2");
 
-            var endState3 = A.Fake<IState>();
+            var endState3 = A.Fake<IDeterministicState>();
             A.CallTo(() => endState3.GetNeighbors()).Returns(new List<IState>());
             A.CallTo(() => endState3.Evaluate(A<int>.Ignored, A<List<IState>>._)).Returns(0);
             A.CallTo(() => endState3.ToString()).Returns("endState3");
 
-            var state1 = A.Fake<IState>();
+            var state1 = A.Fake<IDeterministicState>();
             A.CallTo(() => state1.GetNeighbors()).Returns(new List<IState> { endState1, endState2, endState3 });
 
             A.CallTo(() => state1.Turn).Returns(Player.Min);
@@ -163,14 +163,14 @@ namespace MinMaxSearch.UnitTests
         {
             var cancellationSource = new CancellationTokenSource();
 
-            var state1 = A.Fake<IState>();
-            var state2 = A.Fake<IState>();
-            var state3 = A.Fake<IState>();
-            A.CallTo(() => state1.GetNeighbors()).Returns(new List<IState> { state2 });
+            var state1 = A.Fake<IDeterministicState>();
+            var state2 = A.Fake<IDeterministicState>();
+            var state3 = A.Fake<IDeterministicState>();
+            A.CallTo(() => state1.GetNeighbors()).Returns(new List<IDeterministicState> { state2 });
             A.CallTo(() => state2.GetNeighbors()).ReturnsLazily(() =>
             {
                 cancellationSource.Cancel();
-                return new List<IState> {state3};
+                return new List<IDeterministicState> {state3};
             });
             A.CallTo(() => state3.GetNeighbors()).Returns(new List<IState>());
 

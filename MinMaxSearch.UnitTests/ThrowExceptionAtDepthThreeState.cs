@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace MinMaxSearch.UnitTests
 {
-    class ThrowExceptionAtDepthThreeState : IState
+    class ThrowExceptionAtDepthThreeState : IDeterministicState
     {
         public readonly int Value;
 
@@ -14,7 +14,7 @@ namespace MinMaxSearch.UnitTests
         }
 
         public IEnumerable<IState> GetNeighbors() =>
-            new List<IState> {new ThrowExceptionAtDepthThreeState(Value == 1 ? 0: 1, Utils.GetReversePlayer(Turn))};
+            new List<IDeterministicState> {new ThrowExceptionAtDepthThreeState(Value == 1 ? 0: 1, Utils.GetReversePlayer(Turn))};
 
         public double Evaluate(int depth, List<IState> passedThroughStates) => 
             depth > 3? throw new Exception("Shouldn't have gotten so far into the search") : Value;

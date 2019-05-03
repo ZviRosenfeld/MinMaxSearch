@@ -3,7 +3,7 @@ using System.Threading;
 
 namespace MinMaxSearch.UnitTests
 {
-    class CancelAtValue4State : IState
+    class CancelAtValue4State : IDeterministicState
     {
         public readonly int Value;
         private readonly CancellationTokenSource cancellationTokenSource;
@@ -20,7 +20,7 @@ namespace MinMaxSearch.UnitTests
             if (Value >= 4)
                 cancellationTokenSource.Cancel();
 
-            return new List<IState> {new CancelAtValue4State(Value + 1, cancellationTokenSource, Utils.GetReversePlayer(Turn))};
+            return new List<IDeterministicState> {new CancelAtValue4State(Value + 1, cancellationTokenSource, Utils.GetReversePlayer(Turn))};
         }
 
         public double Evaluate(int depth, List<IState> passedThroughStates) => Value;
