@@ -21,7 +21,7 @@ The algorithm assumes the existence of 2 players: Player.Max and Player.Min (Pla
 Max is the player trying to get the best score, while Min is the player trying to get the worst score. You can choose which player you want to search for.
 
 ### Examples
-Following are a few snippets take from the project's unit tests. You can refer to the [Connnect4 Tests](Connect4Tests/Connect4Tests.cs) or the [Tic-tac-toe Tests](TicTacToeTests/TicTacToeBassicTests.cs) for more examples.
+Following are a few snippets take from the project's unit tests. You can refer to the [Connnect4 Tests](Connect4Tests) or [Tic-tac-toe Tests](TicTacToeTests) for more examples.
 
 example1:
 ```csharp
@@ -45,7 +45,7 @@ var engine =  new SearchEngine()
 var searchResult = engine.Search(startState, Player.Max, searchDepth, cancellationToken);
 ```
 
-### CancellationToken
+### CancellationTokens
 Many of the search methods can accept CancellationTokens. Please note that a canceled search will still rerun the best result it has found so far.
 
 *Please don't use the cancellationToken's CancelAfter or delay options.* Instead, set the SearchEngine's TimeOut field.
