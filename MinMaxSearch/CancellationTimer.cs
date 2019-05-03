@@ -3,7 +3,7 @@ using System.Threading;
 
 namespace MinMaxSearch
 {
-    class CancellationTimer : IDisposable
+    public class CancellationTimer : IDisposable
     {
         private Timer timeoutTimer;
         private readonly TimeSpan? timeOut;
@@ -18,7 +18,7 @@ namespace MinMaxSearch
             if (timeOut != null)
             {
                 var cancellationSource = CancellationTokenSource.CreateLinkedTokenSource(originalToken);
-                timeoutTimer = new Timer(c => cancellationSource.Cancel(), null, timeOut.Value, TimeSpan.MaxValue);
+                timeoutTimer = new Timer(c => cancellationSource.Cancel(), null, timeOut.Value, TimeSpan.FromMilliseconds(-1));
                 return cancellationSource.Token;
             }
 
