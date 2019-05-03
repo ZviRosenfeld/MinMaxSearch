@@ -55,32 +55,25 @@ namespace MinMaxSearch
                 ? value
                 : throw new BadDegreeOfParallelismException("DegreeOfParallelism must be at least one");
         }
-
-        public TimeSpan? TimeOut { get; set; } = null;
-
+        
         public SearchResult Search(IState startState, int maxDepth) =>
             Search(startState, maxDepth, CancellationToken.None);
 
         public Task<SearchResult> SearchAsync(IState startState, int maxDepth, CancellationToken cancellationToken) => 
             Task.Run(() => Search(startState, maxDepth, cancellationToken));
-        
+
         public SearchResult Search(IState startState, int maxDepth, CancellationToken cancellationToken)
         {
-            using (var cancellationTimer = new CancellationTimer(TimeOut))
-            {
-                cancellationToken = cancellationTimer.GetCancellationToken(cancellationToken);
+            if (!startState.GetNeighbors().Any())
+                throw new NoNeighborsException(startState);
 
-                if (!startState.GetNeighbors().Any())
-                    throw new NoNeighborsException(startState);
-                
-                var searchWorker = new SearchWorker(maxDepth, this, pruners);
-                var evaluation = searchWorker.Evaluate(startState, 0, double.MinValue, double.MaxValue, cancellationToken, new List<IState>());
-                evaluation.StateSequence.Reverse();
-                evaluation.StateSequence.RemoveAt(0); // Removing the top node will make the result "nicer"
-                return evaluation;
-            }
+            var searchWorker = new SearchWorker(maxDepth, this, pruners);
+            var evaluation = searchWorker.Evaluate(startState, 0, double.MinValue, double.MaxValue, cancellationToken, new List<IState>());
+            evaluation.StateSequence.Reverse();
+            evaluation.StateSequence.RemoveAt(0); // Removing the top node will make the result "nicer"
+            return evaluation;
         }
-        
+
         public SearchResult IterativeSearch(IState startState, int startDepth, int maxDepth, CancellationToken cancellationToken)
         {
             if (startDepth >= maxDepth)

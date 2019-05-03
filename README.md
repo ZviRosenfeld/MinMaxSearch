@@ -39,16 +39,10 @@ var cancellationToken = new CancellationTokenSource();
 var engine =  new SearchEngine()
 {
     MaxDegreeOfParallelism = 2,
-    TimeOut = TimeSpan.FromMinutes(1),
     FavorShortPaths = true
 };
 var searchResult = engine.Search(startState, Player.Max, searchDepth, cancellationToken);
 ```
-
-### CancellationToken
-Many of the search methods can accept CancellationTokens. Please note that a canceled search will still rerun the best result it has found so far.
-
-*Please don't use the cancellationToken's CancelAfter or delay options.* Instead, set the SearchEngine's TimeOut field.
 
 ### SearchEngine options:
 SearchEngine can be configured with the following options:
@@ -63,9 +57,6 @@ If this option is off, you may experience seemingly weird behavior. Say the algo
 
 **MaxDegreeOfParallelism**
 Note that a higher degree of parallelism doesn't necessarily equal a faster search. You should probably do some benchmarking to find the degree of parallelism best suited for your problem.
-
-**TimeOut:**
-If you set this to a value, the search will automatically cancel once the timeout is exceeded.
 
 **DieEarly:**
 If this option is set to true, the algorithm will rerun as soon as it finds a score bigger then SearchEngine.MaxScore for Max or SearchEngine.MinScore for Min.
