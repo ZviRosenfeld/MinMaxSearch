@@ -7,16 +7,18 @@ You can find MinMaxSearch library on nuget.org via package name MinMaxSearch.
 
 ## How to Use
 To use this algorithm, you'll need to create a new instance of SearchEngine. 
-SearchEngine has a number of Search methods that expect different parameters. Most of the parameters are straight-forward. I'd like to elaborate on the IState.
+SearchEngine has a number of Search methods that expect different parameters. Most of the parameters are straight-forward. I'd like to elaborate on the IState one.
 
 **IState:**
 this is an interface that your game-specific states will need to implement. The interface requires that you implement the following 2 methods:
 1) IEnumerable<IState> GetNeighbors(); - returns a list of the state's neighbors. *Note that a win state shouldn't return any neighbors*.
 2) double Evaluate(int depth, List<IState> passedThroughStates); - returns the state's evaluation (how good it is).
-3) Player Turn - values can be Player.Max and Player.Min (Player is an enum in the code). Max is the player trying to get the best score, while Min is the player trying to get the worst score.
+3) Player Turn; - values can be Player.Max and Player.Min (Player is an enum in the code). Max is the player trying to get the best score, while Min is the player trying to get the worst score.
 While most in most games, turns will alternate between Max and Min, you can really implement any order you want.
 
 In addition, I recommend that your states also implement object's Equals and GetHashCode methods, as many of the algorithm optimizations rely on these methods being implemented in a meaningful way.
+
+The code contains examples for [Tic-tac-toe](TicTacToeTests/TicTacToeState.cs) and [connect4](Connect4Tests/Connect4State.cs) states.
 
 ### Examples
 Following are a few snippets take from the project's unit tests. You can refer to the [Connnect4 Tests](Connect4Tests/Connect4Tests.cs) or the [Tic-tac-toe Tests](TicTacToeTests/TicTacToeBassicTests.cs) for more examples.
