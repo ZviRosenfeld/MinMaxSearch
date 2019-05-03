@@ -69,23 +69,14 @@ namespace MinMaxSearch
             int leaves = 0, internalNodes = 0;
             foreach (var result in results)
             {
-                try
+                var actualResult = result.Result;
+                leaves += actualResult.Leaves;
+                internalNodes += actualResult.InternalNodes;
+                if (IsBetterThen(actualResult.Evaluation, bestEvaluation, actualResult.StateSequence.Count,
+                    bestResult?.StateSequence?.Count, player))
                 {
-                    if (result.IsCanceled) continue;
-
-                    var actualResult = result.Result;
-                    leaves += actualResult.Leaves;
-                    internalNodes += actualResult.InternalNodes;
-                    if (IsBetterThen(actualResult.Evaluation, bestEvaluation, actualResult.StateSequence.Count,
-                        bestResult?.StateSequence?.Count, player))
-                    {
-                        bestEvaluation = actualResult.Evaluation;
-                        bestResult = actualResult;
-                    }
-                }
-                catch (AggregateException)
-                {
-                    // Do nothing - this can happen and if un-needed tasks were canceled
+                    bestEvaluation = actualResult.Evaluation;
+                    bestResult = actualResult;
                 }
             }
 
