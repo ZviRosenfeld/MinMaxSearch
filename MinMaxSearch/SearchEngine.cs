@@ -17,7 +17,7 @@ namespace MinMaxSearch
         /// <summary>
         /// At unstable states, we'll continue searching even after we've hit the maxDepth limit
         /// </summary>
-        public Func<IDeterministicState, int, List<IState>, bool> IsUnstableState { get; set; } = ((s, d, l) => false);
+        public Func<IState, int, List<IState>, bool> IsUnstableState { get; set; } = ((s, d, l) => false);
         
         /// <summary>
         /// Note that this will only work if you implement Equals and GetHashValue in a meaningful way in the states. 

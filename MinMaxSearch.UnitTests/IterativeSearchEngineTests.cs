@@ -41,7 +41,7 @@ namespace MinMaxSearch.UnitTests
             Thread.Sleep(100);
 
             Assert.IsTrue(result.IsCompleted, "Search should have complated by now");
-            Assert.AreEqual(3, result.Result.Evaluation, "Evaluation should have been 3; found " + result.Result.Evaluation);
+            Assert.AreEqual(4, result.Result.Evaluation, "Evaluation should have been 3; found " + result.Result.Evaluation);
         }
     }
 }

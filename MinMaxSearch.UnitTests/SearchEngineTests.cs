@@ -166,27 +166,24 @@ namespace MinMaxSearch.UnitTests
         {
             var cancellationSource = new CancellationTokenSource();
 
-            A.CallTo(() => state1.GetNeighbors()).Returns(new List<IDeterministicState> { state2 });
-            A.CallTo(() => state2.GetNeighbors()).ReturnsLazily(() =>
+            A.CallTo(() => state1.GetNeighbors()).ReturnsLazily(() =>
             {
                 cancellationSource.Cancel();
                 return new List<IDeterministicState> {state3};
             });
-            A.CallTo(() => state3.GetNeighbors()).Returns(new List<IState>());
+            A.CallTo(() => state2.GetNeighbors()).Returns(new List<IState>());
 
             A.CallTo(() => state1.Evaluate(A<int>.Ignored, A<List<IState>>._)).Returns(1);
             A.CallTo(() => state2.Evaluate(A<int>.Ignored, A<List<IState>>._)).Returns(2);
-            A.CallTo(() => state3.Evaluate(A<int>.Ignored, A<List<IState>>._)).Returns(3);
-
+            
             A.CallTo(() => state1.Turn).Returns(Player.Min);
             A.CallTo(() => state2.Turn).Returns(Player.Max);
-            A.CallTo(() => state3.Turn).Returns(Player.Min);
             
             var searchEngine = new SearchEngine() { MaxDegreeOfParallelism = degreeOfParallelism };
             var result = searchEngine.Search(state1, 5, cancellationSource.Token);
 
-            Assert.AreEqual(2, result.Evaluation);
-            Assert.AreEqual(1, result.StateSequence.Count, "We shouldn't have gotten to state3");
+            Assert.AreEqual(1, result.Evaluation);
+            Assert.AreEqual(0, result.StateSequence.Count, "We shouldn't have gotten to state3");
         }
     }
 }

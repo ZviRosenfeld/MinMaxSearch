@@ -22,4 +22,11 @@ namespace MinMaxSearch
         {
         }
     }
+
+    public class BadStateTypeException : ApplicationException
+    {
+        public BadStateTypeException(string message) : base(message)
+        {
+        }
+    }
 }

@@ -12,6 +12,5 @@ namespace MinMaxSearch
             var sequance = new List<IState>(searchResult.StateSequence) {state};
             return new SearchResult(searchResult.Evaluation, sequance, leaves, internalNodes);
         }
-
     }
 }

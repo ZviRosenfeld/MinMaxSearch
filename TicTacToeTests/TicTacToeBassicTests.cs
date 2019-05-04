@@ -44,7 +44,7 @@ namespace TicTacToeTests
             var engine = GetSearchEngine(degreeOfParallelism);
             var newState = (TicTacToeState) engine.Search(startState, 2).NextMove;
 
-            Assert.AreEqual(Player.Min, newState.Board[2,1], "Min didn't block Max's win");
+            Assert.AreEqual(Player.Min, newState.Board[2,1], "Min didn't block Max's win. Board = " + newState);
         }
 
         [DataRow(1)]
