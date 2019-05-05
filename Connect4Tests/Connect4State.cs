@@ -37,7 +37,7 @@ namespace Connect4Tests
         public double Evaluate(int depth, List<IState> passedThroughStates) =>
             BoardEvaluator.Evaluate(Board);
 
-        private Connect4State AddPieceTo(int i)
+        public Connect4State AddPieceTo(int i)
         {
             var newBoard = (Player[,]) Board.Clone();
             for (int j = 0; j < BoardSize; j ++)

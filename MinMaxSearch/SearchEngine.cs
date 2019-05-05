@@ -77,7 +77,7 @@ namespace MinMaxSearch
         public SearchResult IterativeSearch(IDeterministicState startState, int startDepth, int maxDepth, CancellationToken cancellationToken)
         {
             if (startDepth >= maxDepth)
-                throw new Exception($"{nameof(startDepth)} (== {startDepth}) must be bigget than {nameof(maxDepth)} ( == {maxDepth})");
+                throw new Exception($"{nameof(startDepth)} (== {startDepth}) must be bigger than {nameof(maxDepth)} ( == {maxDepth})");
 
             SearchResult bestResultSoFar = null;
             for (int i = startDepth; i < maxDepth; i++)
