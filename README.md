@@ -75,7 +75,7 @@ public interface IDeterministicState : IState
 *In addition, I recommend that your states also implement object's Equals and GetHashCode methods, as many of the algorithm optimizations rely on these methods being implemented in a meaningful way.*
 
 ### Examples
-Following are a few snippets take from the project's unit tests. You can refer to the [Connnect4 Tests](Connect4Tests/Connect4Tests.cs) or the [Tic-tac-toe Tests](TicTacToeTests/TicTacToeBassicTests.cs) for more examples.
+Following are a few snippets take from the project's unit tests. You can refer to the [Connnect4 Tests](Connect4Tests) or [Tic-tac-toe Tests](TicTacToeTests) for more examples.
 
 example1:
 ```csharp
