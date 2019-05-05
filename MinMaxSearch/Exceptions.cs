@@ -4,7 +4,7 @@ namespace MinMaxSearch
 {
     public class NoNeighborsException : ApplicationException
     {
-        public NoNeighborsException(IState startState) : base("start state has no nighbors " + startState)
+        public NoNeighborsException(string message) : base(message)
         {
         }
     }
@@ -19,6 +19,13 @@ namespace MinMaxSearch
     public class BadDegreeOfParallelismException : ApplicationException
     {
         public BadDegreeOfParallelismException(string message) : base(message)
+        {
+        }
+    }
+
+    public class BadStateTypeException : ApplicationException
+    {
+        public BadStateTypeException(string message) : base(message)
         {
         }
     }

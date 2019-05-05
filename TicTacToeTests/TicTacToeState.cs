@@ -5,7 +5,7 @@ using MinMaxSearch;
 
 namespace TicTacToeTests
 {
-    public class TicTacToeState : IState 
+    public class TicTacToeState : IDeterministicState 
     {
         public Player[,] Board { get; }
         public Player Turn { get; }
@@ -24,7 +24,7 @@ namespace TicTacToeTests
             if (IsDiagonalWin(Player.Max) || IsStraightWin(Player.Max))
                 return MaxValue;
 
-            if (IsDiagonalWin(Player.Min) | IsStraightWin(Player.Min))
+            if (IsDiagonalWin(Player.Min) || IsStraightWin(Player.Min))
                 return MinValue;
 
             return 0;
@@ -34,7 +34,7 @@ namespace TicTacToeTests
         {
             var stateEvaluation = Evaluate(0, new List<IState>());
             if (stateEvaluation >= MaxValue || stateEvaluation <= MinValue)
-                return new List<IState>();
+                return new List<IDeterministicState>();
 
             var neighbors = new List<TicTacToeState>();
             for (var i = 0; i < 3; i++)
@@ -76,6 +76,9 @@ namespace TicTacToeTests
             if (!(obj is TicTacToeState ticTacToeState))
                 return false;
 
+            if (Turn != ticTacToeState.Turn)
+                return false;
+
             for (var i = 0; i < 3; i++)
             for (var j = 0; j < 3; j++)
                 if (Board[i, j] != ticTacToeState.Board[i, j])
@@ -90,9 +93,9 @@ namespace TicTacToeTests
 
             for (var i = 0; i < 3; i++)
             for (var j = 0; j < 3; j++)
-                sum = GetValue(Board[i, j]) * (int) Math.Pow(3, i + j * 3);
+                sum += GetValue(Board[i, j]) * (int) Math.Pow(3, i + j * 3);
 
-            return sum;
+            return sum + (int)Turn * (int) Math.Pow(3, 9);
         }
 
         private int GetValue(Player player)

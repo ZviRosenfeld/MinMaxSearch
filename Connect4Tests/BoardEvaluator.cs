@@ -2,7 +2,7 @@
 
 namespace Connect4Tests
 {
-    static class BoardEvaluator
+    public static class BoardEvaluator
     {
         public const int MaxEvaluation = 100000;
         public const int MinEvaluation = -100000;

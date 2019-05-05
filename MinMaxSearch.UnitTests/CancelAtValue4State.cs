@@ -3,15 +3,16 @@ using System.Threading;
 
 namespace MinMaxSearch.UnitTests
 {
-    class CancelAtValue4State : IState
+    class CancelAtValue4State : IDeterministicState
     {
         public readonly int Value;
         private readonly CancellationTokenSource cancellationTokenSource;
 
-        public CancelAtValue4State(int value, CancellationTokenSource cancellationTokenSource)
+        public CancelAtValue4State(int value, CancellationTokenSource cancellationTokenSource, Player turn)
         {
             Value = value;
             this.cancellationTokenSource = cancellationTokenSource;
+            Turn = turn;
         }
 
         public IEnumerable<IState> GetNeighbors()
@@ -19,11 +20,12 @@ namespace MinMaxSearch.UnitTests
             if (Value >= 4)
                 cancellationTokenSource.Cancel();
 
-            return new List<IState> {new CancelAtValue4State(Value + 1, cancellationTokenSource)};
+            return new List<IDeterministicState> {new CancelAtValue4State(Value + 1, cancellationTokenSource, Utils.GetReversePlayer(Turn))};
         }
 
         public double Evaluate(int depth, List<IState> passedThroughStates) => Value;
-        
+        public Player Turn { get; }
+
         public override string ToString() => Value.ToString();
     }
 }

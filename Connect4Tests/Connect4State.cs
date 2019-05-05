@@ -5,23 +5,23 @@ using MinMaxSearch;
 
 namespace Connect4Tests
 {
-    public class Connect4State : IState
+    public class Connect4State : IDeterministicState
     {
         public const int BoardSize = 6;
 
         public Connect4State(Player[,] board, Player turn)
         {
             Board = board;
-            this.turn = turn;
+            Turn = turn;
         }
 
         public Player[,] Board { get; }
-        private readonly Player turn;
+        public Player Turn { get; }
 
         public IEnumerable<IState> GetNeighbors()
         {
-            if (BoardEvaluator.IsWin(Board, Utils.GetReversePlayer(turn)))
-                return new List<IState>();
+            if (BoardEvaluator.IsWin(Board, Utils.GetReversePlayer(Turn)))
+                return new List<IDeterministicState>();
 
             var result = new List<Connect4State>();
             for (int i = 0; i < BoardSize; i++)
@@ -37,14 +37,14 @@ namespace Connect4Tests
         public double Evaluate(int depth, List<IState> passedThroughStates) =>
             BoardEvaluator.Evaluate(Board);
 
-        private Connect4State AddPieceTo(int i)
+        public Connect4State AddPieceTo(int i)
         {
             var newBoard = (Player[,]) Board.Clone();
             for (int j = 0; j < BoardSize; j ++)
                 if (newBoard[j, i] == Player.Empty)
                 {
-                    newBoard[j, i] = turn;
-                    return new Connect4State(newBoard, Utils.GetReversePlayer(turn));
+                    newBoard[j, i] = Turn;
+                    return new Connect4State(newBoard, Utils.GetReversePlayer(Turn));
                 }
 
             return null;
@@ -53,6 +53,9 @@ namespace Connect4Tests
         public override bool Equals(object obj)
         {
             if (!(obj is Connect4State ticTacToeState))
+                return false;
+
+            if (Turn != ticTacToeState.Turn)
                 return false;
 
             for (var i = 0; i < BoardSize; i++)
@@ -69,9 +72,9 @@ namespace Connect4Tests
 
             for (var i = 0; i < BoardSize; i++)
             for (var j = 0; j < BoardSize; j++)
-                sum = GetValue(Board[i, j]) * (int)Math.Pow(3, i + j * 3);
+                sum += GetValue(Board[i, j]) * (int)Math.Pow(3, i + j);
 
-            return sum;
+            return sum + (int) Turn * (int) Math.Pow(3, BoardSize * BoardSize);
         }
 
         private int GetValue(Player player)

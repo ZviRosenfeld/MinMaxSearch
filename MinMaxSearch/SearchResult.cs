@@ -14,9 +14,16 @@ namespace MinMaxSearch
         }
 
         public IState NextMove => StateSequence.First();
+
         public double Evaluation { get; }
+        
+        /// <summary>
+        /// Note that this will be empty for probabilistic states 
+        /// </summary>
         public List<IState> StateSequence { get; }
+
         public int Leaves { get; }
+
         public int InternalNodes { get; }
     }
 }

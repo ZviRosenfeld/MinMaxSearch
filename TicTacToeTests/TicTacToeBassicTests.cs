@@ -22,7 +22,7 @@ namespace TicTacToeTests
             }, Player.Max);
 
             var engine = GetSearchEngine(degreeOfParallelism);
-            var evaluation = engine.Search(startState, Player.Max, 2);
+            var evaluation = engine.Search(startState, 2);
 
             Assert.AreEqual(TicTacToeState.MaxValue, evaluation.NextMove.Evaluate(0, new List<IState>()), "Should have found a wining state");
             Assert.AreEqual(1, evaluation.StateSequence.Count, "StateSequence should only have one state in it");
@@ -42,9 +42,9 @@ namespace TicTacToeTests
             }, Player.Min);
 
             var engine = GetSearchEngine(degreeOfParallelism);
-            var newState = (TicTacToeState) engine.Search(startState, Player.Min, 2).NextMove;
+            var newState = (TicTacToeState) engine.Search(startState, 2).NextMove;
 
-            Assert.AreEqual(Player.Min, newState.Board[2,1], "Min didn't block Max's win");
+            Assert.AreEqual(Player.Min, newState.Board[2,1], "Min didn't block Max's win. Board = " + newState);
         }
 
         [DataRow(1)]
@@ -61,10 +61,11 @@ namespace TicTacToeTests
             }, Player.Max);
 
             var engine = GetSearchEngine(degreeOfParallelism);
-            var evaluation = engine.Search(startState, Player.Max, 3);
+            var evaluation = engine.Search(startState, 3);
 
             Assert.AreEqual(Player.Max, ((TicTacToeState)evaluation.NextMove).Board[2, 2]);
-            Assert.AreEqual(TicTacToeState.MaxValue, evaluation.StateSequence.Last().Evaluate(0, new List<IState>()), "Should have found a wining state");
+            var lastMove = (IDeterministicState)evaluation.StateSequence.Last();
+            Assert.AreEqual(TicTacToeState.MaxValue, lastMove.Evaluate(0, new List<IState>()), "Should have found a wining state");
         }
 
         [DataRow(1)]
@@ -81,10 +82,11 @@ namespace TicTacToeTests
             }, Player.Max);
 
             var engine = GetSearchEngine(degreeOfParallelism);
-            var evaluation = engine.Search(startState, Player.Max, 5);
+            var evaluation = engine.Search(startState, 5);
 
             Assert.AreEqual(TicTacToeState.MaxValue, evaluation.Evaluation);
-            Assert.AreEqual(TicTacToeState.MaxValue, evaluation.StateSequence.Last().Evaluate(0, new List<IState>()), "Should have found a wining state");
+            var lastMove = (IDeterministicState) evaluation.StateSequence.Last();
+            Assert.AreEqual(TicTacToeState.MaxValue, lastMove.Evaluate(0, new List<IState>()), "Should have found a wining state");
         }
 
         [DataRow(1)]
@@ -101,10 +103,11 @@ namespace TicTacToeTests
             }, Player.Min);
 
             var engine = GetSearchEngine(degreeOfParallelism);
-            var evaluation = engine.Search(startState, Player.Min, 5);
+            var evaluation = engine.Search(startState, 5);
 
             Assert.AreEqual(TicTacToeState.MinValue, evaluation.Evaluation);
-            Assert.AreEqual(TicTacToeState.MinValue, evaluation.StateSequence.Last().Evaluate(0, new List<IState>()), "Should have found a wining state");
+            var lastMove = (IDeterministicState)evaluation.StateSequence.Last();
+            Assert.AreEqual(TicTacToeState.MinValue, lastMove.Evaluate(0, new List<IState>()), "Should have found a wining state");
         }
 
         [DataRow(1)]
@@ -121,16 +124,17 @@ namespace TicTacToeTests
             }, Player.Max);
 
             var engine = GetSearchEngine(degreeOfParallelism);
-            var evaluation = engine.Search(startState, Player.Max, 10);
+            var evaluation = engine.Search(startState, 10);
 
             Assert.AreEqual(0, evaluation.Evaluation);
-            Assert.AreEqual(0, evaluation.StateSequence.Last().Evaluate(0, new List<IState>()), "Should have found a wining state");
+            var lastMove = (IDeterministicState)evaluation.StateSequence.Last();
+            Assert.AreEqual(0, lastMove.Evaluate(0, new List<IState>()), "Should have found a wining state");
 
             if (degreeOfParallelism == 1)
             {
                 //Check that the our optimizations are working
-                Assert.IsTrue(evaluation.Leaves < 7500, "Too many leaves in search.");
-                Assert.IsTrue(evaluation.InternalNodes < 11000, "Too many intarnal nodes in search.");
+                Assert.IsTrue(evaluation.Leaves < 63000, "Too many leaves in search.");
+                Assert.IsTrue(evaluation.InternalNodes < 84000, "Too many intarnal nodes in search.");
             }
 
             // Too few leaves or internal nodes means that something went wrong

@@ -10,37 +10,91 @@ namespace MinMaxSearch.UnitTests
     [TestClass]
     public class SearchEngineTests
     {
+        private readonly IDeterministicState state1 = A.Fake<IDeterministicState>();
+        private readonly IDeterministicState state2 = A.Fake<IDeterministicState>();
+        private readonly IDeterministicState state3 = A.Fake<IDeterministicState>();
+        private readonly IDeterministicState endState1 = A.Fake<IDeterministicState>();
+        private readonly IDeterministicState endState2 = A.Fake<IDeterministicState>();
+        private readonly IDeterministicState endState3 = A.Fake<IDeterministicState>();
+
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            A.CallTo(() => state1.ToString()).Returns("State1");
+            A.CallTo(() => state2.ToString()).Returns("State2");
+            A.CallTo(() => state3.ToString()).Returns("State3");
+            A.CallTo(() => endState1.ToString()).Returns("EndState1");
+            A.CallTo(() => endState2.ToString()).Returns("EndState2");
+            A.CallTo(() => endState3.ToString()).Returns("EndState3");
+            A.CallTo(() => endState1.GetNeighbors()).Returns(new List<IState>());
+            A.CallTo(() => endState2.GetNeighbors()).Returns(new List<IState>());
+            A.CallTo(() => endState3.GetNeighbors()).Returns(new List<IState>());
+        }
+
         [TestMethod]
         [ExpectedException(typeof(NoNeighborsException))]
         public void Search_StartStateHasNoNeighbors_ExceptionThrown()
         {
-            var state = A.Fake<IState>();
-            A.CallTo(() => state.GetNeighbors()).Returns(new List<IState>());
+            var state = A.Fake<IDeterministicState>();
+            A.CallTo(() => state.GetNeighbors()).Returns(new List<IDeterministicState>());
+            A.CallTo(() => state.Turn).Returns(Player.Empty);
 
             var searchEngine = new SearchEngine();
-            searchEngine.Search(state, Player.Max, 1);
+            searchEngine.Search(state, 1);
         }
 
         [TestMethod]
         [ExpectedException(typeof(EmptyPlayerException))]
         public void Search_StartEmptyPlayer_ExceptionThrown()
         {
-            var state = A.Fake<IState>();
-            A.CallTo(() => state.GetNeighbors()).Returns(new List<IState>{state});
+            var state = A.Fake<IDeterministicState>();
+            A.CallTo(() => state.GetNeighbors()).Returns(new List<IDeterministicState>{state});
+            A.CallTo(() => state.Turn).Returns(Player.Empty);
 
             var searchEngine = new SearchEngine();
-            searchEngine.Search(state, Player.Empty, 1);
+            searchEngine.Search(state, 1);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(EmptyPlayerException))]
+        public void Search_EmptyPlayerStateInSearch_ExceptionThrown()
+        {
+            var state = A.Fake<IDeterministicState>();
+            A.CallTo(() => state.GetNeighbors()).Returns(new List<IDeterministicState> { state });
+            A.CallTo(() => state.Turn).Returns(Player.Empty);
+
+            var startState = A.Fake<IDeterministicState>();
+            A.CallTo(() => startState.GetNeighbors()).Returns(new List<IDeterministicState> { state });
+            A.CallTo(() => startState.Turn).Returns(Player.Min);
+
+            var searchEngine = new SearchEngine();
+            searchEngine.Search(startState, 1);
         }
 
         [TestMethod]
         [ExpectedException(typeof(BadDegreeOfParallelismException))]
         public void Search_StartWithZeroDegreeOfParallelism_ExceptionThrown()
         {
-            var state = A.Fake<IState>();
-            A.CallTo(() => state.GetNeighbors()).Returns(new List<IState> { state });
+            var state = A.Fake<IDeterministicState>();
+            A.CallTo(() => state.GetNeighbors()).Returns(new List<IDeterministicState> { state });
+            A.CallTo(() => state.Turn).Returns(Player.Max);
 
             var searchEngine = new SearchEngine() { MaxDegreeOfParallelism = 0};
-            searchEngine.Search(state, Player.Min, 1);
+            searchEngine.Search(state, 1);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(BadStateTypeException))]
+        public void Search_ContainsAnIState_ExceptionThrown()
+        {
+            var istate = A.Fake<IState>();
+            var state = A.Fake<IDeterministicState>();
+            A.CallTo(() => state.GetNeighbors()).Returns(new List<IState> { istate });
+            A.CallTo(() => state.Turn).Returns(Player.Max);
+            A.CallTo(() => istate.Turn).Returns(Player.Max);
+
+            var searchEngine = new SearchEngine() { MaxDegreeOfParallelism = 1 };
+            searchEngine.Search(state, 5);
         }
 
         [DataRow(1)]
@@ -50,7 +104,7 @@ namespace MinMaxSearch.UnitTests
         public void Search_DontStopWithUnstableState(int degreeOfParallelism)
         {
             var searchEngine = new SearchEngine() {IsUnstableState = (s, d, l) => s.Evaluate(d, l) < 10, MaxDegreeOfParallelism = degreeOfParallelism};
-            var result = searchEngine.Search(new IncreasingNumberState(0), Player.Max, 1);
+            var result = searchEngine.Search(new IncreasingNumberState(0, Player.Max), 1);
 
             Assert.AreEqual(10, result.Evaluation, "Engine seems to have stopped before reaching a stable state");
         }
@@ -61,50 +115,39 @@ namespace MinMaxSearch.UnitTests
         [TestMethod]
         public void Search_CheckThatRecordPassThroughStatesIsWorking(int degreeOfParallelism)
         {
-            var state2 = A.Fake<IState>();
-            var state1 = A.Fake<IState>();
-            A.CallTo(() => state2.GetNeighbors()).Returns(new List<IState>());
-            A.CallTo(() => state2.Evaluate(A<int>.Ignored, A<List<IState>>.That.IsEmpty()))
+            A.CallTo(() => endState1.Evaluate(A<int>.Ignored, A<List<IState>>.That.IsEmpty()))
                 .Throws(new Exception("passedStats list should have been empty"));
-            A.CallTo(() => state2.Evaluate(A<int>.Ignored, A<List<IState>>._))
+            A.CallTo(() => endState1.Evaluate(A<int>.Ignored, A<List<IState>>._))
                 .Invokes((int i, List<IState> l) =>
                 {
                     Assert.AreEqual(1, l.Count, "passThroughStates should only have one node (state1)");
                     Assert.IsTrue(l.Contains(state1), "passThroughStates should contain state1");
                 });
 
-            A.CallTo(() => state1.GetNeighbors()).Returns(new List<IState> { state2 });
+            A.CallTo(() => state1.GetNeighbors()).Returns(new List<IDeterministicState> { endState1 });
+
+            A.CallTo(() => state1.Turn).Returns(Player.Max);
+            A.CallTo(() => endState1.Turn).Returns(Player.Min);
 
             var searchEngine = new SearchEngine {MaxDegreeOfParallelism = degreeOfParallelism};
-            searchEngine.Search(state1, Player.Max, 5);
+            searchEngine.Search(state1, 5);
         }
         
-        [DataRow(Player.Max, 1)]
-        [DataRow(Player.Min, 2)]
-        [DataRow(Player.Min, 8)]
+        [DataRow(1)]
         [TestMethod]
-        public void Search_DieEarllyOptionWorks(Player player, int degreeOfParallelism)
+        public void Search_DieEarllyOptionWorks(int degreeOfParallelism)
         {
-            var endState1 = A.Fake<IState>();
-            A.CallTo(() => endState1.GetNeighbors()).Returns(new List<IState>());
-            A.CallTo(() => endState1.Evaluate(A<int>.Ignored, A<List<IState>>.That.IsEmpty())).Returns(10);
-            A.CallTo(() => endState1.ToString()).Returns("endState1");
-
-            var endState2 = A.Fake<IState>();
-            A.CallTo(() => endState2.GetNeighbors()).Returns(new List<IState>());
-            A.CallTo(() => endState2.Evaluate(A<int>.Ignored, A<List<IState>>.That.IsEmpty())).Returns(15);
-            A.CallTo(() => endState2.ToString()).Returns("endState2");
-
-            var endState3 = A.Fake<IState>();
-            A.CallTo(() => endState3.GetNeighbors()).Returns(new List<IState>());
-            A.CallTo(() => endState3.Evaluate(A<int>.Ignored, A<List<IState>>.That.IsEmpty())).Returns(0);
-            A.CallTo(() => endState3.ToString()).Returns("endState3");
-
-            var state1 = A.Fake<IState>();
+            A.CallTo(() => endState1.Evaluate(A<int>.Ignored, A<List<IState>>._)).Returns(10);
+            A.CallTo(() => endState2.Evaluate(A<int>.Ignored, A<List<IState>>._)).Returns(15);
+            A.CallTo(() => endState3.Evaluate(A<int>.Ignored, A<List<IState>>._)).Returns(0);
             A.CallTo(() => state1.GetNeighbors()).Returns(new List<IState> { endState1, endState2, endState3 });
+            A.CallTo(() => state1.Turn).Returns(Player.Min);
+            A.CallTo(() => endState1.Turn).Returns(Player.Max);
+            A.CallTo(() => endState2.Turn).Returns(Player.Max);
+            A.CallTo(() => endState3.Turn).Returns(Player.Max);
 
             var searchEngine = new SearchEngine() { DieEarly = true, MaxScore = 5, MinScore = 5, MaxDegreeOfParallelism = degreeOfParallelism};
-            var evaluation = searchEngine.Search(state1, Player.Min, 2);
+            var evaluation = searchEngine.Search(state1, 2);
 
             Assert.AreEqual(endState1, evaluation.StateSequence.Last(), "Should have ended with endState1; found: " + evaluation.StateSequence.Last());
         }
@@ -116,7 +159,7 @@ namespace MinMaxSearch.UnitTests
         public void Search_CheckPreventLoopPrunerWorks(int degreeOfParallelism)
         {
             var searchEngine = new SearchEngine() {PreventLoops = true, MaxDegreeOfParallelism = degreeOfParallelism};
-            searchEngine.Search(new ThrowExceptionAtDepthThreeState(0), Player.Max, 5);
+            searchEngine.Search(new ThrowExceptionAtDepthThreeState(0, Player.Max), 5);
         }
         
         [TestMethod]
@@ -125,7 +168,7 @@ namespace MinMaxSearch.UnitTests
         {
             var searchEngine = new SearchEngine() { PreventLoops = true};
             searchEngine.PreventLoops = false;
-            searchEngine.Search(new ThrowExceptionAtDepthThreeState(0), Player.Max, 5);
+            searchEngine.Search(new ThrowExceptionAtDepthThreeState(0, Player.Max), 5);
         }
 
         [DataRow(1)]
@@ -136,30 +179,23 @@ namespace MinMaxSearch.UnitTests
         {
             var cancellationSource = new CancellationTokenSource();
 
-            var state1 = A.Fake<IState>();
-            var state2 = A.Fake<IState>();
-            var state3 = A.Fake<IState>();
-            A.CallTo(() => state1.GetNeighbors()).Returns(new List<IState> { state2 });
-            A.CallTo(() => state2.GetNeighbors()).ReturnsLazily(() =>
+            A.CallTo(() => state1.GetNeighbors()).ReturnsLazily(() =>
             {
                 cancellationSource.Cancel();
-                return new List<IState> {state3};
+                return new List<IDeterministicState> {endState1};
             });
-            A.CallTo(() => state3.GetNeighbors()).Returns(new List<IState>());
 
             A.CallTo(() => state1.Evaluate(A<int>.Ignored, A<List<IState>>._)).Returns(1);
-            A.CallTo(() => state2.Evaluate(A<int>.Ignored, A<List<IState>>._)).Returns(2);
-            A.CallTo(() => state3.Evaluate(A<int>.Ignored, A<List<IState>>._)).Returns(3);
-
-            A.CallTo(() => state1.ToString()).Returns("State1");
-            A.CallTo(() => state2.ToString()).Returns("State2");
-            A.CallTo(() => state3.ToString()).Returns("State3");
-
+            A.CallTo(() => endState1.Evaluate(A<int>.Ignored, A<List<IState>>._)).Returns(2);
+            
+            A.CallTo(() => state1.Turn).Returns(Player.Min);
+            A.CallTo(() => endState1.Turn).Returns(Player.Max);
+            
             var searchEngine = new SearchEngine() { MaxDegreeOfParallelism = degreeOfParallelism };
-            var result = searchEngine.Search(state1, Player.Min, 5, cancellationSource.Token);
+            var result = searchEngine.Search(state1, 5, cancellationSource.Token);
 
-            Assert.AreEqual(2, result.Evaluation);
-            Assert.AreEqual(1, result.StateSequence.Count, "We shouldn't have gotten to state3");
+            Assert.AreEqual(1, result.Evaluation);
+            Assert.AreEqual(0, result.StateSequence.Count, "We shouldn't have gotten to state3");
         }
     }
 }
