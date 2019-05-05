@@ -65,7 +65,7 @@ namespace MinMaxSearch
         public SearchResult Search(IDeterministicState startState, int maxDepth, CancellationToken cancellationToken)
         {
             if (!startState.GetNeighbors().Any())
-                throw new NoNeighborsException(startState);
+                throw new NoNeighborsException("start state has no nighbors " + startState);
 
             var searchWorker = new SearchWorker(maxDepth, this, pruners);
             var evaluation = searchWorker.Evaluate(startState, 0, double.MinValue, double.MaxValue, cancellationToken, new List<IState>());

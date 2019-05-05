@@ -133,8 +133,8 @@ namespace TicTacToeTests
             if (degreeOfParallelism == 1)
             {
                 //Check that the our optimizations are working
-                Assert.IsTrue(evaluation.Leaves < 7500, "Too many leaves in search.");
-                Assert.IsTrue(evaluation.InternalNodes < 11000, "Too many intarnal nodes in search.");
+                Assert.IsTrue(evaluation.Leaves < 63000, "Too many leaves in search.");
+                Assert.IsTrue(evaluation.InternalNodes < 84000, "Too many intarnal nodes in search.");
             }
 
             // Too few leaves or internal nodes means that something went wrong

@@ -34,18 +34,11 @@ namespace MinMaxSearch
                 return new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0);
 
             if (startState is IDeterministicState deterministicState)
-            {
-                return !deterministicState.GetNeighbors().Any()
-                    ? new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0)
-                    : deterministicSearchUtils.EvaluateChildren(deterministicState, depth, alpha, bata, cancellationToken, new List<IState>(statesUpToNow) {startState});
-            }
-            if (startState is IProbabilisticState probabilisticState)
-            {
-                return !probabilisticState.GetNeighbors().Any()
-                    ? new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> { startState }, 1, 0)
-                    : probabilisticSearchUtils.EvaluateChildren(probabilisticState, depth, alpha, bata, cancellationToken, new List<IState>(statesUpToNow) { startState });
-            }
+                return deterministicSearchUtils.EvaluateChildren(deterministicState, depth, alpha, bata, cancellationToken, statesUpToNow);
 
+            if (startState is IProbabilisticState probabilisticState)
+                return probabilisticSearchUtils.EvaluateChildren(probabilisticState, depth, cancellationToken, statesUpToNow);
+            
             throw new BadStateTypeException($"State must implement {nameof(IDeterministicState)} or {nameof(IProbabilisticState)}");
         }
         

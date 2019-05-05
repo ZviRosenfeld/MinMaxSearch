@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,6 +22,9 @@ namespace MinMaxSearch
         public SearchResult EvaluateChildren(IDeterministicState startState, int depth, double alpha, double bata,
             CancellationToken cancellationToken, List<IState> statesUpToNow, IDictionary<IState, double> storedStates = null)
         {
+            if (!startState.GetNeighbors().Any())
+                return new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0);
+
             var player = startState.Turn;
             var results = new List<Task<SearchResult>>();
             var cancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -28,10 +33,10 @@ namespace MinMaxSearch
                 var taskResult = storedStates != null && storedStates.ContainsKey(state)
                     ? Task.FromResult(new SearchResult(storedStates[state], new List<IState> {state}, 1, 0))
                     : threadManager.Invoke(() =>
-                        searchWorker.Evaluate(state, depth + 1, alpha, bata, cancellationSource.Token, statesUpToNow));
+                        searchWorker.Evaluate(state, depth + 1, alpha, bata, cancellationSource.Token, new List<IState>(statesUpToNow) {startState}));
                 results.Add(taskResult);
 
-                if (taskResult.Status == TaskStatus.RanToCompletion)
+                if (taskResult.Status == TaskStatus.RanToCompletion && taskResult.Result != null)
                 {
                     var stateEvaluation = taskResult.Result;
                     if (storedStates != null)
@@ -46,7 +51,7 @@ namespace MinMaxSearch
                 }
             }
 
-            return Reduce(results, player, startState) ?? new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> { startState }, 1, 0);
+            return Reduce(results, player, startState);
         }
 
         private SearchResult Reduce(List<Task<SearchResult>> results, Player player, IState startState)
@@ -57,6 +62,8 @@ namespace MinMaxSearch
             foreach (var result in results)
             {
                 var actualResult = result.Result;
+                if (actualResult == null) continue;
+
                 leaves += actualResult.Leaves;
                 internalNodes += actualResult.InternalNodes;
                 if (IsBetterThen(actualResult.Evaluation, bestEvaluation, actualResult.StateSequence.Count,
@@ -66,16 +73,16 @@ namespace MinMaxSearch
                     bestResult = actualResult;
                 }
             }
-
+            
             return bestResult?.CloneAndAddStateToTop(startState, leaves, internalNodes + 1);
         }
 
         private bool AlphaBataShouldPrune(double alpha, double bata, double evaluation, Player player)
         {
-            if (player == Player.Min && evaluation <= alpha)
+            if (player == Player.Min && evaluation < alpha)
                 return true;
 
-            if (player == Player.Max && evaluation >= bata)
+            if (player == Player.Max && evaluation > bata)
                 return true;
 
             return false;

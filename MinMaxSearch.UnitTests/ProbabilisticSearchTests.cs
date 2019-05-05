@@ -65,5 +65,22 @@ namespace MinMaxSearch.UnitTests
             Assert.AreEqual(probabilisticState2, searchResult.NextMove, $"Should have found {nameof(probabilisticState2)} as the nextState");
             Assert.IsTrue(Math.Abs(searchResult.Evaluation - 0.4) < 0.01, "Evaluation should have been .4; actual result is " + searchResult.Evaluation);
         }
+
+        [TestMethod]
+        public void Search_StateWithNoRealNeighbors_EvaluatesState()
+        {
+            A.CallTo(() => startState.GetNeighbors()).Returns(new List<IState> {probabilisticState1});
+            A.CallTo(() => probabilisticState1.GetNeighbors()).Returns(new List<Tuple<double, List<IState>>>()
+            {
+                new Tuple<double, List<IState>>(0.5, new List<IState>()),
+                new Tuple<double, List<IState>>(0.5, new List<IState>()),
+            });
+            A.CallTo(() => probabilisticState1.Evaluate(A<int>._, A<List<IState>>._)).Returns(2);
+
+            var searchEngine = new SearchEngine();
+            var searchResult = searchEngine.Search(startState, 10);
+
+            Assert.AreEqual(2, searchResult.Evaluation);
+        }
     }
 }

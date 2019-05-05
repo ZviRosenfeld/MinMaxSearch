@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,16 +18,18 @@ namespace MinMaxSearch
             this.threadManager = threadManager;
         }
 
-        public SearchResult EvaluateChildren(IProbabilisticState startState, int depth, double alpha, double bata,
-            CancellationToken cancellationToken, List<IState> statesUpToNow)
+        public SearchResult EvaluateChildren(IProbabilisticState startState, int depth, CancellationToken cancellationToken, List<IState> statesUpToNow)
         {
+            if (!startState.GetNeighbors().Any())
+                return new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0);
+
             var storedStates = new ConcurrentDictionary<IState, double>();
             var results = new List<Tuple<double, Task<SearchResult>>>();
             foreach (var neighbor in startState.GetNeighbors())
             {
-                var wrappedState = new ProbablisticStateWrapper(startState.Turn, neighbor.Item2);
+                var wrappedState = new ProbablisticStateWrapper(neighbor.Item2, startState);       
                 var searchResult = threadManager.Invoke(() =>
-                    deterministicSearchUtils.EvaluateChildren(wrappedState, depth, alpha, bata, cancellationToken, statesUpToNow, storedStates));
+                    deterministicSearchUtils.EvaluateChildren(wrappedState, depth, double.MinValue, double.MaxValue, cancellationToken, statesUpToNow, storedStates));
                 results.Add(new Tuple<double, Task<SearchResult>>(neighbor.Item1, searchResult));
             }
 
