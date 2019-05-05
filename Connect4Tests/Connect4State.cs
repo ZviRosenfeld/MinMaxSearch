@@ -72,7 +72,7 @@ namespace Connect4Tests
 
             for (var i = 0; i < BoardSize; i++)
             for (var j = 0; j < BoardSize; j++)
-                sum = GetValue(Board[i, j]) * (int)Math.Pow(3, i + j);
+                sum += GetValue(Board[i, j]) * (int)Math.Pow(3, i + j);
 
             return sum + (int) Turn * (int) Math.Pow(3, BoardSize * BoardSize);
         }

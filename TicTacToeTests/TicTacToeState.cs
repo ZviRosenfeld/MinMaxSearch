@@ -93,7 +93,7 @@ namespace TicTacToeTests
 
             for (var i = 0; i < 3; i++)
             for (var j = 0; j < 3; j++)
-                sum = GetValue(Board[i, j]) * (int) Math.Pow(3, i + j * 3);
+                sum += GetValue(Board[i, j]) * (int) Math.Pow(3, i + j * 3);
 
             return sum + (int)Turn * (int) Math.Pow(3, 9);
         }

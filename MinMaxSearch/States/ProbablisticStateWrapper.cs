@@ -12,9 +12,8 @@ namespace MinMaxSearch
             Turn = turn;
             this.neighbors = neighbors;
         }
-        
-        public double Evaluate(int depth, List<IState> passedThroughStates) => 
-            throw new Exception("This should never be called");
+
+        public double Evaluate(int depth, List<IState> passedThroughStates) => 0;
 
         public Player Turn { get; }
         public IEnumerable<IState> GetNeighbors() => neighbors;

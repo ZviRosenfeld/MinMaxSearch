@@ -51,6 +51,16 @@ namespace Connect4Tests
         }
 
         public override string ToString() => connect4State.ToString();
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is ProbabilisticConnect4State probabilisticConnect4State))
+                return false;
+
+            return connect4State.Equals(probabilisticConnect4State.connect4State);
+        }
+
+        public override int GetHashCode() => connect4State.GetHashCode();
     }
 }
 

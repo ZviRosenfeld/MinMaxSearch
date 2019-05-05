@@ -66,7 +66,7 @@ namespace ProbabilisticConnect4Tests
             var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism);
             var startState = new StartState(new Connect4State(Connect4TestUtils.GetEmptyBoard(), Player.Max));
 
-            var results = engine.Benchmark(startState, 6);
+            var results = engine.Benchmark(startState, 8);
             Console.WriteLine(results.ToString());
         }
     }

@@ -18,20 +18,24 @@ namespace MinMaxSearch
         }
 
         public SearchResult EvaluateChildren(IDeterministicState startState, int depth, double alpha, double bata,
-            CancellationToken cancellationToken, List<IState> statesUpToNow)
+            CancellationToken cancellationToken, List<IState> statesUpToNow, IDictionary<IState, double> storedStates = null)
         {
             var player = startState.Turn;
             var results = new List<Task<SearchResult>>();
             var cancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             foreach (var state in startState.GetNeighbors())
             {
-                var taskResult = threadManager.Invoke(() =>
-                    searchWorker.Evaluate(state, depth + 1, alpha, bata, cancellationSource.Token, statesUpToNow));
+                var taskResult = storedStates != null && storedStates.ContainsKey(state)
+                    ? Task.FromResult(new SearchResult(storedStates[state], new List<IState> {state}, 1, 0))
+                    : threadManager.Invoke(() =>
+                        searchWorker.Evaluate(state, depth + 1, alpha, bata, cancellationSource.Token, statesUpToNow));
                 results.Add(taskResult);
 
                 if (taskResult.Status == TaskStatus.RanToCompletion)
                 {
                     var stateEvaluation = taskResult.Result;
+                    if (storedStates != null)
+                        storedStates[state] = stateEvaluation.Evaluation;
                     if (AlphaBataShouldPrune(alpha, bata, stateEvaluation.Evaluation, player) ||
                         ShouldDieEarlly(stateEvaluation.Evaluation, player, stateEvaluation.StateSequence.Count))
                     {
