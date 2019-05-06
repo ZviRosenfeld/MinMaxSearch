@@ -120,6 +120,10 @@ If this option is set to true, the algorithm will rerun as soon as it finds a sc
 The rationale behind this is that once the algorithm finds a win there's no point in more searching. (We assume that a score greater then MaxScore is a win for Max, and one smaller then MinScore is a win for Min).
 Note that this will only work if Equals is implement in a meaningful way on your states.
 
+**RememberDeadEndStates**
+If true, the engine will remember states from which all children lead to endStates, so that it won't need to re-calculate their search-tree. This can save a lot of time in some games.
+Note that this will only work if the state overrides object's Equals and GetHashCode methods in a meaningful way.
+
 **IsUnstableState:**
 Some states are more interesting than others. With this delegate you can tell the algorithm to continue searching for "interesting" states even after it's reached the max search depth.
 IsUnstableState is a delegate of the form Func<IState, int, List<IState>, bool>. It receives a state and the states leading up to it, and decides if it's safe to terminate the search at this state.
