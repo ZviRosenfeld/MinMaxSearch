@@ -77,6 +77,8 @@ public interface IDeterministicState : IState
 ### Examples
 Following are a few snippets take from the project's unit tests. You can refer to the [Connnect4 Tests](Connect4Tests) or [Tic-tac-toe Tests](TicTacToeTests) for more examples.
 
+In addition, you can find a tutorial on how to create a tic-tac-toe state [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Tic-Tac-Toe-Tutorial).
+
 example1:
 ```csharp
 var startState = new TicTacToeState();

@@ -24,7 +24,7 @@ namespace MinMaxSearch
         {
             if (!startState.GetNeighbors().Any())
                 return new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0);
-
+            
             var player = startState.Turn;
             var results = new List<Task<SearchResult>>();
             var cancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
