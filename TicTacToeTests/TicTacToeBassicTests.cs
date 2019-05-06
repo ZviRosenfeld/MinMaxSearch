@@ -129,6 +129,7 @@ namespace TicTacToeTests
             Assert.AreEqual(0, evaluation.Evaluation);
             var lastMove = (IDeterministicState)evaluation.StateSequence.Last();
             Assert.AreEqual(0, lastMove.Evaluate(0, new List<IState>()), "Should have found a wining state");
+            Assert.IsTrue(evaluation.AllChildrenAreDeadEnds);
 
             if (degreeOfParallelism == 1)
             {
@@ -148,7 +149,8 @@ namespace TicTacToeTests
                 MaxDegreeOfParallelism = degreeOfParallelism,
                 DieEarly = true,
                 MinScore = -0.5,
-                MaxScore = 0.5
+                MaxScore = 0.5,
+                RememberDeadEndStates = true
             };
     }
 }

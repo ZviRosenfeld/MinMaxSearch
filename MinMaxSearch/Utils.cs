@@ -7,10 +7,10 @@ namespace MinMaxSearch
         public static Player GetReversePlayer(Player player) =>
             player == Player.Max ? Player.Min : Player.Max;
 
-        public static SearchResult CloneAndAddStateToTop(this SearchResult searchResult, IState state, int leaves, int internalNodes)
+        public static SearchResult CloneAndAddStateToTop(this SearchResult searchResult, IState state, int leaves, int internalNodes, bool allChildrenAreDeadEnds)
         {
             var sequance = new List<IState>(searchResult.StateSequence) {state};
-            return new SearchResult(searchResult.Evaluation, sequance, leaves, internalNodes);
+            return new SearchResult(searchResult.Evaluation, sequance, leaves, internalNodes, allChildrenAreDeadEnds);
         }
     }
 }

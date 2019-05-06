@@ -20,18 +20,26 @@ namespace MinMaxSearch
         }
 
         public SearchResult EvaluateChildren(IDeterministicState startState, int depth, double alpha, double bata,
-            CancellationToken cancellationToken, List<IState> statesUpToNow, IDictionary<IState, double> storedStates = null)
+            CancellationToken cancellationToken, List<IState> statesUpToNow,
+            IDictionary<IState, double> storedStates = null)
         {
             if (!startState.GetNeighbors().Any())
-                return new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0);
-            
+                return new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0, true);
+
+            if (searchEngine.RememberDeadEndStates && searchWorker.DeadEndStates.ContainsKey(startState))
+            {
+                var rememberdState = searchWorker.DeadEndStates[startState];
+                return new SearchResult(rememberdState.Item1, new List<IState>(rememberdState.Item2), 1, 0, true);
+            }
+
+            var pruned = false;
             var player = startState.Turn;
             var results = new List<Task<SearchResult>>();
             var cancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             foreach (var state in startState.GetNeighbors())
             {
                 var taskResult = storedStates != null && storedStates.ContainsKey(state)
-                    ? Task.FromResult(new SearchResult(storedStates[state], new List<IState> {state}, 1, 0))
+                    ? Task.FromResult(new SearchResult(storedStates[state], new List<IState> {state}, 1, 0, true))
                     : threadManager.Invoke(() =>
                         searchWorker.Evaluate(state, depth + 1, alpha, bata, cancellationSource.Token, new List<IState>(statesUpToNow) {startState}));
                 results.Add(taskResult);
@@ -44,6 +52,7 @@ namespace MinMaxSearch
                     if (AlphaBataShouldPrune(alpha, bata, stateEvaluation.Evaluation, player) ||
                         ShouldDieEarlly(stateEvaluation.Evaluation, player, stateEvaluation.StateSequence.Count))
                     {
+                        pruned = true;
                         cancellationSource.Cancel();
                         break;
                     }
@@ -51,14 +60,19 @@ namespace MinMaxSearch
                 }
             }
 
-            return Reduce(results, player, startState);
+            var result = Reduce(results, player, startState, pruned);
+            if (searchEngine.RememberDeadEndStates && result.AllChildrenAreDeadEnds)
+                searchWorker.DeadEndStates[startState] = new Tuple<double, List<IState>>(result.Evaluation, new List<IState>(result.StateSequence));
+
+            return result;
         }
 
-        private SearchResult Reduce(List<Task<SearchResult>> results, Player player, IState startState)
+        private SearchResult Reduce(List<Task<SearchResult>> results, Player player, IState startState, bool pruned)
         {
             var bestEvaluation = player == Player.Max ? double.MinValue : double.MaxValue;
             SearchResult bestResult = null;
             int leaves = 0, internalNodes = 0;
+            var allChildrenAreDeadEnds = true;
             foreach (var result in results)
             {
                 var actualResult = result.Result;
@@ -66,6 +80,7 @@ namespace MinMaxSearch
 
                 leaves += actualResult.Leaves;
                 internalNodes += actualResult.InternalNodes;
+                allChildrenAreDeadEnds = allChildrenAreDeadEnds && actualResult.AllChildrenAreDeadEnds;
                 if (IsBetterThen(actualResult.Evaluation, bestEvaluation, actualResult.StateSequence.Count,
                     bestResult?.StateSequence?.Count, player))
                 {
@@ -73,8 +88,8 @@ namespace MinMaxSearch
                     bestResult = actualResult;
                 }
             }
-            
-            return bestResult?.CloneAndAddStateToTop(startState, leaves, internalNodes + 1);
+
+            return bestResult?.CloneAndAddStateToTop(startState, leaves, internalNodes + 1, allChildrenAreDeadEnds || pruned);
         }
 
         private bool AlphaBataShouldPrune(double alpha, double bata, double evaluation, Player player)

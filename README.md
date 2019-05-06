@@ -95,7 +95,8 @@ var cancellationToken = new CancellationTokenSource();
 var engine =  new SearchEngine()
 {
     MaxDegreeOfParallelism = 2,
-    FavorShortPaths = true
+    FavorShortPaths = true,
+	RememberDeadEndStates = true
 };
 var searchResult = engine.Search(startState, searchDepth, cancellationToken);
 ```

@@ -9,11 +9,15 @@ namespace MinMaxSearch
 {
     class ProbabilisticSearchUtils
     {
+        private readonly SearchEngine searchEngine;
+        private readonly SearchWorker searchWorker;
         private readonly ThreadManager threadManager;
         private readonly DeterministicSearchUtils deterministicSearchUtils;
 
-        public ProbabilisticSearchUtils(ThreadManager threadManager, DeterministicSearchUtils deterministicSearchUtils)
+        public ProbabilisticSearchUtils(SearchWorker searchWorker, SearchEngine searchEngine, ThreadManager threadManager, DeterministicSearchUtils deterministicSearchUtils)
         {
+            this.searchWorker = searchWorker;
+            this.searchEngine = searchEngine;
             this.deterministicSearchUtils = deterministicSearchUtils;
             this.threadManager = threadManager;
         }
@@ -21,7 +25,11 @@ namespace MinMaxSearch
         public SearchResult EvaluateChildren(IProbabilisticState startState, int depth, CancellationToken cancellationToken, List<IState> statesUpToNow)
         {
             if (!startState.GetNeighbors().Any())
-                return new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0);
+                return new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0, true);
+
+            if (searchEngine.RememberDeadEndStates && searchWorker.DeadEndStates.ContainsKey(startState))
+                return new SearchResult(searchWorker.DeadEndStates[startState].Item1, new List<IState> {startState}, 1, 0, true);
+
 
             var storedStates = new ConcurrentDictionary<IState, double>();
             var results = new List<Tuple<double, Task<SearchResult>>>();
@@ -33,22 +41,28 @@ namespace MinMaxSearch
                 results.Add(new Tuple<double, Task<SearchResult>>(neighbor.Item1, searchResult));
             }
 
-            return Reduce(results, startState);
+            var result = Reduce(results, startState);
+            if (searchEngine.RememberDeadEndStates && result.AllChildrenAreDeadEnds)
+                searchWorker.DeadEndStates[startState] = new Tuple<double, List<IState>>(result.Evaluation, new List<IState>(result.StateSequence));
+
+            return result;
         }
 
         private SearchResult Reduce(List<Tuple<double, Task<SearchResult>>> results, IState startState)
         {
             double sum = 0;
             int leaves = 0, internalNodes = 0;
+            var allChildrenAreDeadEnds = true;
             foreach (var result in results)
             {
                 var searchResult = result.Item2.Result;
                 sum += result.Item1 * searchResult.Evaluation;
                 leaves += searchResult.Leaves;
                 internalNodes += searchResult.InternalNodes;
+                allChildrenAreDeadEnds = allChildrenAreDeadEnds && searchResult.AllChildrenAreDeadEnds;
             }
 
-            return new SearchResult(sum, new List<IState>() {startState}, leaves, internalNodes);
+            return new SearchResult(sum, new List<IState>() {startState}, leaves, internalNodes, allChildrenAreDeadEnds);
         }
     }
 }

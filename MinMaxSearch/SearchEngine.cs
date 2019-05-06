@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -11,6 +12,7 @@ namespace MinMaxSearch
     {
         private readonly List<IPruner> pruners = new List<IPruner>();
         private readonly PreventLoopPruner preventLoopPruner = new PreventLoopPruner();
+        private readonly IDictionary<IState, Tuple<double, List<IState>>> deadEndStates = new ConcurrentDictionary<IState, Tuple<double, List<IState>>>();
 
         public void AddPruner(IPruner pruner) => pruners.Add(pruner);
 
@@ -43,6 +45,13 @@ namespace MinMaxSearch
         /// </summary>
         public bool DieEarly { get; set; }
 
+        /// <summary>
+        /// If true, the engine will remember states from which all children lead to endStates, so that it won't need to re-calculate their search-tree. 
+        /// This can save a lot of time in some games.
+        /// Note that this will only work if the state overrides object's Equals and GetHashCode methods in a meaningful way.
+        /// </summary>
+        public bool RememberDeadEndStates { get; set; }
+
         public double MaxScore { get; set; } = double.MaxValue;
 
         public double MinScore { get; set; } = double.MinValue;
@@ -67,7 +76,7 @@ namespace MinMaxSearch
             if (!startState.GetNeighbors().Any())
                 throw new NoNeighborsException("start state has no nighbors " + startState);
 
-            var searchWorker = new SearchWorker(maxDepth, this, pruners);
+            var searchWorker = new SearchWorker(maxDepth, this, pruners, deadEndStates);
             var evaluation = searchWorker.Evaluate(startState, 0, double.MinValue, double.MaxValue, cancellationToken, new List<IState>());
             evaluation.StateSequence.Reverse();
             evaluation.StateSequence.RemoveAt(0); // Removing the top node will make the result "nicer"
