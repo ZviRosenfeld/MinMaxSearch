@@ -42,6 +42,8 @@ public interface IDeterministicState : IState
 
 The code contains examples for [Tic-tac-toe](TicTacToeTests/TicTacToeState.cs) and [connect4](Connect4Tests/Connect4State.cs) states.
 
+In addition, you can find a tutorial on how to create a tic-tac-toe state [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Tic-Tac-Toe-Tutorial).
+
 **IProbabilisticState**
 
 States used for indeterministic games (games that have an element of luck in them), like backgammon.
