@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MinMaxSearch.UnitTests.TestStates;
 
 namespace MinMaxSearch.UnitTests
 {

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 
-namespace MinMaxSearch.UnitTests
+namespace MinMaxSearch.UnitTests.TestStates
 {
     class CancelAtValue4State : IDeterministicState
     {

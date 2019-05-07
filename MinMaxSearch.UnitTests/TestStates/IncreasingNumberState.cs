@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace MinMaxSearch.UnitTests
+namespace MinMaxSearch.UnitTests.TestStates
 {
     class IncreasingNumberState : IDeterministicState
     {

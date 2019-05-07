@@ -99,9 +99,10 @@ namespace MinMaxSearch
                     bestResultSoFar = result;
                 if (cancellationToken.IsCancellationRequested)
                     break;
+                if (result.AllChildrenAreDeadEnds)
+                    break; // No point searching any deeper
             }
             return bestResultSoFar;
         }
-
     }
 }
