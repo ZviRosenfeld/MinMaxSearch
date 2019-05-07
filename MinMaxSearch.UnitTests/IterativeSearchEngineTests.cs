@@ -38,10 +38,26 @@ namespace MinMaxSearch.UnitTests
             var cancellationSource = new CancellationTokenSource(100);
             var searchEngine = new SearchEngine() {MaxDegreeOfParallelism = degreeOfParallelism};
             var result = Task.Run(() => searchEngine.IterativeSearch(new CancelAtValue4State(1, cancellationSource, Player.Max), 1, int.MaxValue, cancellationSource.Token));
-            Thread.Sleep(100);
+            result.Wait(200);
 
             Assert.IsTrue(result.IsCompleted, "Search should have complated by now");
             Assert.AreEqual(4, result.Result.Evaluation, "Evaluation should have been 3; found " + result.Result.Evaluation);
+        }
+
+        [DataRow(1)]
+        [DataRow(2)]
+        [DataRow(8)]
+        [TestMethod]
+        public void IterativeSearch_TimeoutSet_WeDontContinueLookingAfterTimeout(int degreeOfParallelism)
+        {
+            var searchEngine = new SearchEngine() { MaxDegreeOfParallelism = degreeOfParallelism };
+            var result = Task.Run(() => searchEngine.IterativeSearch(new SlowState(0), 1, int.MaxValue, TimeSpan.FromMilliseconds(100)));
+            
+            Assert.IsFalse(result.IsCompleted, "We shouldn't have stopped running yet");
+
+            result.Wait(400);
+
+            Assert.IsTrue(result.IsCompleted, "Search should have complated by now");
         }
     }
 }

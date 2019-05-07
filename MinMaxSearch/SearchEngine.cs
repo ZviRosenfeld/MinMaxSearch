@@ -83,6 +83,9 @@ namespace MinMaxSearch
             return evaluation;
         }
 
+        public SearchResult IterativeSearch(IDeterministicState startState, int startDepth, int maxDepth, TimeSpan timeout) =>
+            IterativeSearch(startState, startDepth, maxDepth, new CancellationTokenSource(timeout).Token);
+
         public SearchResult IterativeSearch(IDeterministicState startState, int startDepth, int maxDepth, CancellationToken cancellationToken)
         {
             if (startDepth >= maxDepth)

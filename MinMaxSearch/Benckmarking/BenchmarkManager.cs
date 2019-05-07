@@ -12,7 +12,6 @@ namespace MinMaxSearch.Benckmarking
             var result = searchEngine.Search(startState, searchDepth);
             var endTime = DateTime.Now;
             return new BenckmarkResult(endTime - startTime, result.Leaves, result.InternalNodes);
-
         }
     }
 }

@@ -76,10 +76,12 @@ public interface IDeterministicState : IState
 
 *In addition, I recommend that your states also implement object's Equals and GetHashCode methods, as many of the algorithm optimizations rely on these methods being implemented in a meaningful way.*
 
+You can find a tutorial on how to create a probabilistic tic-tac-toe game [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Probabilistic-Tic-Tac-Toe-Tutorial).
+
 ### Examples
 Following are a few snippets take from the project's unit tests. You can refer to the [Connnect4 Tests](Connect4Tests) or [Tic-tac-toe Tests](TicTacToeTests) for more examples.
 
-In addition, you can find a tutorial on how to create a tic-tac-toe state [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Tic-Tac-Toe-Tutorial).
+In addition, you can find a tutorial on how to create a tic-tac-toe state [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Tic-Tac-Toe-Tutorial), and one on probabilistic tic-tac-toe game [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Probabilistic-Tic-Tac-Toe-Tutorial).
 
 example1:
 ```csharp
@@ -122,7 +124,7 @@ If this option is set to true, the algorithm will rerun as soon as it finds a sc
 The rationale behind this is that once the algorithm finds a win there's no point in more searching. (We assume that a score greater then MaxScore is a win for Max, and one smaller then MinScore is a win for Min).
 Note that this will only work if Equals is implement in a meaningful way on your states.
 
-**RememberDeadEndStates**
+**RememberDeadEndStates:**
 If true, the engine will remember states from which all children lead to endStates, so that it won't need to re-calculate their search-tree. This can save a lot of time in some games.
 Note that this will only work if the state overrides object's Equals and GetHashCode methods in a meaningful way.
 
@@ -137,4 +139,4 @@ Pruners can be implemented by implementing the IPruner interface. Then, the Shou
 ## Benchmarking
 An optimization that will improve one search can hurt another. That's why benchmarking is so impotent. It lets you customize the search to best suite your needs.
 
-**BanckmarkResult[] Benchmark(this SearchEngine searchEngine, IState startState, int searchDepth, int times)**: This is an extension method that will provide you with information regarding the search's performance.
+**BanckmarkResult[] Benchmark(this SearchEngine searchEngine, IState startState, int searchDepth)**: This is an extension method that will provide you with information regarding the search's performance.
