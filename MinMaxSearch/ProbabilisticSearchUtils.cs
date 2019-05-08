@@ -9,15 +9,15 @@ namespace MinMaxSearch
 {
     class ProbabilisticSearchUtils
     {
-        private readonly SearchEngine searchEngine;
+        private readonly SearchOptions searchOptions;
         private readonly SearchWorker searchWorker;
         private readonly ThreadManager threadManager;
         private readonly DeterministicSearchUtils deterministicSearchUtils;
 
-        public ProbabilisticSearchUtils(SearchWorker searchWorker, SearchEngine searchEngine, ThreadManager threadManager, DeterministicSearchUtils deterministicSearchUtils)
+        public ProbabilisticSearchUtils(SearchWorker searchWorker, SearchOptions searchOptions, ThreadManager threadManager, DeterministicSearchUtils deterministicSearchUtils)
         {
             this.searchWorker = searchWorker;
-            this.searchEngine = searchEngine;
+            this.searchOptions = searchOptions;
             this.deterministicSearchUtils = deterministicSearchUtils;
             this.threadManager = threadManager;
         }
@@ -27,7 +27,7 @@ namespace MinMaxSearch
             if (!startState.GetNeighbors().Any())
                 return new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0, true);
 
-            if (searchEngine.RememberDeadEndStates && searchWorker.DeadEndStates.ContainsKey(startState))
+            if (searchOptions.RememberDeadEndStates && searchWorker.DeadEndStates.ContainsKey(startState))
                 return new SearchResult(searchWorker.DeadEndStates[startState].Item1, new List<IState> {startState}, 1, 0, true);
 
 
@@ -42,7 +42,7 @@ namespace MinMaxSearch
             }
 
             var result = Reduce(results, startState);
-            if (searchEngine.RememberDeadEndStates && result.AllChildrenAreDeadEnds)
+            if (searchOptions.RememberDeadEndStates && result.AllChildrenAreDeadEnds)
                 searchWorker.DeadEndStates[startState] = new Tuple<double, List<IState>>(result.Evaluation, new List<IState>(result.StateSequence));
 
             return result;

@@ -8,14 +8,14 @@ namespace MinMaxSearch
 {
     class DeterministicSearchUtils
     {
-        private readonly SearchEngine searchEngine;
+        private readonly SearchOptions searchOptions;
         private readonly SearchWorker searchWorker;
         private readonly ThreadManager threadManager;
 
-        public DeterministicSearchUtils(SearchWorker searchWorker, SearchEngine searchEngine, ThreadManager threadManager)
+        public DeterministicSearchUtils(SearchWorker searchWorker, SearchOptions searchOptions, ThreadManager threadManager)
         {
             this.searchWorker = searchWorker;
-            this.searchEngine = searchEngine;
+            this.searchOptions = searchOptions;
             this.threadManager = threadManager;
         }
 
@@ -26,7 +26,7 @@ namespace MinMaxSearch
             if (!startState.GetNeighbors().Any())
                 return new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0, true);
 
-            if (searchEngine.RememberDeadEndStates && searchWorker.DeadEndStates.ContainsKey(startState))
+            if (searchOptions.RememberDeadEndStates && searchWorker.DeadEndStates.ContainsKey(startState))
             {
                 var rememberdState = searchWorker.DeadEndStates[startState];
                 return new SearchResult(rememberdState.Item1, new List<IState>(rememberdState.Item2), 1, 0, true);
@@ -61,7 +61,7 @@ namespace MinMaxSearch
             }
 
             var result = Reduce(results, player, startState, pruned);
-            if (searchEngine.RememberDeadEndStates && result.AllChildrenAreDeadEnds)
+            if (searchOptions.RememberDeadEndStates && result.AllChildrenAreDeadEnds)
                 searchWorker.DeadEndStates[startState] = new Tuple<double, List<IState>>(result.Evaluation, new List<IState>(result.StateSequence));
 
             return result;
@@ -113,14 +113,14 @@ namespace MinMaxSearch
 
         private bool ShouldDieEarlly(double evaluation, Player player, int pathLength)
         {
-            if (!searchEngine.DieEarly)
+            if (!searchOptions.DieEarly)
                 return false;
-            if (searchEngine.FavorShortPaths && pathLength > 1)
+            if (searchOptions.FavorShortPaths && pathLength > 1)
                 return false;
 
-            if (player == Player.Min && evaluation > searchEngine.MaxScore)
+            if (player == Player.Min && evaluation > searchOptions.MaxScore)
                 return true;
-            if (player == Player.Max && evaluation < searchEngine.MinScore)
+            if (player == Player.Max && evaluation < searchOptions.MinScore)
                 return true;
 
             return false;
@@ -128,7 +128,7 @@ namespace MinMaxSearch
 
         private bool IsBetterThen(double firstValue, double secondValue, int firstPathLength, int? secondPathLength, Player player)
         {
-            if (searchEngine.FavorShortPaths && firstValue == secondValue)
+            if (searchOptions.FavorShortPaths && firstValue == secondValue)
             {
                 if (player == Player.Min)
                     return firstPathLength > secondPathLength;

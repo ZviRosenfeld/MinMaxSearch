@@ -126,6 +126,7 @@ Note that this will only work if Equals is implement in a meaningful way on your
 
 **RememberDeadEndStates:**
 If true, the engine will remember states from which all children lead to endStates, so that it won't need to re-calculate their search-tree. This can save a lot of time in some games.
+You can use SearchEngine.Clear to clear the remembered dead-end states if they're taking up too much memory.
 Note that this will only work if the state overrides object's Equals and GetHashCode methods in a meaningful way.
 
 **IsUnstableState:**

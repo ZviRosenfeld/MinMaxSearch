@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -10,23 +9,22 @@ namespace MinMaxSearch
     class SearchWorker
     {
         private readonly int maxDepth;
-        private readonly SearchEngine searchEngine;
-        private readonly List<IPruner> pruners;
+
+        private readonly SearchOptions searchOptions;
         private readonly ThreadManager threadManager;
         private readonly DeterministicSearchUtils deterministicSearchUtils;
         private readonly ProbabilisticSearchUtils probabilisticSearchUtils;
 
         public IDictionary<IState, Tuple<double, List<IState>>> DeadEndStates { get; }
 
-        public SearchWorker(int maxDepth, SearchEngine searchEngine, List<IPruner> pruners, IDictionary<IState, Tuple<double, List<IState>>> deadEndStates)
+        public SearchWorker(int maxDepth, SearchOptions searchOptions, IDictionary<IState, Tuple<double, List<IState>>> deadEndStates)
         {
             DeadEndStates = deadEndStates;
             this.maxDepth = maxDepth;
-            this.searchEngine = searchEngine;
-            this.pruners = pruners;
-            threadManager = new ThreadManager(searchEngine.MaxDegreeOfParallelism);
-            deterministicSearchUtils = new DeterministicSearchUtils(this, searchEngine, threadManager);
-            probabilisticSearchUtils = new ProbabilisticSearchUtils(this, searchEngine, threadManager, deterministicSearchUtils);
+            this.searchOptions = searchOptions;
+            threadManager = new ThreadManager(searchOptions.MaxDegreeOfParallelism);
+            deterministicSearchUtils = new DeterministicSearchUtils(this, searchOptions, threadManager);
+            probabilisticSearchUtils = new ProbabilisticSearchUtils(this, searchOptions, threadManager, deterministicSearchUtils);
         }
 
         public SearchResult Evaluate(IState startState, int depth, double alpha, double bata,
@@ -49,11 +47,11 @@ namespace MinMaxSearch
         
         private bool ShouldStop(IState state, int depth, CancellationToken cancellationToken, List<IState> passedStates)
         {
-            if (depth >= maxDepth && !searchEngine.IsUnstableState(state, depth, passedStates))
+            if (depth >= maxDepth && !searchOptions.IsUnstableState(state, depth, passedStates))
                 return true;
             if (cancellationToken.IsCancellationRequested)
                 return true;
-            if (pruners.Any(pruner => pruner.ShouldPrune(state, depth, passedStates)))
+            if (searchOptions.Pruners.Any(pruner => pruner.ShouldPrune(state, depth, passedStates)))
                 return true;
 
             return false;
