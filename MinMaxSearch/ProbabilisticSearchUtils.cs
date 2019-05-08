@@ -27,7 +27,7 @@ namespace MinMaxSearch
             if (!startState.GetNeighbors().Any())
                 return new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0, true);
 
-            if (searchOptions.RememberDeadEndStates && searchWorker.DeadEndStates.ContainsKey(startState))
+            if (searchWorker.DeadEndStates.ContainsKey(startState))
                 return new SearchResult(searchWorker.DeadEndStates[startState].Item1, new List<IState> {startState}, 1, 0, true);
 
 
@@ -42,7 +42,7 @@ namespace MinMaxSearch
             }
 
             var result = Reduce(results, startState);
-            if (searchOptions.RememberDeadEndStates && result.AllChildrenAreDeadEnds)
+            if (result.AllChildrenAreDeadEnds)
                 searchWorker.DeadEndStates[startState] = new Tuple<double, List<IState>>(result.Evaluation, new List<IState>(result.StateSequence));
 
             return result;

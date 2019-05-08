@@ -150,7 +150,7 @@ namespace TicTacToeTests
                 DieEarly = true,
                 MinScore = -0.5,
                 MaxScore = 0.5,
-                RememberDeadEndStates = true
+                RememberDeadEndStates = RememberStatesMode.BetweenSearches
             };
     }
 }

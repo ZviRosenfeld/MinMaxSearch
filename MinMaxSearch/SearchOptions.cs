@@ -7,14 +7,13 @@ namespace MinMaxSearch
     class SearchOptions
     {
         public SearchOptions(List<IPruner> pruners, Func<IState, int, List<IState>, bool> isUnstableState,
-            bool preventLoops, bool favorShortPaths, bool dieEarly, bool rememberDeadEndStates, double maxScore,
+            bool preventLoops, bool favorShortPaths, bool dieEarly, double maxScore,
             double minScore, int maxDegreeOfParallelism)
         {
             Pruners = pruners;
             IsUnstableState = isUnstableState;
             FavorShortPaths = favorShortPaths;
             DieEarly = dieEarly;
-            RememberDeadEndStates = rememberDeadEndStates;
             MaxScore = maxScore;
             MinScore = minScore;
             MaxDegreeOfParallelism = maxDegreeOfParallelism >= 1
@@ -34,9 +33,7 @@ namespace MinMaxSearch
         public bool FavorShortPaths { get; }
 
         public bool DieEarly { get; }
-
-        public bool RememberDeadEndStates { get; }
-
+        
         public double MaxScore { get; }
 
         public double MinScore { get; }

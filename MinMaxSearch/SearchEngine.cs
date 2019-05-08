@@ -41,12 +41,12 @@ namespace MinMaxSearch
         public bool DieEarly { get; set; }
 
         /// <summary>
-        /// If true, the engine will remember states from which all children lead to endStates, so that it won't need to re-calculate their search-tree. 
+        /// Tells the engine whether to remember states from which all children lead to endStates, so that it won't need to re-calculate their search-tree. 
         /// This can save a lot of time in some games.
         /// You can use SearchEngine.Clear to clear the remembered dead-end states if they're taking up too much memory.
         /// Note that this will only work if the state overrides object's Equals and GetHashCode methods in a meaningful way.
         /// </summary>
-        public bool RememberDeadEndStates { get; set; }
+        public RememberStatesMode RememberDeadEndStates { get; set; }
 
         public double MaxScore { get; set; } = double.MaxValue;
 
@@ -71,16 +71,29 @@ namespace MinMaxSearch
         {
             if (!startState.GetNeighbors().Any())
                 throw new NoNeighborsException("start state has no nighbors " + startState);
-
-            var searchWorker = new SearchWorker(maxDepth, CreateSearchOptions(), deadEndStates);
+            
+            var searchWorker = new SearchWorker(maxDepth, CreateSearchOptions(), GetStoredStatesDictionary());
             var evaluation = searchWorker.Evaluate(startState, 0, double.MinValue, double.MaxValue, cancellationToken, new List<IState>());
             evaluation.StateSequence.Reverse();
             evaluation.StateSequence.RemoveAt(0); // Removing the top node will make the result "nicer"
             return evaluation;
         }
 
+        private IDictionary<IState, Tuple<double, List<IState>>> GetStoredStatesDictionary()
+        {
+            switch (RememberDeadEndStates)
+            {
+                case RememberStatesMode.Never: return new NullDictionary<IState, Tuple<double, List<IState>>>();
+                case RememberStatesMode.InSameSearch: return new ConcurrentDictionary<IState, Tuple<double, List<IState>>>();
+                case RememberStatesMode.BetweenSearches: return deadEndStates;
+                default:
+                    throw new ArgumentException(
+                        $"{nameof(RememberDeadEndStates)} is of type {RememberDeadEndStates}, which isn't valid");
+            }
+        }
+
         private SearchOptions CreateSearchOptions() => new SearchOptions(pruners, IsUnstableState, PreventLoops,
-            FavorShortPaths, DieEarly, RememberDeadEndStates, MaxScore, MinScore, MaxDegreeOfParallelism);
+            FavorShortPaths, DieEarly, MaxScore, MinScore, MaxDegreeOfParallelism);
 
         public SearchResult IterativeSearch(IDeterministicState startState, int startDepth, int maxDepth, TimeSpan timeout) =>
             IterativeSearch(startState, startDepth, maxDepth, new CancellationTokenSource(timeout).Token);

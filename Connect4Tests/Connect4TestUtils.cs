@@ -11,7 +11,7 @@ namespace Connect4Tests
                 DieEarly = true,
                 MinScore = BoardEvaluator.MinEvaluation + 1,
                 MaxScore = BoardEvaluator.MaxEvaluation - 1,
-                RememberDeadEndStates = true
+                RememberDeadEndStates = RememberStatesMode.BetweenSearches
             };
 
         public static Player[,] GetEmptyBoard() =>

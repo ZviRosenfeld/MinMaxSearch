@@ -30,6 +30,43 @@ namespace MinMaxSearch.UnitTests
             A.CallTo(() => endState1.GetNeighbors()).Returns(new List<IState>());
             A.CallTo(() => endState2.GetNeighbors()).Returns(new List<IState>());
             A.CallTo(() => endState3.GetNeighbors()).Returns(new List<IState>());
+            A.CallTo(() => state1.Turn).Returns(Player.Max);
+            A.CallTo(() => state2.Turn).Returns(Player.Max);
+            A.CallTo(() => state3.Turn).Returns(Player.Max);
+            A.CallTo(() => endState1.Turn).Returns(Player.Max);
+            A.CallTo(() => endState2.Turn).Returns(Player.Max);
+            A.CallTo(() => endState3.Turn).Returns(Player.Max);
+        }
+
+        [DataRow(RememberStatesMode.Never)]
+        [DataRow(RememberStatesMode.BetweenSearches)]
+        [DataRow(RememberStatesMode.InSameSearch)]
+        [TestMethod]
+        public void Search_TestRememberStates(RememberStatesMode rememberStatesMode)
+        {
+            A.CallTo(() => state1.GetNeighbors()).Returns(new List<IState> { state2, endState2 });
+            A.CallTo(() => state2.GetNeighbors()).Returns(new List<IState> { endState1 });
+            
+            A.CallTo(() => endState1.Evaluate(A<int>._, A<List<IState>>._)).Returns(8);
+            A.CallTo(() => endState2.Evaluate(A<int>._, A<List<IState>>._)).Returns(5);
+            A.CallTo(() => state2.Evaluate(A<int>._, A<List<IState>>._)).Returns(1);
+
+            var engine = new SearchEngine { RememberDeadEndStates = rememberStatesMode };
+            engine.Search(state1, 5); // Do the first search, so that we remember endState1
+            var result = engine.Search(state1, 1);
+
+            if (rememberStatesMode == RememberStatesMode.BetweenSearches)
+            {
+                Assert.AreEqual(endState1, result.StateSequence.Last(), $"We should have remembered that {endState1} is the final state");
+                Assert.AreEqual(state2, result.NextMove);
+                Assert.AreEqual(8, result.Evaluation);
+            }
+            else
+            {
+                Assert.AreEqual(endState2, result.StateSequence.Last());
+                Assert.AreEqual(endState2, result.NextMove);
+                Assert.AreEqual(5, result.Evaluation);
+            }
         }
 
         [DataRow(1)]
@@ -39,12 +76,7 @@ namespace MinMaxSearch.UnitTests
         public void Search_MaxHasTwoTurnsInARow_FindBestMove(int degreeOfParallelism)
         {
             A.CallTo(() => state1.GetNeighbors()).Returns(new List<IState> { endState1, endState2, endState3});
-
-            A.CallTo(() => state1.Turn).Returns(Player.Max);
-            A.CallTo(() => endState1.Turn).Returns(Player.Max);
-            A.CallTo(() => endState2.Turn).Returns(Player.Max);
-            A.CallTo(() => endState3.Turn).Returns(Player.Max);
-
+            
             A.CallTo(() => endState1.Evaluate(A<int>._, A<List<IState>>._)).Returns(2);
             A.CallTo(() => endState2.Evaluate(A<int>._, A<List<IState>>._)).Returns(1);
             A.CallTo(() => endState3.Evaluate(A<int>._, A<List<IState>>._)).Returns(3);
@@ -56,8 +88,8 @@ namespace MinMaxSearch.UnitTests
         }
 
         [DataRow(1)]
-        //[DataRow(2)]
-        //[DataRow(8)]
+        [DataRow(2)]
+        [DataRow(8)]
         [TestMethod]
         public void Search_RowOfMixedMove_FindBest(int degreeOfParallelism)
         {
