@@ -14,7 +14,7 @@ namespace MinMaxSearch.UnitTests.TestStates
         }
 
         public IEnumerable<IState> GetNeighbors() =>
-            new List<IDeterministicState> {new ThrowExceptionAtDepthThreeState(Value == 1 ? 0: 1, Utils.GetReversePlayer(Turn))};
+            new List<IDeterministicState> {new ThrowExceptionAtDepthThreeState(Value == 1 ? 0: 1, Turn.GetReversePlayer())};
 
         public double Evaluate(int depth, List<IState> passedThroughStates) => 
             depth > 3? throw new Exception("Shouldn't have gotten so far into the search") : Value;

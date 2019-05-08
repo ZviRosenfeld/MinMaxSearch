@@ -43,7 +43,7 @@ namespace TicTacToeTests
                 {
                     var newBoard = (Player[,]) Board.Clone();
                     newBoard[i, j] = Turn;
-                    neighbors.Add(new TicTacToeState(newBoard, Utils.GetReversePlayer(Turn)));
+                    neighbors.Add(new TicTacToeState(newBoard, Turn.GetReversePlayer()));
                 }
             return neighbors;
         }

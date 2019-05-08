@@ -116,7 +116,7 @@ Note that this will only work if Equals is implement in a meaningful way on your
 If true, the algorithm will favor short solutions over long solutions when they both result in the same score.
 If this option is off, you may experience seemingly weird behavior. Say the algorithm sees that Min can set a trap that will end in Max's defeat in six moves. Without favoring short paths, the algorithm might decide to "give up", causing Max to perform random moves, and possibly lose much sooner - even if its opponent may not have noticed the trap.
 
-**MaxDegreeOfParallelism**
+**MaxDegreeOfParallelism:**
 Note that a higher degree of parallelism doesn't necessarily equal a faster search. You should probably do some benchmarking to find the degree of parallelism best suited for your problem.
 
 **DieEarly:**
@@ -127,7 +127,7 @@ Note that this will only work if Equals is implement in a meaningful way on your
 **RememberDeadEndStates:**
 Tells the engine whether to remember states from which all children lead to endStates, so that it won't need to re-calculate their search-tree. 
 This can save a lot of time in some games.
-You can use SearchEngine.Clear to clear the remembered dead-end states if they're taking up too much memory.
+You can use SearchEngine's Clear or SmartClear methods to clear the remembered dead-end states if they're taking up too much memory.
 Note that this will only work if the state overrides object's Equals and GetHashCode methods in a meaningful way.
 
 **IsUnstableState:**

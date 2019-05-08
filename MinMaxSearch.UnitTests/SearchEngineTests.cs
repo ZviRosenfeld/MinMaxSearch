@@ -68,6 +68,27 @@ namespace MinMaxSearch.UnitTests
                 Assert.AreEqual(5, result.Evaluation);
             }
         }
+        
+        [TestMethod]
+        public void Search_SmartClearOnlyClearsRequiredStrates()
+        {
+            A.CallTo(() => state1.GetNeighbors()).Returns(new List<IState> { state2, state3, endState3 });
+            A.CallTo(() => state2.GetNeighbors()).Returns(new List<IState> { endState1 });
+            A.CallTo(() => state3.GetNeighbors()).Returns(new List<IState> { endState2 });
+
+            A.CallTo(() => endState1.Evaluate(A<int>._, A<List<IState>>._)).Returns(5);
+            A.CallTo(() => endState2.Evaluate(A<int>._, A<List<IState>>._)).Returns(8);
+            A.CallTo(() => endState2.Evaluate(A<int>._, A<List<IState>>._)).Returns(4);
+            A.CallTo(() => state2.Evaluate(A<int>._, A<List<IState>>._)).Returns(1);
+            A.CallTo(() => state3.Evaluate(A<int>._, A<List<IState>>._)).Returns(3);
+
+            var engine = new SearchEngine { RememberDeadEndStates = RememberStatesMode.BetweenSearches };
+            engine.Search(state1, 5); // Do the first search, so that we remember all states
+            engine.SmartClear(s => s == state3, CancellationToken.None);
+            var result = engine.Search(state1, 1);
+
+            Assert.AreEqual(state2, result.NextMove, $"Next move == {result.NextMove}, when it should have been {nameof(state2)}");
+        }
 
         [DataRow(1)]
         [DataRow(2)]

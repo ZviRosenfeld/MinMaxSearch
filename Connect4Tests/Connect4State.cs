@@ -20,7 +20,7 @@ namespace Connect4Tests
 
         public IEnumerable<IState> GetNeighbors()
         {
-            if (BoardEvaluator.IsWin(Board, Utils.GetReversePlayer(Turn)))
+            if (BoardEvaluator.IsWin(Board, Turn.GetReversePlayer()))
                 return new List<IDeterministicState>();
 
             var result = new List<Connect4State>();
@@ -44,7 +44,7 @@ namespace Connect4Tests
                 if (newBoard[j, i] == Player.Empty)
                 {
                     newBoard[j, i] = Turn;
-                    return new Connect4State(newBoard, Utils.GetReversePlayer(Turn));
+                    return new Connect4State(newBoard, Turn.GetReversePlayer());
                 }
 
             return null;

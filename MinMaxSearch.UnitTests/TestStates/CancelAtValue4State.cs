@@ -20,7 +20,7 @@ namespace MinMaxSearch.UnitTests.TestStates
             if (Value >= 4)
                 cancellationTokenSource.Cancel();
 
-            return new List<IDeterministicState> {new CancelAtValue4State(Value + 1, cancellationTokenSource, Utils.GetReversePlayer(Turn))};
+            return new List<IDeterministicState> {new CancelAtValue4State(Value + 1, cancellationTokenSource, Turn.GetReversePlayer())};
         }
 
         public double Evaluate(int depth, List<IState> passedThroughStates) => Value;

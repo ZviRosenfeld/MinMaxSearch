@@ -13,7 +13,7 @@ namespace MinMaxSearch.UnitTests.TestStates
         }
 
         public IEnumerable<IState> GetNeighbors() =>
-            new List<IncreasingNumberState>{ new IncreasingNumberState(value + 1, Utils.GetReversePlayer(Turn)), new IncreasingNumberState(value + 2, Utils.GetReversePlayer(Turn))};
+            new List<IncreasingNumberState>{ new IncreasingNumberState(value + 1, Turn.GetReversePlayer()), new IncreasingNumberState(value + 2, Turn.GetReversePlayer())};
 
         public double Evaluate(int depth, List<IState> passedThroughStates) => value;
         public Player Turn { get; }

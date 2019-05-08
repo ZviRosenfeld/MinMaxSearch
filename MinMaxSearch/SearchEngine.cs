@@ -11,12 +11,34 @@ namespace MinMaxSearch
     public class SearchEngine
     {
         private readonly List<IPruner> pruners = new List<IPruner>();
-        private readonly IDictionary<IState, Tuple<double, List<IState>>> deadEndStates = new ConcurrentDictionary<IState, Tuple<double, List<IState>>>();
+        private IDictionary<IState, Tuple<double, List<IState>>> deadEndStates = new ConcurrentDictionary<IState, Tuple<double, List<IState>>>();
 
         /// <summary>
         /// Clears the remembered DeadEndStates.
         /// </summary>
-        public void Clear() => deadEndStates.Clear();
+        public void Clear() => deadEndStates = new ConcurrentDictionary<IState, Tuple<double, List<IState>>>();
+
+        /// <summary>
+        /// Clears the remembered DeadEndStates that meat the shouldClear Func criteria. 
+        /// This method can be used in the background while waiting for the user's move.
+        /// </summary>
+        /// <param name="shouldClear"> If this Func returns true, the state will be cleared</param>
+        /// <param name="cancellationToken"></param>
+        public void SmartClear(Func<IState, bool> shouldClear, CancellationToken cancellationToken)
+        {
+            for (int i = 0; i < deadEndStates.Count; i++)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                    break;
+
+                var state = deadEndStates.ElementAt(i).Key;
+                if (shouldClear(state))
+                {
+                    deadEndStates.Remove(state);
+                    i--;
+                }
+            }
+        }
 
         public void AddPruner(IPruner pruner) => pruners.Add(pruner);
 
@@ -43,10 +65,10 @@ namespace MinMaxSearch
         /// <summary>
         /// Tells the engine whether to remember states from which all children lead to endStates, so that it won't need to re-calculate their search-tree. 
         /// This can save a lot of time in some games.
-        /// You can use SearchEngine.Clear to clear the remembered dead-end states if they're taking up too much memory.
+        /// You can use SearchEngine methods Clear or SmartClear methods to clear the remembered dead-end states if they're taking up too much memory.
         /// Note that this will only work if the state overrides object's Equals and GetHashCode methods in a meaningful way.
         /// </summary>
-        public RememberStatesMode RememberDeadEndStates { get; set; }
+        public RememberStatesMode RememberDeadEndStates { get; set; } = RememberStatesMode.InSameSearch;
 
         public double MaxScore { get; set; } = double.MaxValue;
 

@@ -25,7 +25,7 @@ namespace Connect4Tests
 
         public IEnumerable<Tuple<double, List<IState>>> GetNeighbors()
         {
-            if (BoardEvaluator.IsWin(connect4State.Board, Utils.GetReversePlayer(Turn)))
+            if (BoardEvaluator.IsWin(connect4State.Board, Turn.GetReversePlayer()))
                 return new List<Tuple<double, List<IState>>>();
 
             var result = new List<Tuple<double, List<IState>>>();

@@ -24,7 +24,7 @@ namespace MinMaxSearch
             this.searchOptions = searchOptions;
             threadManager = new ThreadManager(searchOptions.MaxDegreeOfParallelism);
             deterministicSearchUtils = new DeterministicSearchUtils(this, searchOptions, threadManager);
-            probabilisticSearchUtils = new ProbabilisticSearchUtils(this, searchOptions, threadManager, deterministicSearchUtils);
+            probabilisticSearchUtils = new ProbabilisticSearchUtils(this, threadManager, deterministicSearchUtils);
         }
 
         public SearchResult Evaluate(IState startState, int depth, double alpha, double bata,

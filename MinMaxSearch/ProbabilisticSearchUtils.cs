@@ -9,15 +9,13 @@ namespace MinMaxSearch
 {
     class ProbabilisticSearchUtils
     {
-        private readonly SearchOptions searchOptions;
         private readonly SearchWorker searchWorker;
         private readonly ThreadManager threadManager;
         private readonly DeterministicSearchUtils deterministicSearchUtils;
 
-        public ProbabilisticSearchUtils(SearchWorker searchWorker, SearchOptions searchOptions, ThreadManager threadManager, DeterministicSearchUtils deterministicSearchUtils)
+        public ProbabilisticSearchUtils(SearchWorker searchWorker, ThreadManager threadManager, DeterministicSearchUtils deterministicSearchUtils)
         {
             this.searchWorker = searchWorker;
-            this.searchOptions = searchOptions;
             this.deterministicSearchUtils = deterministicSearchUtils;
             this.threadManager = threadManager;
         }

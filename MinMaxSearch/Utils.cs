@@ -4,7 +4,7 @@ namespace MinMaxSearch
 {
     public static class Utils
     {
-        public static Player GetReversePlayer(Player player) =>
+        public static Player GetReversePlayer(this Player player) =>
             player == Player.Max ? Player.Min : Player.Max;
 
         public static SearchResult CloneAndAddStateToTop(this SearchResult searchResult, IState state, int leaves, int internalNodes, bool allChildrenAreDeadEnds)
