@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>MinMaxSearch</id>
-    <version>1.2.1</version>
+    <version>1.2.2</version>
     <description>A MinMax Search Engine</description>
     <authors>Zvi Rosenfeld</authors>
 	<license type="expression">MIT</license>

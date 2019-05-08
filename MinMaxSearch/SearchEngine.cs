@@ -20,7 +20,7 @@ namespace MinMaxSearch
 
         /// <summary>
         /// Clears the remembered DeadEndStates that meat the shouldClear Func criteria. 
-        /// This method can be used in the background while waiting for the user's move.
+        /// This method can be used in the background while waiting for the user's next move.
         /// </summary>
         /// <param name="shouldClear"> If this Func returns true, the state will be cleared</param>
         /// <param name="cancellationToken"></param>

@@ -15,12 +15,12 @@
         Never,
 
         /// <summary>
-        /// Remember states that we've encountered in this search
+        /// Remember states we've encountered in the current search, but don't remember states between searches.
         /// </summary>
         InSameSearch,
 
         /// <summary>
-        /// Remember all states we've encountered - even between searches.
+        /// If a state is encountered in one search, we'll remember it for the next searches performed by the same SearchEngine.
         /// If the remembered search table gets to heavy, you can use the SearchEngin's Clear method to clear it.
         /// </summary>
         BetweenSearches,

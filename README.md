@@ -129,6 +129,7 @@ Tells the engine whether to remember states from which all children lead to endS
 This can save a lot of time in some games.
 You can use SearchEngine's Clear or SmartClear methods to clear the remembered dead-end states if they're taking up too much memory.
 Note that this will only work if the state overrides object's Equals and GetHashCode methods in a meaningful way.
+You can read more about RememberDeadEndStates [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Remembering-Dead-End-States).
 
 **IsUnstableState:**
 Some states are more interesting than others. With this delegate you can tell the algorithm to continue searching for "interesting" states even after it's reached the max search depth.

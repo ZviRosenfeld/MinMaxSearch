@@ -25,13 +25,7 @@ namespace MinMaxSearch
         {
             if (!startState.GetNeighbors().Any())
                 return new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0, true);
-
-            if (searchWorker.DeadEndStates.ContainsKey(startState))
-            {
-                var rememberdState = searchWorker.DeadEndStates[startState];
-                return new SearchResult(rememberdState.Item1, new List<IState>(rememberdState.Item2), 1, 0, true);
-            }
-
+            
             var pruned = false;
             var player = startState.Turn;
             var results = new List<Task<SearchResult>>();

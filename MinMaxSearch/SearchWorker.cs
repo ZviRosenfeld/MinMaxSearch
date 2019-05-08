@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using MinMaxSearch.Pruners;
 
 namespace MinMaxSearch
 {
@@ -32,7 +31,13 @@ namespace MinMaxSearch
         {
             if (startState.Turn == Player.Empty)
                 throw new EmptyPlayerException(nameof(startState.Turn) + " can't be " + nameof(Player.Empty));
-            
+
+            if (DeadEndStates.ContainsKey(startState))
+            {
+                var rememberdState = DeadEndStates[startState];
+                return new SearchResult(rememberdState.Item1, new List<IState>(rememberdState.Item2), 1, 0, true);
+            }
+
             if (ShouldStop(startState, depth, cancellationToken, statesUpToNow))
                 return new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0, false);
             
