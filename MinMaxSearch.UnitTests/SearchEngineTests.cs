@@ -27,9 +27,9 @@ namespace MinMaxSearch.UnitTests
             A.CallTo(() => endState1.ToString()).Returns("EndState1");
             A.CallTo(() => endState2.ToString()).Returns("EndState2");
             A.CallTo(() => endState3.ToString()).Returns("EndState3");
-            A.CallTo(() => endState1.GetNeighbors()).Returns(new List<IState>());
-            A.CallTo(() => endState2.GetNeighbors()).Returns(new List<IState>());
-            A.CallTo(() => endState3.GetNeighbors()).Returns(new List<IState>());
+            endState1.SetAsEndState();
+            endState2.SetAsEndState();
+            endState3.SetAsEndState();
             A.CallTo(() => state1.Turn).Returns(Player.Max);
             A.CallTo(() => state2.Turn).Returns(Player.Max);
             A.CallTo(() => state3.Turn).Returns(Player.Max);
@@ -44,12 +44,35 @@ namespace MinMaxSearch.UnitTests
         [TestMethod]
         public void Search_WinMovesTwoAndThreeStepsAway_FindTheNearerOne(int degreeOfParallelism)
         {
-            A.CallTo(() => state1.GetNeighbors()).Returns(new[] {endState1, state2});
-            A.CallTo(() => state2.GetNeighbors()).Returns(new[] {endState2, endState3});
+            state1.SetNeigbors(new[] { state2, endState1, state3 });
+            state2.SetNeigbor(endState2);
+            state3.SetNeigbor(endState3);
 
-            endState1.SetEvaluationTo(12);
-            endState2.SetEvaluationTo(15);
+            endState1.SetEvaluationTo(15);
+            endState2.SetEvaluationTo(11);
             endState3.SetEvaluationTo(18);
+
+            var engine = new SearchEngine()
+            {
+                MaxDegreeOfParallelism = degreeOfParallelism,
+                FavorShortPaths = true,
+                DieEarly = true,
+                MaxScore = 10
+            };
+            var result = engine.Search(state1, 5);
+
+            Assert.AreEqual(endState1, result.StateSequence.Last(), nameof(endState1) + " should have been good enough");
+        }
+
+        [TestMethod]
+        public void Search_FindWinThreeStepsAway_DontCheckNeigborsFourStepsAway(int degreeOfParallelism)
+        {
+            state1.SetNeigbor(state2);
+            state2.SetNeigbors(new[] { endState1, state3 });
+            state3.SetNeigbor(endState2);
+
+            endState1.SetEvaluationTo(15);
+            A.CallTo(() => endState2.Evaluate(A<int>._, A<List<IState>>._)).ReturnsLazily(() => throw  new Exception("We shouldn't have needed to check " + nameof(endState3)));
 
             var engine = new SearchEngine()
             {
@@ -69,8 +92,8 @@ namespace MinMaxSearch.UnitTests
         [TestMethod]
         public void Search_MaxHasTwoTurnsInARow_FindBestMove(int degreeOfParallelism)
         {
-            A.CallTo(() => state1.GetNeighbors()).Returns(new List<IState> { endState1, endState2, endState3});
-            
+            state1.SetNeigbors(new List<IState> { endState1, endState2, endState3 });
+
             endState1.SetEvaluationTo(2);
             endState2.SetEvaluationTo(1);
             endState3.SetEvaluationTo(3);
@@ -87,12 +110,9 @@ namespace MinMaxSearch.UnitTests
         [TestMethod]
         public void Search_RowOfMixedMove_FindBest(int degreeOfParallelism)
         {
-            A.CallTo(() => state1.GetNeighbors()).Returns(new List<IState> { endState1, endState2, endState3 });
+            state1.SetNeigbors(new List<IState> { endState1, endState2, endState3 });
 
-            A.CallTo(() => state1.Turn).Returns(Player.Max);
-            A.CallTo(() => endState1.Turn).Returns(Player.Max);
             A.CallTo(() => endState2.Turn).Returns(Player.Min);
-            A.CallTo(() => endState3.Turn).Returns(Player.Max);
 
             endState1.SetEvaluationTo(2);
             endState2.SetEvaluationTo(1);
@@ -131,9 +151,8 @@ namespace MinMaxSearch.UnitTests
                     Assert.IsTrue(l.Contains(state1), "passThroughStates should contain state1");
                 });
 
-            A.CallTo(() => state1.GetNeighbors()).Returns(new List<IDeterministicState> { endState1 });
+            state1.SetNeigbors(new List<IDeterministicState> { endState1 });
 
-            A.CallTo(() => state1.Turn).Returns(Player.Max);
             A.CallTo(() => endState1.Turn).Returns(Player.Min);
 
             var searchEngine = new SearchEngine {MaxDegreeOfParallelism = degreeOfParallelism};
@@ -141,17 +160,18 @@ namespace MinMaxSearch.UnitTests
         }
         
         [DataRow(1)]
+        [DataRow(2)]
+        [DataRow(8)]
         [TestMethod]
         public void Search_DieEarllyOptionWorks(int degreeOfParallelism)
         {
             endState1.SetEvaluationTo(10);
             endState2.SetEvaluationTo(15);
             endState3.SetEvaluationTo(0);
-            A.CallTo(() => state1.GetNeighbors()).Returns(new List<IState> { endState1, endState2, endState3 });
-            A.CallTo(() => state1.Turn).Returns(Player.Min);
-            A.CallTo(() => endState1.Turn).Returns(Player.Max);
-            A.CallTo(() => endState2.Turn).Returns(Player.Max);
-            A.CallTo(() => endState3.Turn).Returns(Player.Max);
+            state1.SetNeigbors(new List<IState> { endState1, endState2, endState3 });
+            A.CallTo(() => endState1.Turn).Returns(Player.Min);
+            A.CallTo(() => endState2.Turn).Returns(Player.Min);
+            A.CallTo(() => endState3.Turn).Returns(Player.Min);
 
             var searchEngine = new SearchEngine() { DieEarly = true, MaxScore = 5, MinScore = 5, MaxDegreeOfParallelism = degreeOfParallelism};
             var evaluation = searchEngine.Search(state1, 2);
@@ -187,7 +207,6 @@ namespace MinMaxSearch.UnitTests
             endState1.SetEvaluationTo(2);
             
             A.CallTo(() => state1.Turn).Returns(Player.Min);
-            A.CallTo(() => endState1.Turn).Returns(Player.Max);
             
             var searchEngine = new SearchEngine() { MaxDegreeOfParallelism = degreeOfParallelism };
             var result = searchEngine.Search(state1, 5, cancellationSource.Token);

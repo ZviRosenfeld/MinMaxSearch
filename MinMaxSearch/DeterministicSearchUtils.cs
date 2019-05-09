@@ -43,7 +43,7 @@ namespace MinMaxSearch
                     if (storedStates != null)
                         storedStates[state] = stateEvaluation.Evaluation;
                     if (AlphaBataShouldPrune(alpha, bata, stateEvaluation.Evaluation, player) ||
-                        ShouldDieEarlly(stateEvaluation.Evaluation, player))
+                        ShouldDieEarlly(stateEvaluation.Evaluation, player, stateEvaluation.StateSequence.Count))
                     {
                         pruned = true;
                         cancellationSource.Cancel();
@@ -100,9 +100,11 @@ namespace MinMaxSearch
                 bata = evaluation;
         }
 
-        private bool ShouldDieEarlly(double evaluation, Player player)
+        private bool ShouldDieEarlly(double evaluation, Player player, int pathLength)
         {
             if (!searchOptions.DieEarly)
+                return false;
+            if (searchOptions.FavorShortPaths && pathLength > 1)
                 return false;
 
             if (player == Player.Max && evaluation > searchOptions.MaxScore)
