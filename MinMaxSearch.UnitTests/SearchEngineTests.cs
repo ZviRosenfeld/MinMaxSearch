@@ -65,23 +65,22 @@ namespace MinMaxSearch.UnitTests
         }
 
         [TestMethod]
-        public void Search_FindWinThreeStepsAway_DontCheckNeigborsFourStepsAway(int degreeOfParallelism)
+        public void Search_FindWinThreeStepsAway_DontCheckNeigborsFourStepsAway()
         {
-            state1.SetNeigbor(state2);
-            state2.SetNeigbors(new[] { endState1, state3 });
+            state1.SetNeigbors(new [] {state2, state3});
+            state2.SetNeigbor(endState1);
             state3.SetNeigbor(endState2);
 
             endState1.SetEvaluationTo(15);
-            A.CallTo(() => endState2.Evaluate(A<int>._, A<List<IState>>._)).ReturnsLazily(() => throw  new Exception("We shouldn't have needed to check " + nameof(endState3)));
+            A.CallTo(() => endState2.Evaluate(A<int>._, A<List<IState>>._)).Invokes(() => throw new Exception("We shouldn't have needed to check " + nameof(endState3)));
 
             var engine = new SearchEngine()
             {
-                MaxDegreeOfParallelism = degreeOfParallelism,
                 FavorShortPaths = true,
                 DieEarly = true,
                 MaxScore = 10
             };
-            var result = engine.Search(state1, 5);
+            var result = engine.Search(state1, 6);
 
             Assert.AreEqual(endState1, result.StateSequence.Last(), nameof(endState1) + " should have been good enough");
         }
@@ -142,9 +141,9 @@ namespace MinMaxSearch.UnitTests
         [TestMethod]
         public void Search_CheckThatRecordPassThroughStatesIsWorking(int degreeOfParallelism)
         {
-            A.CallTo(() => endState1.Evaluate(A<int>.Ignored, A<List<IState>>.That.IsEmpty()))
+            A.CallTo(() => endState1.Evaluate(A<int>._, A<List<IState>>.That.IsEmpty()))
                 .Throws(new Exception("passedStats list should have been empty"));
-            A.CallTo(() => endState1.Evaluate(A<int>.Ignored, A<List<IState>>._))
+            A.CallTo(() => endState1.Evaluate(A<int>._, A<List<IState>>._))
                 .Invokes((int i, List<IState> l) =>
                 {
                     Assert.AreEqual(1, l.Count, "passThroughStates should only have one node (state1)");

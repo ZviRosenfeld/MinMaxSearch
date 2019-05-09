@@ -18,7 +18,7 @@ namespace MinMaxSearch
             this.threadManager = threadManager;
         }
 
-        public SearchResult EvaluateChildren(IDeterministicState startState, int depth, double alpha, double bata,
+        public SearchResult EvaluateChildren(IDeterministicState startState, int maxDepth, int depth, double alpha, double bata,
             CancellationToken cancellationToken, List<IState> statesUpToNow,
             IDictionary<IState, double> storedStates = null)
         {
@@ -34,7 +34,7 @@ namespace MinMaxSearch
                 var taskResult = storedStates != null && storedStates.ContainsKey(state)
                     ? Task.FromResult(new SearchResult(storedStates[state], new List<IState> {state}, 1, 0, true))
                     : threadManager.Invoke(() =>
-                        searchWorker.Evaluate(state, depth + 1, alpha, bata, cancellationSource.Token, new List<IState>(statesUpToNow) {startState}));
+                        searchWorker.Evaluate(state, maxDepth, depth + 1, alpha, bata, cancellationSource.Token, new List<IState>(statesUpToNow) {startState}));
                 results.Add(taskResult);
 
                 if (taskResult.Status == TaskStatus.RanToCompletion && taskResult.Result != null)
@@ -42,13 +42,22 @@ namespace MinMaxSearch
                     var stateEvaluation = taskResult.Result;
                     if (storedStates != null)
                         storedStates[state] = stateEvaluation.Evaluation;
-                    if (AlphaBataShouldPrune(alpha, bata, stateEvaluation.Evaluation, player) ||
-                        ShouldDieEarlly(stateEvaluation.Evaluation, player, stateEvaluation.StateSequence.Count))
+                    if (AlphaBataShouldPrune(alpha, bata, stateEvaluation.Evaluation, player))
                     {
                         pruned = true;
                         cancellationSource.Cancel();
                         break;
                     }
+                    var shouldDieEarlly = ShouldDieEarlly(stateEvaluation.Evaluation, player, stateEvaluation.StateSequence.Count);
+                    if (shouldDieEarlly.Item1 && shouldDieEarlly.Item2 == 0)
+                    {
+                        pruned = true;
+                        cancellationSource.Cancel();
+                        break;
+                    }
+                    else if (shouldDieEarlly.Item1)
+                        maxDepth = shouldDieEarlly.Item2 + depth;
+                    
                     UpdateAlphaAndBata(ref alpha, ref bata, stateEvaluation.Evaluation, player);
                 }
             }
@@ -100,31 +109,29 @@ namespace MinMaxSearch
                 bata = evaluation;
         }
 
-        private bool ShouldDieEarlly(double evaluation, Player player, int pathLength)
+        private (bool, int) ShouldDieEarlly(double evaluation, Player player, int pathLength)
         {
             if (!searchOptions.DieEarly)
-                return false;
-            if (searchOptions.FavorShortPaths && pathLength > 1)
-                return false;
+                return (false, 0);
+            
+            if ((player == Player.Max && evaluation > searchOptions.MaxScore) ||
+                (player == Player.Min && evaluation < searchOptions.MinScore))
+            {
+                if (searchOptions.FavorShortPaths && pathLength > 1)
+                    return (true, pathLength - 1);
 
-            if (player == Player.Max && evaluation > searchOptions.MaxScore)
-                return true;
-            if (player == Player.Min && evaluation < searchOptions.MinScore)
-                return true;
+                return (true, 0);
+            }
 
-            return false;
+            return (false, 0);
         }
 
         private bool IsBetterThen(double firstValue, double secondValue, int firstPathLength, int? secondPathLength, Player player)
         {
-            if (searchOptions.FavorShortPaths && BothEvaluationsAreEquallyAcceptable(firstValue, secondValue, player))
-            {
+            if (searchOptions.FavorShortPaths && BothEvaluationsAreEquallyAcceptable(firstValue, secondValue, player))           
                 return player == Player.Min ? firstPathLength > secondPathLength : firstPathLength < secondPathLength;
-            }
-
-            if (player == Player.Min)
-                return firstValue < secondValue;
-            return firstValue > secondValue;
+            
+            return player == Player.Min ? firstValue < secondValue : firstValue > secondValue;
         }
 
         private bool BothEvaluationsAreEquallyAcceptable(double evaluation1, double evaluation2, Player player)

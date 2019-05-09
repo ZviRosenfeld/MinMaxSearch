@@ -58,8 +58,8 @@ namespace MinMaxSearch
             if (!startState.GetNeighbors().Any())
                 throw new NoNeighborsException("start state has no nighbors " + startState);
             
-            var searchWorker = new SearchWorker(maxDepth, CreateSearchOptions());
-            var evaluation = searchWorker.Evaluate(startState, 0, double.MinValue, double.MaxValue, cancellationToken, new List<IState>());
+            var searchWorker = new SearchWorker(CreateSearchOptions());
+            var evaluation = searchWorker.Evaluate(startState, maxDepth, 0, double.MinValue, double.MaxValue, cancellationToken, new List<IState>());
             evaluation.StateSequence.Reverse();
             evaluation.StateSequence.RemoveAt(0); // Removing the top node will make the result "nicer"
             return evaluation;
