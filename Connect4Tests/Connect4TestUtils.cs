@@ -10,8 +10,7 @@ namespace Connect4Tests
                 MaxDegreeOfParallelism = maxDegreeOfParallelism,
                 DieEarly = true,
                 MinScore = BoardEvaluator.MinEvaluation + 1,
-                MaxScore = BoardEvaluator.MaxEvaluation - 1,
-                RememberDeadEndStates = RememberStatesMode.BetweenSearches
+                MaxScore = BoardEvaluator.MaxEvaluation - 1
             };
 
         public static Player[,] GetEmptyBoard() =>

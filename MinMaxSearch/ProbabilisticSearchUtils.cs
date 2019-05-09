@@ -24,11 +24,7 @@ namespace MinMaxSearch
         {
             if (!startState.GetNeighbors().Any())
                 return new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0, true);
-
-            if (searchWorker.DeadEndStates.ContainsKey(startState))
-                return new SearchResult(searchWorker.DeadEndStates[startState].Item1, new List<IState> {startState}, 1, 0, true);
-
-
+            
             var storedStates = new ConcurrentDictionary<IState, double>();
             var results = new List<Tuple<double, Task<SearchResult>>>();
             foreach (var neighbor in startState.GetNeighbors())
@@ -38,12 +34,8 @@ namespace MinMaxSearch
                     deterministicSearchUtils.EvaluateChildren(wrappedState, depth, double.MinValue, double.MaxValue, cancellationToken, statesUpToNow, storedStates));
                 results.Add(new Tuple<double, Task<SearchResult>>(neighbor.Item1, searchResult));
             }
-
-            var result = Reduce(results, startState);
-            if (result.AllChildrenAreDeadEnds)
-                searchWorker.DeadEndStates[startState] = new Tuple<double, List<IState>>(result.Evaluation, new List<IState>(result.StateSequence));
-
-            return result;
+            
+            return Reduce(results, startState);
         }
 
         private SearchResult Reduce(List<Tuple<double, Task<SearchResult>>> results, IState startState)

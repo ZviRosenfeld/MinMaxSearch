@@ -13,12 +13,9 @@ namespace MinMaxSearch
         private readonly ThreadManager threadManager;
         private readonly DeterministicSearchUtils deterministicSearchUtils;
         private readonly ProbabilisticSearchUtils probabilisticSearchUtils;
-
-        public IDictionary<IState, Tuple<double, List<IState>>> DeadEndStates { get; }
-
-        public SearchWorker(int maxDepth, SearchOptions searchOptions, IDictionary<IState, Tuple<double, List<IState>>> deadEndStates)
+        
+        public SearchWorker(int maxDepth, SearchOptions searchOptions)
         {
-            DeadEndStates = deadEndStates;
             this.maxDepth = maxDepth;
             this.searchOptions = searchOptions;
             threadManager = new ThreadManager(searchOptions.MaxDegreeOfParallelism);
@@ -32,11 +29,8 @@ namespace MinMaxSearch
             if (startState.Turn == Player.Empty)
                 throw new EmptyPlayerException(nameof(startState.Turn) + " can't be " + nameof(Player.Empty));
 
-            if (DeadEndStates.ContainsKey(startState))
-            {
-                var rememberdState = DeadEndStates[startState];
-                return new SearchResult(rememberdState.Item1, new List<IState>(rememberdState.Item2), 1, 0, true);
-            }
+            if (searchOptions.Pruners.Any(pruner => pruner.ShouldPrune(startState, depth, statesUpToNow)))
+                return new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> { startState }, 1, 0, true);
 
             if (ShouldStop(startState, depth, cancellationToken, statesUpToNow))
                 return new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0, false);
@@ -56,9 +50,7 @@ namespace MinMaxSearch
                 return true;
             if (cancellationToken.IsCancellationRequested)
                 return true;
-            if (searchOptions.Pruners.Any(pruner => pruner.ShouldPrune(state, depth, passedStates)))
-                return true;
-
+            
             return false;
         }
     }

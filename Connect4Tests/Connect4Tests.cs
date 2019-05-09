@@ -117,8 +117,8 @@ namespace Connect4Tests
             if (degreeOfParallelism == 1)
             {
                 //Check that the our optimizations are working
-                Assert.IsTrue(evaluation.Leaves < 14000, "Too many leaves in search. Leaves = " + evaluation.Leaves);
-                Assert.IsTrue(evaluation.InternalNodes < 6000,
+                Assert.IsTrue(evaluation.Leaves < 26000, "Too many leaves in search. Leaves = " + evaluation.Leaves);
+                Assert.IsTrue(evaluation.InternalNodes < 10000,
                     "Too many intarnal nodes in search. Nodes = " + evaluation.InternalNodes);
             }
             // Too few leaves or internal nodes means that something went wrong

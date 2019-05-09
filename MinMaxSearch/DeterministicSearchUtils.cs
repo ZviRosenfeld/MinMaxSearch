@@ -53,12 +53,8 @@ namespace MinMaxSearch
                     UpdateAlphaAndBata(ref alpha, ref bata, stateEvaluation.Evaluation, player);
                 }
             }
-
-            var result = Reduce(results, player, startState, pruned);
-            if (result.AllChildrenAreDeadEnds)
-                searchWorker.DeadEndStates[startState] = new Tuple<double, List<IState>>(result.Evaluation, new List<IState>(result.StateSequence));
-
-            return result;
+            
+            return Reduce(results, player, startState, pruned);
         }
 
         private SearchResult Reduce(List<Task<SearchResult>> results, Player player, IState startState, bool pruned)

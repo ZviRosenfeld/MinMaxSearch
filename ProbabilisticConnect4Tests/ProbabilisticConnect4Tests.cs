@@ -64,7 +64,6 @@ namespace ProbabilisticConnect4Tests
         {
             Console.WriteLine("Running with degreeOfParallelism: " + degreeOfParallelism);
             var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism);
-            engine.RememberDeadEndStates = RememberStatesMode.Never;
             var startState = new StartState(new Connect4State(Connect4TestUtils.GetEmptyBoard(), Player.Max));
 
             var results = engine.Benchmark(startState, 7);

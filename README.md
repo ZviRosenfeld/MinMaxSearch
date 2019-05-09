@@ -99,8 +99,7 @@ var cancellationToken = new CancellationTokenSource();
 var engine =  new SearchEngine()
 {
     MaxDegreeOfParallelism = 2,
-    FavorShortPaths = true,
-	RememberDeadEndStates = true
+    FavorShortPaths = true
 };
 var searchResult = engine.Search(startState, searchDepth, cancellationToken);
 ```
@@ -123,13 +122,6 @@ Note that a higher degree of parallelism doesn't necessarily equal a faster sear
 If this option is set to true, the algorithm will rerun as soon as it finds a score bigger then SearchEngine.MaxScore for Max or SearchEngine.MinScore for Min.
 The rationale behind this is that once the algorithm finds a win there's no point in more searching. (We assume that a score greater then MaxScore is a win for Max, and one smaller then MinScore is a win for Min).
 Note that this will only work if Equals is implement in a meaningful way on your states.
-
-**RememberDeadEndStates:**
-Tells the engine whether to remember states from which all children lead to endStates, so that it won't need to re-calculate their search-tree. 
-This can save a lot of time in some games.
-You can use SearchEngine's Clear or SmartClear methods to clear the remembered dead-end states if they're taking up too much memory.
-Note that this will only work if the state overrides object's Equals and GetHashCode methods in a meaningful way.
-You can read more about RememberDeadEndStates [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Remembering-Dead-End-States).
 
 **IsUnstableState:**
 Some states are more interesting than others. With this delegate you can tell the algorithm to continue searching for "interesting" states even after it's reached the max search depth.
