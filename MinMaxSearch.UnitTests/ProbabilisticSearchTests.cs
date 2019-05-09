@@ -24,9 +24,9 @@ namespace MinMaxSearch.UnitTests
             A.CallTo(() => evaluation2State.ToString()).Returns(nameof(evaluation2State));
             A.CallTo(() => evaluationNagitive2State.ToString()).Returns(nameof(evaluationNagitive2State));
 
-            A.CallTo(() => evaluation2State.Evaluate(A<int>._, A<List<IState>>._)).Returns(2);
-            A.CallTo(() => evaluationNagitive2State.Evaluate(A<int>._, A<List<IState>>._)).Returns(-2);
-
+            evaluation2State.SetEvaluationTo(2);
+            evaluationNagitive2State.SetEvaluationTo(-2);
+            
             A.CallTo(() => startState.Turn).Returns(Player.Max);
             A.CallTo(() => probabilisticState1.Turn).Returns(Player.Min);
             A.CallTo(() => probabilisticState2.Turn).Returns(Player.Min);
@@ -75,7 +75,7 @@ namespace MinMaxSearch.UnitTests
                 new Tuple<double, List<IState>>(0.5, new List<IState>()),
                 new Tuple<double, List<IState>>(0.5, new List<IState>()),
             });
-            A.CallTo(() => probabilisticState1.Evaluate(A<int>._, A<List<IState>>._)).Returns(2);
+            probabilisticState1.SetEvaluationTo(2);
 
             var searchEngine = new SearchEngine();
             var searchResult = searchEngine.Search(startState, 10);

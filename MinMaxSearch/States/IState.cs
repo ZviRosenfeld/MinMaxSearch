@@ -6,6 +6,7 @@ namespace MinMaxSearch
     {
         /// <summary>
         /// returns the state's evaluation (how good it is).
+        /// Evaluate must return a value smaller then double.MaxValue and greater then double.MinValue
         /// </summary>
         double Evaluate(int depth, List<IState> passedThroughStates);
 

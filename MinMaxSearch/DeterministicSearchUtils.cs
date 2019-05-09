@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -44,7 +43,7 @@ namespace MinMaxSearch
                     if (storedStates != null)
                         storedStates[state] = stateEvaluation.Evaluation;
                     if (AlphaBataShouldPrune(alpha, bata, stateEvaluation.Evaluation, player) ||
-                        ShouldDieEarlly(stateEvaluation.Evaluation, player, stateEvaluation.StateSequence.Count))
+                        ShouldDieEarlly(stateEvaluation.Evaluation, player))
                     {
                         pruned = true;
                         cancellationSource.Cancel();
@@ -101,16 +100,14 @@ namespace MinMaxSearch
                 bata = evaluation;
         }
 
-        private bool ShouldDieEarlly(double evaluation, Player player, int pathLength)
+        private bool ShouldDieEarlly(double evaluation, Player player)
         {
             if (!searchOptions.DieEarly)
                 return false;
-            if (searchOptions.FavorShortPaths && pathLength > 1)
-                return false;
 
-            if (player == Player.Min && evaluation > searchOptions.MaxScore)
+            if (player == Player.Max && evaluation > searchOptions.MaxScore)
                 return true;
-            if (player == Player.Max && evaluation < searchOptions.MinScore)
+            if (player == Player.Min && evaluation < searchOptions.MinScore)
                 return true;
 
             return false;
@@ -118,16 +115,27 @@ namespace MinMaxSearch
 
         private bool IsBetterThen(double firstValue, double secondValue, int firstPathLength, int? secondPathLength, Player player)
         {
-            if (searchOptions.FavorShortPaths && firstValue == secondValue)
+            if (searchOptions.FavorShortPaths && BothEvaluationsAreEquallyAcceptable(firstValue, secondValue, player))
             {
-                if (player == Player.Min)
-                    return firstPathLength > secondPathLength;
-                return firstPathLength < secondPathLength;
+                return player == Player.Min ? firstPathLength > secondPathLength : firstPathLength < secondPathLength;
             }
 
             if (player == Player.Min)
                 return firstValue < secondValue;
             return firstValue > secondValue;
+        }
+
+        private bool BothEvaluationsAreEquallyAcceptable(double evaluation1, double evaluation2, Player player)
+        {
+            if (evaluation1 == evaluation2)
+                return true;
+            if (!searchOptions.FavorShortPaths)
+                return false;
+            if (player == Player.Max && evaluation1 > searchOptions.MaxScore && evaluation2 > searchOptions.MaxScore)
+                return true;
+            if (player == Player.Min && evaluation1 < searchOptions.MinScore && evaluation2 < searchOptions.MinScore)
+                return true;
+            return false;
         }
     }
 }

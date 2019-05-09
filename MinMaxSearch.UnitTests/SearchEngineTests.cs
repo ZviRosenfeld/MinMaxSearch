@@ -37,7 +37,32 @@ namespace MinMaxSearch.UnitTests
             A.CallTo(() => endState2.Turn).Returns(Player.Max);
             A.CallTo(() => endState3.Turn).Returns(Player.Max);
         }
-        
+
+        [DataRow(1)]
+        [DataRow(2)]
+        [DataRow(8)]
+        [TestMethod]
+        public void Search_WinMovesTwoAndThreeStepsAway_FindTheNearerOne(int degreeOfParallelism)
+        {
+            A.CallTo(() => state1.GetNeighbors()).Returns(new[] {endState1, state2});
+            A.CallTo(() => state2.GetNeighbors()).Returns(new[] {endState2, endState3});
+
+            endState1.SetEvaluationTo(12);
+            endState2.SetEvaluationTo(15);
+            endState3.SetEvaluationTo(18);
+
+            var engine = new SearchEngine()
+            {
+                MaxDegreeOfParallelism = degreeOfParallelism,
+                FavorShortPaths = true,
+                DieEarly = true,
+                MaxScore = 10
+            };
+            var result = engine.Search(state1, 5);
+
+            Assert.AreEqual(endState1, result.StateSequence.Last(), nameof(endState1) + " should have been good enough");
+        }
+
         [DataRow(1)]
         [DataRow(2)]
         [DataRow(8)]
@@ -46,9 +71,9 @@ namespace MinMaxSearch.UnitTests
         {
             A.CallTo(() => state1.GetNeighbors()).Returns(new List<IState> { endState1, endState2, endState3});
             
-            A.CallTo(() => endState1.Evaluate(A<int>._, A<List<IState>>._)).Returns(2);
-            A.CallTo(() => endState2.Evaluate(A<int>._, A<List<IState>>._)).Returns(1);
-            A.CallTo(() => endState3.Evaluate(A<int>._, A<List<IState>>._)).Returns(3);
+            endState1.SetEvaluationTo(2);
+            endState2.SetEvaluationTo(1);
+            endState3.SetEvaluationTo(3);
 
             var engine = new SearchEngine { MaxDegreeOfParallelism = degreeOfParallelism};
             var result = engine.Search(state1, 5);
@@ -69,9 +94,9 @@ namespace MinMaxSearch.UnitTests
             A.CallTo(() => endState2.Turn).Returns(Player.Min);
             A.CallTo(() => endState3.Turn).Returns(Player.Max);
 
-            A.CallTo(() => endState1.Evaluate(A<int>._, A<List<IState>>._)).Returns(2);
-            A.CallTo(() => endState2.Evaluate(A<int>._, A<List<IState>>._)).Returns(1);
-            A.CallTo(() => endState3.Evaluate(A<int>._, A<List<IState>>._)).Returns(3);
+            endState1.SetEvaluationTo(2);
+            endState2.SetEvaluationTo(1);
+            endState3.SetEvaluationTo(3);
 
             var engine = new SearchEngine { MaxDegreeOfParallelism = degreeOfParallelism };
             var result = engine.Search(state1, 5);
@@ -119,9 +144,9 @@ namespace MinMaxSearch.UnitTests
         [TestMethod]
         public void Search_DieEarllyOptionWorks(int degreeOfParallelism)
         {
-            A.CallTo(() => endState1.Evaluate(A<int>.Ignored, A<List<IState>>._)).Returns(10);
-            A.CallTo(() => endState2.Evaluate(A<int>.Ignored, A<List<IState>>._)).Returns(15);
-            A.CallTo(() => endState3.Evaluate(A<int>.Ignored, A<List<IState>>._)).Returns(0);
+            endState1.SetEvaluationTo(10);
+            endState2.SetEvaluationTo(15);
+            endState3.SetEvaluationTo(0);
             A.CallTo(() => state1.GetNeighbors()).Returns(new List<IState> { endState1, endState2, endState3 });
             A.CallTo(() => state1.Turn).Returns(Player.Min);
             A.CallTo(() => endState1.Turn).Returns(Player.Max);
@@ -131,7 +156,7 @@ namespace MinMaxSearch.UnitTests
             var searchEngine = new SearchEngine() { DieEarly = true, MaxScore = 5, MinScore = 5, MaxDegreeOfParallelism = degreeOfParallelism};
             var evaluation = searchEngine.Search(state1, 2);
 
-            Assert.AreEqual(endState1, evaluation.StateSequence.Last(), "Should have ended with endState1; found: " + evaluation.StateSequence.Last());
+            Assert.AreEqual(endState1, evaluation.StateSequence.Last(), "Should have ended with" + nameof(endState1));
         }
 
         [DataRow(1)]
@@ -158,8 +183,8 @@ namespace MinMaxSearch.UnitTests
                 return new List<IDeterministicState> {endState1};
             });
 
-            A.CallTo(() => state1.Evaluate(A<int>.Ignored, A<List<IState>>._)).Returns(1);
-            A.CallTo(() => endState1.Evaluate(A<int>.Ignored, A<List<IState>>._)).Returns(2);
+            state1.SetEvaluationTo(1);
+            endState1.SetEvaluationTo(2);
             
             A.CallTo(() => state1.Turn).Returns(Player.Min);
             A.CallTo(() => endState1.Turn).Returns(Player.Max);
