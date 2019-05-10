@@ -34,9 +34,10 @@ namespace MinMaxSearch
                     ? Task.FromResult(new SearchResult(storedStates[state], new List<IState> {state}, 1, 0, true))
                     : threadManager.Invoke(() =>
                     {
+                        var actualStartState = startState is ProbablisticStateWrapper wrapper ? (IState) wrapper.InnerState : startState;
                         var localSearchContext = new SearchContext(searchContext.MaxDepth,
                             searchContext.CurrentDepth + 1, searchContext.Alpha, searchContext.Bata,
-                            cancellationSource.Token, new List<IState>(searchContext.StatesUpTillNow) {startState});
+                            cancellationSource.Token, new List<IState>(searchContext.StatesUpTillNow) {actualStartState});
                         return searchWorker.Evaluate(state, localSearchContext);
                     });
                 results.Add(taskResult);

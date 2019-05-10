@@ -37,8 +37,7 @@ namespace MinMaxSearch.UnitTests
                 .Returns(new List<Tuple<double, List<IState>>>());
             A.CallTo(() => evaluationNagitive2State.GetNeighbors())
                 .Returns(new List<Tuple<double, List<IState>>>());
-            A.CallTo(() => startState.GetNeighbors())
-                .Returns(new List<IState> {probabilisticState1, probabilisticState2});  
+            startState.SetNeigbors(new List<IState> {probabilisticState1, probabilisticState2});  
         }
 
         [DataRow(1)]
@@ -81,6 +80,31 @@ namespace MinMaxSearch.UnitTests
             var searchResult = searchEngine.Search(startState, 10);
 
             Assert.AreEqual(2, searchResult.Evaluation);
+        }
+
+        [DataRow(1)]
+        [DataRow(2)]
+        [DataRow(8)]
+        [TestMethod]
+        public void Search_CheckThatRecordPassThroughStatesIsWorking(int degreeOfParallelism)
+        {
+            A.CallTo(() => evaluation2State.Evaluate(A<int>._, A<List<IState>>.That.IsEmpty()))
+                .Throws(new Exception("passedStats list should have been empty"));
+            A.CallTo(() => evaluationNagitive2State.Evaluate(A<int>._, A<List<IState>>._))
+                .Invokes((int i, List<IState> l) =>
+                {
+                    Assert.AreEqual(2, l.Count, "passThroughStates should have two states in it (startState and probabilisticState1)");
+                    Assert.IsTrue(l.Contains(probabilisticState1), "passThroughStates should contain" + nameof(probabilisticState1));
+                });
+
+            startState.SetNeigbor(probabilisticState1);
+            A.CallTo(() => probabilisticState1.GetNeighbors()).Returns(new List<Tuple<double, List<IState>>>()
+            {
+                new Tuple<double, List<IState>>(1, new List<IState> {evaluation2State, evaluationNagitive2State})
+            });
+
+            var searchEngine = new SearchEngine { MaxDegreeOfParallelism = degreeOfParallelism };
+            searchEngine.Search(startState, 5);
         }
     }
 }
