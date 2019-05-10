@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace MinMaxSearch
 {
@@ -18,5 +17,11 @@ namespace MinMaxSearch
 
         public Player Turn => innerState.Turn;
         public IEnumerable<IState> GetNeighbors() => neighbors;
+
+        public override bool Equals(object obj) => innerState.Equals(obj);
+
+        public override int GetHashCode() => innerState.GetHashCode();
+
+        public override string ToString() => innerState.ToString();
     }
 }

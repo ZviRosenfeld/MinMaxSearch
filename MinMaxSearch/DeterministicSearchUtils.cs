@@ -18,23 +18,27 @@ namespace MinMaxSearch
             this.threadManager = threadManager;
         }
 
-        public SearchResult EvaluateChildren(IDeterministicState startState, int maxDepth, int depth, double alpha, double bata,
-            CancellationToken cancellationToken, List<IState> statesUpToNow,
+        public SearchResult EvaluateChildren(IDeterministicState startState, SearchContext searchContext,
             IDictionary<IState, double> storedStates = null)
         {
             if (!startState.GetNeighbors().Any())
-                return new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0, true);
+                return new SearchResult(startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow), new List<IState> {startState}, 1, 0, true);
             
             var pruned = false;
             var player = startState.Turn;
             var results = new List<Task<SearchResult>>();
-            var cancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            var cancellationSource = CancellationTokenSource.CreateLinkedTokenSource(searchContext.CancellationToken);
             foreach (var state in startState.GetNeighbors())
             {
                 var taskResult = storedStates != null && storedStates.ContainsKey(state)
                     ? Task.FromResult(new SearchResult(storedStates[state], new List<IState> {state}, 1, 0, true))
                     : threadManager.Invoke(() =>
-                        searchWorker.Evaluate(state, maxDepth, depth + 1, alpha, bata, cancellationSource.Token, new List<IState>(statesUpToNow) {startState}));
+                    {
+                        var localSearchContext = new SearchContext(searchContext.MaxDepth,
+                            searchContext.CurrentDepth + 1, searchContext.Alpha, searchContext.Bata,
+                            cancellationSource.Token, new List<IState>(searchContext.StatesUpTillNow) {startState});
+                        return searchWorker.Evaluate(state, localSearchContext);
+                    });
                 results.Add(taskResult);
 
                 if (taskResult.Status == TaskStatus.RanToCompletion && taskResult.Result != null)
@@ -42,7 +46,7 @@ namespace MinMaxSearch
                     var stateEvaluation = taskResult.Result;
                     if (storedStates != null)
                         storedStates[state] = stateEvaluation.Evaluation;
-                    if (AlphaBataShouldPrune(alpha, bata, stateEvaluation.Evaluation, player))
+                    if (AlphaBataShouldPrune(searchContext.Alpha, searchContext.Bata, stateEvaluation.Evaluation, player))
                     {
                         pruned = true;
                         cancellationSource.Cancel();
@@ -56,9 +60,9 @@ namespace MinMaxSearch
                         break;
                     }
                     else if (shouldDieEarlly.Item1)
-                        maxDepth = shouldDieEarlly.Item2 + depth;
+                        searchContext.MaxDepth = shouldDieEarlly.Item2 + searchContext.CurrentDepth;
                     
-                    UpdateAlphaAndBata(ref alpha, ref bata, stateEvaluation.Evaluation, player);
+                    UpdateAlphaAndBata(searchContext, stateEvaluation.Evaluation, player);
                 }
             }
             
@@ -101,12 +105,12 @@ namespace MinMaxSearch
             return false;
         }
 
-        private void UpdateAlphaAndBata(ref double alpha, ref double bata, double evaluation, Player player)
+        private void UpdateAlphaAndBata(SearchContext searchContext, double evaluation, Player player)
         {
-            if (player == Player.Max && evaluation > alpha)
-                alpha = evaluation;
-            if (player == Player.Min && evaluation < bata)
-                bata = evaluation;
+            if (player == Player.Max && evaluation > searchContext.Alpha)
+                searchContext.Alpha = evaluation;
+            if (player == Player.Min && evaluation < searchContext.Bata)
+                searchContext.Bata = evaluation;
         }
 
         private (bool, int) ShouldDieEarlly(double evaluation, Player player, int pathLength)

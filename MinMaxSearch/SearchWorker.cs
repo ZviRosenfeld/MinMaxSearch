@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 
 namespace MinMaxSearch
 {
@@ -19,32 +18,31 @@ namespace MinMaxSearch
             probabilisticSearchUtils = new ProbabilisticSearchUtils(threadManager, deterministicSearchUtils);
         }
 
-        public SearchResult Evaluate(IState startState, int maxDepth, int depth, double alpha, double bata,
-            CancellationToken cancellationToken, List<IState> statesUpToNow)
+        public SearchResult Evaluate(IState startState, SearchContext searchContext)
         {
             if (startState.Turn == Player.Empty)
                 throw new EmptyPlayerException(nameof(startState.Turn) + " can't be " + nameof(Player.Empty));
 
-            if (searchOptions.Pruners.Any(pruner => pruner.ShouldPrune(startState, depth, statesUpToNow)))
-                return new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> { startState }, 1, 0, true);
+            if (searchOptions.Pruners.Any(pruner => pruner.ShouldPrune(startState, searchContext.CurrentDepth, searchContext.StatesUpTillNow)))
+                return new SearchResult(startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow), new List<IState> { startState }, 1, 0, true);
 
-            if (ShouldStop(startState, maxDepth, depth, cancellationToken, statesUpToNow))
-                return new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0, false);
+            if (ShouldStop(startState, searchContext))
+                return new SearchResult(startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow), new List<IState> {startState}, 1, 0, false);
             
             if (startState is IDeterministicState deterministicState)
-                return deterministicSearchUtils.EvaluateChildren(deterministicState, maxDepth, depth, alpha, bata, cancellationToken, statesUpToNow);
+                return deterministicSearchUtils.EvaluateChildren(deterministicState, searchContext);
 
             if (startState is IProbabilisticState probabilisticState)
-                return probabilisticSearchUtils.EvaluateChildren(probabilisticState, maxDepth, depth, cancellationToken, statesUpToNow);
+                return probabilisticSearchUtils.EvaluateChildren(probabilisticState, searchContext);
             
             throw new BadStateTypeException($"State must implement {nameof(IDeterministicState)} or {nameof(IProbabilisticState)}");
         }
         
-        private bool ShouldStop(IState state, int maxDepth, int depth, CancellationToken cancellationToken, List<IState> passedStates)
+        private bool ShouldStop(IState state, SearchContext searchContext)
         {
-            if (depth >= maxDepth && !searchOptions.IsUnstableState(state, depth, passedStates))
+            if (searchContext.CurrentDepth >= searchContext.MaxDepth && !searchOptions.IsUnstableState(state, searchContext.CurrentDepth, searchContext.StatesUpTillNow))
                 return true;
-            if (cancellationToken.IsCancellationRequested)
+            if (searchContext.CancellationToken.IsCancellationRequested)
                 return true;
             
             return false;

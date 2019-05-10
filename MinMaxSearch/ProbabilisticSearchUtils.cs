@@ -18,10 +18,10 @@ namespace MinMaxSearch
             this.threadManager = threadManager;
         }
 
-        public SearchResult EvaluateChildren(IProbabilisticState startState, int maxDepth, int depth, CancellationToken cancellationToken, List<IState> statesUpToNow)
+        public SearchResult EvaluateChildren(IProbabilisticState startState, SearchContext searchContext)
         {
             if (!startState.GetNeighbors().Any())
-                return new SearchResult(startState.Evaluate(depth, statesUpToNow), new List<IState> {startState}, 1, 0, true);
+                return new SearchResult(startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow), new List<IState> {startState}, 1, 0, true);
             
             var storedStates = new ConcurrentDictionary<IState, double>();
             var results = new List<Tuple<double, Task<SearchResult>>>();
@@ -29,7 +29,11 @@ namespace MinMaxSearch
             {
                 var wrappedState = new ProbablisticStateWrapper(neighbor.Item2, startState);       
                 var searchResult = threadManager.Invoke(() =>
-                    deterministicSearchUtils.EvaluateChildren(wrappedState, maxDepth, depth, double.MinValue, double.MaxValue, cancellationToken, statesUpToNow, storedStates));
+                {
+                    var localSearchContext = new SearchContext(searchContext.MaxDepth, searchContext.CurrentDepth, double.MinValue,
+                        double.MaxValue, searchContext.CancellationToken, searchContext.StatesUpTillNow);
+                    return deterministicSearchUtils.EvaluateChildren(wrappedState, localSearchContext, storedStates);
+                });
                 results.Add(new Tuple<double, Task<SearchResult>>(neighbor.Item1, searchResult));
             }
             
