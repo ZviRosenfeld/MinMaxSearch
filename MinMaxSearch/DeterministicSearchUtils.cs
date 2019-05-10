@@ -28,46 +28,61 @@ namespace MinMaxSearch
             var player = startState.Turn;
             var results = new List<Task<SearchResult>>();
             var cancellationSource = CancellationTokenSource.CreateLinkedTokenSource(searchContext.CancellationToken);
+            searchContext.CancellationToken = cancellationSource.Token;
             foreach (var state in startState.GetNeighbors())
             {
-                var taskResult = storedStates != null && storedStates.ContainsKey(state)
-                    ? Task.FromResult(new SearchResult(storedStates[state], new List<IState> {state}, 1, 0, true))
-                    : threadManager.Invoke(() =>
-                    {
-                        var actualStartState = startState is ProbablisticStateWrapper wrapper ? (IState) wrapper.InnerState : startState;
-                        var localSearchContext = new SearchContext(searchContext.MaxDepth,
-                            searchContext.CurrentDepth + 1, searchContext.Alpha, searchContext.Bata,
-                            cancellationSource.Token, new List<IState>(searchContext.StatesUpTillNow) {actualStartState});
-                        return searchWorker.Evaluate(state, localSearchContext);
-                    });
+                var taskResult = Evaluate(startState, searchContext, storedStates, state);
                 results.Add(taskResult);
 
-                if (taskResult.Status == TaskStatus.RanToCompletion && taskResult.Result != null)
+                if (ProcessResult(taskResult, searchContext, storedStates, state, player))
                 {
-                    var stateEvaluation = taskResult.Result;
-                    if (storedStates != null)
-                        storedStates[state] = stateEvaluation.Evaluation;
-                    if (AlphaBataShouldPrune(searchContext.Alpha, searchContext.Bata, stateEvaluation.Evaluation, player))
-                    {
-                        pruned = true;
-                        cancellationSource.Cancel();
-                        break;
-                    }
-                    var shouldDieEarlly = ShouldDieEarlly(stateEvaluation.Evaluation, player, stateEvaluation.StateSequence.Count);
-                    if (shouldDieEarlly.Item1 && shouldDieEarlly.Item2 == 0)
-                    {
-                        pruned = true;
-                        cancellationSource.Cancel();
-                        break;
-                    }
-                    else if (shouldDieEarlly.Item1)
-                        searchContext.MaxDepth = shouldDieEarlly.Item2 + searchContext.CurrentDepth;
-                    
-                    UpdateAlphaAndBata(searchContext, stateEvaluation.Evaluation, player);
+                    pruned = true;
+                    cancellationSource.Cancel();
+                    break;
                 }
             }
             
             return Reduce(results, player, startState, pruned);
+        }
+
+        private bool ProcessResult(Task<SearchResult> taskResult, SearchContext searchContext, IDictionary<IState, double> storedStates, IState state, Player player)
+        {
+            if (taskResult.Status == TaskStatus.RanToCompletion && taskResult.Result != null)
+            {
+                var stateEvaluation = taskResult.Result;
+                if (storedStates != null)
+                    storedStates[state] = stateEvaluation.Evaluation;
+                if (AlphaBataShouldPrune(searchContext.Alpha, searchContext.Bata, stateEvaluation.Evaluation, player))
+                    return true;
+                
+                var shouldDieEarlly = ShouldDieEarlly(stateEvaluation.Evaluation, player, stateEvaluation.StateSequence.Count);
+                if (shouldDieEarlly.Item1 && shouldDieEarlly.Item2 == 0)
+                    return true;
+                else if (shouldDieEarlly.Item1)
+                    searchContext.MaxDepth = shouldDieEarlly.Item2 + searchContext.CurrentDepth;
+
+                UpdateAlphaAndBata(searchContext, stateEvaluation.Evaluation, player);
+            }
+            return false;
+        }
+
+        private Task<SearchResult> Evaluate(IDeterministicState startState, SearchContext searchContext,
+            IDictionary<IState, double> storedStates, IState state)
+        {
+            var taskResult = storedStates != null && storedStates.ContainsKey(state)
+                ? Task.FromResult(new SearchResult(storedStates[state], new List<IState> {state}, 1, 0, true))
+                : threadManager.Invoke(() =>
+                {
+                    var actualStartState = startState is ProbablisticStateWrapper wrapper
+                        ? (IState) wrapper.InnerState
+                        : startState;
+                    var localSearchContext = new SearchContext(searchContext.MaxDepth,
+                        searchContext.CurrentDepth + 1, searchContext.Alpha, searchContext.Bata,
+                        searchContext.CancellationToken,
+                        new List<IState>(searchContext.StatesUpTillNow) {actualStartState});
+                    return searchWorker.Evaluate(state, localSearchContext);
+                });
+            return taskResult;
         }
 
         private SearchResult Reduce(List<Task<SearchResult>> results, Player player, IState startState, bool pruned)
@@ -114,6 +129,7 @@ namespace MinMaxSearch
                 searchContext.Bata = evaluation;
         }
 
+        /// <returns> A tuple of (SouldWeDieEarlly, and if so InHowManyMoves)</returns>
         private (bool, int) ShouldDieEarlly(double evaluation, Player player, int pathLength)
         {
             if (!searchOptions.DieEarly)
