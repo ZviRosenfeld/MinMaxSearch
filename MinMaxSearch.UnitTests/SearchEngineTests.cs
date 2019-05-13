@@ -64,21 +64,24 @@ namespace MinMaxSearch.UnitTests
             Assert.AreEqual(endState1, result.StateSequence.Last(), nameof(endState1) + " should have been good enough");
         }
 
+        [DataRow(false)]
+        [DataRow(true)]
         [TestMethod]
-        public void Search_FindWinThreeStepsAway_DontCheckNeigborsFourStepsAway()
+        public void Search_FindWinThreeStepsAway_DontCheckNeigborsFourStepsAway(bool unstableState)
         {
             state1.SetNeigbors(new [] {state2, state3});
             state2.SetNeigbor(endState1);
             state3.SetNeigbor(endState2);
 
             endState1.SetEvaluationTo(15);
-            A.CallTo(() => endState2.Evaluate(A<int>._, A<List<IState>>._)).Invokes(() => throw new Exception("We shouldn't have needed to check " + nameof(endState3)));
+            A.CallTo(() => endState2.Evaluate(A<int>._, A<List<IState>>._)).Invokes(() => throw new Exception("We shouldn't have needed to check " + nameof(endState2)));
 
             var engine = new SearchEngine()
             {
                 FavorShortPaths = true,
                 DieEarly = true,
-                MaxScore = 10
+                MaxScore = 10,
+                IsUnstableState = (s, i, l) => unstableState
             };
             var result = engine.Search(state1, 6);
 

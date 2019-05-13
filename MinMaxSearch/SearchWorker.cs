@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace MinMaxSearch
@@ -27,8 +28,11 @@ namespace MinMaxSearch
                 return new SearchResult(startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow), new List<IState> { startState }, 1, 0, true);
 
             if (ShouldStop(startState, searchContext))
-                return new SearchResult(startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow), new List<IState> {startState}, 1, 0, false);
-            
+            {
+                var stoppedDueToPrune = searchContext.PruneAtMaxDepth && searchContext.MaxDepth == searchContext.CurrentDepth;
+                return new SearchResult(startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow), new List<IState> {startState}, 1, 0, stoppedDueToPrune);
+            }
+
             if (startState is IDeterministicState deterministicState)
                 return deterministicSearchUtils.EvaluateChildren(deterministicState, searchContext);
 
@@ -40,8 +44,13 @@ namespace MinMaxSearch
         
         private bool ShouldStop(IState state, SearchContext searchContext)
         {
-            if (searchContext.CurrentDepth >= searchContext.MaxDepth && !searchOptions.IsUnstableState(state, searchContext.CurrentDepth, searchContext.StatesUpTillNow))
-                return true;
+            if (searchContext.CurrentDepth >= searchContext.MaxDepth)
+            {
+                if (searchContext.PruneAtMaxDepth)
+                    return true;
+                if (!searchOptions.IsUnstableState(state, searchContext.CurrentDepth, searchContext.StatesUpTillNow))
+                    return true;
+            }
             if (searchContext.CancellationToken.IsCancellationRequested)
                 return true;
             

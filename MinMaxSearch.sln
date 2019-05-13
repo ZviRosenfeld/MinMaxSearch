@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TicTacToeTests", "TicTacToe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Connect4Tests", "Connect4Tests\Connect4Tests.csproj", "{09A75E8B-7DBA-43A6-ABB8-0A2B03194F0D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProbabilisticConnect4Tests", "ProbabilisticConnect4Tests\ProbabilisticConnect4Tests.csproj", "{1554BB7F-01EC-4CFF-8082-06A42B5B8505}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProbabilisticConnect4Tests", "ProbabilisticConnect4Tests\ProbabilisticConnect4Tests.csproj", "{1554BB7F-01EC-4CFF-8082-06A42B5B8505}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

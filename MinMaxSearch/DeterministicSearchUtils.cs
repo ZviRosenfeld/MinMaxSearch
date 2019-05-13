@@ -34,7 +34,7 @@ namespace MinMaxSearch
                 var taskResult = Evaluate(startState, searchContext, storedStates, state);
                 results.Add(taskResult);
 
-                if (ProcessResult(taskResult, searchContext, storedStates, state, player))
+                if (ProcessResultAndReturnWhetherWeShouldBreak(taskResult, searchContext, storedStates, state, player))
                 {
                     pruned = true;
                     cancellationSource.Cancel();
@@ -45,9 +45,9 @@ namespace MinMaxSearch
             return Reduce(results, player, startState, pruned);
         }
 
-        private bool ProcessResult(Task<SearchResult> taskResult, SearchContext searchContext, IDictionary<IState, double> storedStates, IState state, Player player)
+        private bool ProcessResultAndReturnWhetherWeShouldBreak(Task<SearchResult> taskResult, SearchContext searchContext, IDictionary<IState, double> storedStates, IState state, Player player)
         {
-            if (taskResult.Status == TaskStatus.RanToCompletion && taskResult.Result != null)
+            if (taskResult.Status == TaskStatus.RanToCompletion)
             {
                 var stateEvaluation = taskResult.Result;
                 if (storedStates != null)
@@ -59,7 +59,10 @@ namespace MinMaxSearch
                 if (shouldDieEarlly.Item1 && shouldDieEarlly.Item2 == 0)
                     return true;
                 else if (shouldDieEarlly.Item1)
+                {
                     searchContext.MaxDepth = shouldDieEarlly.Item2 + searchContext.CurrentDepth;
+                    searchContext.PruneAtMaxDepth = true;
+                }
 
                 UpdateAlphaAndBata(searchContext, stateEvaluation.Evaluation, player);
             }
@@ -70,17 +73,13 @@ namespace MinMaxSearch
             IDictionary<IState, double> storedStates, IState state)
         {
             var taskResult = storedStates != null && storedStates.ContainsKey(state)
-                ? Task.FromResult(new SearchResult(storedStates[state], new List<IState> {state}, 1, 0, true))
+                ? Task.FromResult(new SearchResult(storedStates[state], new List<IState> { state }, 1, 0, true))
                 : threadManager.Invoke(() =>
                 {
                     var actualStartState = startState is ProbablisticStateWrapper wrapper
                         ? (IState) wrapper.InnerState
                         : startState;
-                    var localSearchContext = new SearchContext(searchContext.MaxDepth,
-                        searchContext.CurrentDepth + 1, searchContext.Alpha, searchContext.Bata,
-                        searchContext.CancellationToken,
-                        new List<IState>(searchContext.StatesUpTillNow) {actualStartState});
-                    return searchWorker.Evaluate(state, localSearchContext);
+                    return searchWorker.Evaluate(state, searchContext.CloneAndAddState(actualStartState));
                 });
             return taskResult;
         }
@@ -94,8 +93,6 @@ namespace MinMaxSearch
             foreach (var result in results)
             {
                 var actualResult = result.Result;
-                if (actualResult == null) continue;
-
                 leaves += actualResult.Leaves;
                 internalNodes += actualResult.InternalNodes;
                 allChildrenAreDeadEnds = allChildrenAreDeadEnds && actualResult.AllChildrenAreDeadEnds;
@@ -107,7 +104,7 @@ namespace MinMaxSearch
                 }
             }
 
-            return bestResult?.CloneAndAddStateToTop(startState, leaves, internalNodes + 1, allChildrenAreDeadEnds || pruned);
+            return bestResult.CloneAndAddStateToTop(startState, leaves, internalNodes + 1, allChildrenAreDeadEnds || pruned);
         }
 
         private bool AlphaBataShouldPrune(double alpha, double bata, double evaluation, Player player)

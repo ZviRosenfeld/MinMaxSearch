@@ -78,12 +78,12 @@ public interface IDeterministicState : IState
 
 *In addition, I recommend that your states also implement object's Equals and GetHashCode methods, as many of the algorithm optimizations rely on these methods being implemented in a meaningful way.*
 
-You can find a tutorial on how to create a probabilistic tic-tac-toe game [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Probabilistic-Tic-Tac-Toe-Tutorial).
+You can find a tutorial on how to create a probabilistic version of tic-tac-toe [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Probabilistic-Tic-Tac-Toe-Tutorial).
 
 ### Examples
 Following are a few snippets take from the project's unit tests. You can refer to the [Connnect4 Tests](Connect4Tests) or [Tic-tac-toe Tests](TicTacToeTests) for more examples.
 
-In addition, you can find a tutorial on how to create a tic-tac-toe state [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Tic-Tac-Toe-Tutorial), and one on probabilistic tic-tac-toe game [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Probabilistic-Tic-Tac-Toe-Tutorial).
+In addition, you can find a tutorial on how to create a tic-tac-toe state [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Tic-Tac-Toe-Tutorial), and one on a probabilistic version of tic-tac-toe [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Probabilistic-Tic-Tac-Toe-Tutorial).
 
 example1:
 ```csharp
