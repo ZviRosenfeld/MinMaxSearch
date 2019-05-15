@@ -1,28 +1,25 @@
 ﻿using FakeItEasy;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MinMaxSearch.States;
 
 namespace MinMaxSearch.UnitTests
 {
     [TestClass]
     public class AlternateEvaluationTests
     {
-        private readonly DeterministicAlternateEvaluationState deterministicEndState = A.Fake<DeterministicAlternateEvaluationState>();
-        private readonly ProbabilisticAlternateEvaluationState probabilisticEndState = A.Fake<ProbabilisticAlternateEvaluationState>();
-        private readonly DeterministicAlternateEvaluationState startState = A.Fake<DeterministicAlternateEvaluationState>();
+        private readonly IDeterministicState deterministicEndState = A.Fake<IDeterministicState>();
+        private readonly IProbabilisticState probabilisticEndState = A.Fake<IProbabilisticState>();
+        private readonly IDeterministicState startState = A.Fake<IDeterministicState>();
 
         [TestInitialize]
         public void TestInitialize()
         {
             A.CallTo(() => deterministicEndState.ToString()).Returns(nameof(deterministicEndState)); 
             deterministicEndState.SetAsEndState();
-            deterministicEndState.SetEvaluationTo(10);
-            deterministicEndState.SetAlternateEvaluationTo(-10);
+            deterministicEndState.SetEvaluationTo(0);
 
             A.CallTo(() => probabilisticEndState.ToString()).Returns(nameof(probabilisticEndState));
             probabilisticEndState.SetAsEndState();
-            probabilisticEndState.SetEvaluationTo(10);
-            probabilisticEndState.SetAlternateEvaluationTo(-10);
+            probabilisticEndState.SetEvaluationTo(0);
 
             A.CallTo(() => startState.ToString()).Returns(nameof(startState));
         }
@@ -36,7 +33,11 @@ namespace MinMaxSearch.UnitTests
             A.CallTo(() => startState.Turn).Returns(startPlayer);
             A.CallTo(() => deterministicEndState.Turn).Returns(startPlayer.GetReversePlayer());
 
-            var engine = new SearchEngine();
+            var engine = new SearchEngine()
+            {
+                MaxAlternateEvaluation = (s,d,l) => 10,
+                MinAlternateEvaluation = (s,l,d) => -10
+            };
             var evaluation = engine.Search(startState, 2);
 
             Assert.AreEqual(startPlayer == Player.Max ? 10 : -10, evaluation.Evaluation);
@@ -51,18 +52,14 @@ namespace MinMaxSearch.UnitTests
             A.CallTo(() => startState.Turn).Returns(startPlayer);
             A.CallTo(() => probabilisticEndState.Turn).Returns(startPlayer.GetReversePlayer());
 
-            var engine = new SearchEngine();
+            var engine = new SearchEngine()
+            {
+                MaxAlternateEvaluation = (s, d, l) => 10,
+                MinAlternateEvaluation = (s, l, d) => -10
+            };
             var evaluation = engine.Search(startState, 2);
 
             Assert.AreEqual(startPlayer == Player.Max ? 10 : -10, evaluation.Evaluation);
         }
-    }
-
-    public interface DeterministicAlternateEvaluationState : IDeterministicState, IAlternateEvaluationState
-    {        
-    }
-
-    public interface ProbabilisticAlternateEvaluationState : IProbabilisticState, IAlternateEvaluationState
-    {
     }
 }

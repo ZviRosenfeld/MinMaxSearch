@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using MinMaxSearch.States;
 
 namespace MinMaxSearch
 {
@@ -23,12 +22,15 @@ namespace MinMaxSearch
                 searchContext.StartPlayer, new List<IState>(searchContext.StatesUpTillNow) {newState}, searchContext.Alpha, 
                 searchContext.Bata, searchContext.PruneAtMaxDepth);
 
-        public static double Evaluate(this IState state, int depth, List<IState> passedThroughStates, Player startPlayer)
+        public static double Evaluate(this IState state, int depth, List<IState> passedThroughStates, Player startPlayer, SearchOptions searchOptions)
         {
-            if (startPlayer == Player.Max || !(state is IAlternateEvaluationState alternateEvaluationState))
-                return state.Evaluate(depth, passedThroughStates);
+            if (startPlayer == Player.Max && searchOptions.MaxAlternateEvaluation != null)
+                return searchOptions.MaxAlternateEvaluation(state, depth, passedThroughStates);
 
-            return alternateEvaluationState.AlternateEvaluation(depth, passedThroughStates);
+            if (startPlayer == Player.Min && searchOptions.MinAlternateEvaluation != null)
+                return searchOptions.MinAlternateEvaluation(state, depth, passedThroughStates);
+
+            return state.Evaluate(depth, passedThroughStates);
         }
     }
 }

@@ -46,7 +46,11 @@ namespace MinMaxSearch
                 ? value
                 : throw new BadDegreeOfParallelismException("DegreeOfParallelism must be at least one. Tried to set it to " + maxDegreeOfParallelism);
         }
-        
+
+        public Func<IState, int, List<IState>, double> MinAlternateEvaluation { get; set; }
+
+        public Func<IState, int, List<IState>, double> MaxAlternateEvaluation { get; set; }
+
         public SearchResult Search(IDeterministicState startState, int maxDepth) =>
             Search(startState, maxDepth, CancellationToken.None);
 
@@ -67,7 +71,7 @@ namespace MinMaxSearch
         }
         
         private SearchOptions CreateSearchOptions() => new SearchOptions(pruners, IsUnstableState, PreventLoops,
-            FavorShortPaths, DieEarly, MaxScore, MinScore, MaxDegreeOfParallelism);
+            FavorShortPaths, DieEarly, MaxScore, MinScore, MaxDegreeOfParallelism, MinAlternateEvaluation, MaxAlternateEvaluation);
 
         public SearchResult IterativeSearch(IDeterministicState startState, int startDepth, int maxDepth, TimeSpan timeout) =>
             IterativeSearch(startState, startDepth, maxDepth, new CancellationTokenSource(timeout).Token);

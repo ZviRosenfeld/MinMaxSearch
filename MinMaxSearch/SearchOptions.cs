@@ -4,11 +4,12 @@ using MinMaxSearch.Pruners;
 
 namespace MinMaxSearch
 {
-    class SearchOptions
+    public class SearchOptions
     {
         public SearchOptions(List<IPruner> pruners, Func<IState, int, List<IState>, bool> isUnstableState,
             bool preventLoops, bool favorShortPaths, bool dieEarly, double maxScore,
-            double minScore, int maxDegreeOfParallelism)
+            double minScore, int maxDegreeOfParallelism, Func<IState, int, List<IState>, double> minAlternateEvaluation, 
+            Func<IState, int, List<IState>, double> maxAlternateEvaluation)
         {
             Pruners = pruners;
             IsUnstableState = isUnstableState;
@@ -16,6 +17,8 @@ namespace MinMaxSearch
             DieEarly = dieEarly;
             MaxScore = maxScore;
             MinScore = minScore;
+            MinAlternateEvaluation = minAlternateEvaluation;
+            MaxAlternateEvaluation = maxAlternateEvaluation;
             MaxDegreeOfParallelism = maxDegreeOfParallelism >= 1
                 ? maxDegreeOfParallelism
                 : throw new BadDegreeOfParallelismException(
@@ -29,7 +32,11 @@ namespace MinMaxSearch
         public List<IPruner> Pruners { get; }
 
         public Func<IState, int, List<IState>, bool> IsUnstableState { get; }
-        
+
+        public Func<IState, int, List<IState>, double> MinAlternateEvaluation { get; }
+
+        public Func<IState, int, List<IState>, double> MaxAlternateEvaluation { get; }
+
         public bool FavorShortPaths { get; }
 
         public bool DieEarly { get; }

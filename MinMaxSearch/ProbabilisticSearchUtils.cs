@@ -10,10 +10,12 @@ namespace MinMaxSearch
     {
         private readonly ThreadManager threadManager;
         private readonly DeterministicSearchUtils deterministicSearchUtils;
+        private readonly SearchOptions searchOptions;
 
-        public ProbabilisticSearchUtils(ThreadManager threadManager, DeterministicSearchUtils deterministicSearchUtils)
+        public ProbabilisticSearchUtils(ThreadManager threadManager, DeterministicSearchUtils deterministicSearchUtils, SearchOptions searchOptions)
         {
             this.deterministicSearchUtils = deterministicSearchUtils;
+            this.searchOptions = searchOptions;
             this.threadManager = threadManager;
         }
 
@@ -21,7 +23,7 @@ namespace MinMaxSearch
         {
             if (!startState.GetNeighbors().Any())
             {
-                var evaluation = startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow, searchContext.StartPlayer);
+                var evaluation = startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow, searchContext.StartPlayer, searchOptions);
                 return new SearchResult(evaluation, new List<IState> {startState}, 1, 0, true);
             }
 

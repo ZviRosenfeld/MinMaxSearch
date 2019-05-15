@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using MinMaxSearch.States;
 
 namespace MinMaxSearch
 {
@@ -17,9 +16,7 @@ namespace MinMaxSearch
             this.startPlayer = startPlayer;
         }
 
-        public double Evaluate(int depth, List<IState> passedThroughStates) => 
-            startPlayer == Player.Min && InnerState is IAlternateEvaluationState alternateEvaluationState ?
-            alternateEvaluationState.AlternateEvaluation(depth, passedThroughStates) :
+        public double Evaluate(int depth, List<IState> passedThroughStates) =>
             InnerState.Evaluate(depth, passedThroughStates);
 
         public Player Turn => InnerState.Turn;

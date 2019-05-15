@@ -8,18 +8,23 @@ namespace MinMaxSearch.Benckmarking
     {
         /// <summary>
         /// With this method you can simulate a complete game and compare different evaluation-strategies.
-        /// Use IAlternateEvaluationState to test different evaluation-strategies. 
-        /// If your states implement IAlternateEvaluationState then any time min started the search we'll use the IAlternateEvaluationState.AlternateEvaluation
-        /// to evaluate the states rather then the IState.Evaluation method.
+        /// maxAlternateEvaluation will be used to evaluate the board on max's turn in stead of the state's regaler Evaluate method
+        /// minAlternateEvaluation will be used to evaluate the board on min's turn in stead of the state's regaler Evaluate method 
         /// </summary>
-        public static CompetitionResult Compete(this SearchEngine engine, IDeterministicState startState, int searchDepth, int maxPayDepth) =>
-            Compete(engine, engine, startState, searchDepth, searchDepth, maxPayDepth);
+        public static CompetitionResult Compete(this SearchEngine engine, IDeterministicState startState,
+            int searchDepth, Func<IState, int, List<IState>, double> maxAlternateEvaluation = null,
+            Func<IState, int, List<IState>, double> minAlternateEvaluation = null, int maxPayDepth = int.MaxValue)
+        {
+            if (maxAlternateEvaluation == null && minAlternateEvaluation == null)
+                throw new ArgumentException($"At least one of {nameof(maxAlternateEvaluation)} or {nameof(minAlternateEvaluation)} shouldn't be null");
+
+            engine.MaxAlternateEvaluation = maxAlternateEvaluation;
+            engine.MaxAlternateEvaluation = minAlternateEvaluation;
+            return Compete(engine, engine, startState, searchDepth, searchDepth, maxPayDepth);
+        }
 
         /// <summary>
-        /// With this method you can simulate a complete game and compare different engines, search-depths or evaluation-strategies.
-        /// Use IAlternateEvaluationState to test different evaluation-strategies. 
-        /// If your states implement IAlternateEvaluationState then any time min started the search we'll use the IAlternateEvaluationState.AlternateEvaluation
-        /// to evaluate the states rather then the IState.Evaluation method.
+        /// With this method you can simulate a complete game and compare different engines or search-depths.
         /// </summary>
         /// <param name="maxEngine"> The engine to use for max</param>
         /// <param name="minEngine"> The engine to use for min</param>
