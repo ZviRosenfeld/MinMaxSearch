@@ -56,10 +56,10 @@ namespace MinMaxSearch
         public SearchResult Search(IDeterministicState startState, int maxDepth, CancellationToken cancellationToken)
         {
             if (!startState.GetNeighbors().Any())
-                throw new NoNeighborsException("start state has no nighbors " + startState);
+                throw new NoNeighborsException("start state has no neighbors " + startState);
             
             var searchWorker = new SearchWorker(CreateSearchOptions());
-            var searchContext = new SearchContext(maxDepth, 0, cancellationToken);
+            var searchContext = new SearchContext(maxDepth, 0, cancellationToken, startState.Turn);
             var evaluation = searchWorker.Evaluate(startState, searchContext);
             evaluation.StateSequence.Reverse();
             evaluation.StateSequence.RemoveAt(0); // Removing the top node will make the result "nicer"

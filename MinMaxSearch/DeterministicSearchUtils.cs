@@ -22,8 +22,11 @@ namespace MinMaxSearch
             IDictionary<IState, double> storedStates = null)
         {
             if (!startState.GetNeighbors().Any())
-                return new SearchResult(startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow), new List<IState> {startState}, 1, 0, true);
-            
+            {
+                var evaluation = startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow, searchContext.StartPlayer);
+                return new SearchResult(evaluation, new List<IState> {startState}, 1, 0, true);
+            }
+
             var pruned = false;
             var player = startState.Turn;
             var results = new List<Task<SearchResult>>();

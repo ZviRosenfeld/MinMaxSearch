@@ -20,13 +20,16 @@ namespace MinMaxSearch
         public SearchResult EvaluateChildren(IProbabilisticState startState, SearchContext searchContext)
         {
             if (!startState.GetNeighbors().Any())
-                return new SearchResult(startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow), new List<IState> {startState}, 1, 0, true);
-            
+            {
+                var evaluation = startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow, searchContext.StartPlayer);
+                return new SearchResult(evaluation, new List<IState> {startState}, 1, 0, true);
+            }
+
             var storedStates = new ConcurrentDictionary<IState, double>();
             var results = new List<Tuple<double, Task<SearchResult>>>();
             foreach (var neighbor in startState.GetNeighbors())
             {
-                var wrappedState = new ProbablisticStateWrapper(neighbor.Item2, startState);
+                var wrappedState = new ProbablisticStateWrapper(neighbor.Item2, startState, searchContext.StartPlayer);
                 var searchResult = threadManager.Invoke(() =>
                     deterministicSearchUtils.EvaluateChildren(wrappedState, searchContext.CloneWithMaxAlphaAndBeta(), storedStates));
                 results.Add(new Tuple<double, Task<SearchResult>>(neighbor.Item1, searchResult));

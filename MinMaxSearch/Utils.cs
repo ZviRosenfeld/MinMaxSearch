@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using MinMaxSearch.States;
 
 namespace MinMaxSearch
 {
@@ -14,13 +15,20 @@ namespace MinMaxSearch
         }
 
         public static SearchContext CloneWithMaxAlphaAndBeta(this SearchContext searchContext) => new SearchContext(
-            searchContext.MaxDepth, searchContext.CurrentDepth, searchContext.CancellationToken,
+            searchContext.MaxDepth, searchContext.CurrentDepth, searchContext.CancellationToken, searchContext.StartPlayer,
             searchContext.StatesUpTillNow, pruneAtMaxDepth: searchContext.PruneAtMaxDepth);
 
         public static SearchContext CloneAndAddState(this SearchContext searchContext, IState newState) =>
-            new SearchContext(searchContext.MaxDepth, searchContext.CurrentDepth + 1, searchContext.CancellationToken,
-                new List<IState>(searchContext.StatesUpTillNow) {newState}, searchContext.Alpha, searchContext.Bata,
-                searchContext.PruneAtMaxDepth);
+            new SearchContext(searchContext.MaxDepth, searchContext.CurrentDepth + 1, searchContext.CancellationToken, 
+                searchContext.StartPlayer, new List<IState>(searchContext.StatesUpTillNow) {newState}, searchContext.Alpha, 
+                searchContext.Bata, searchContext.PruneAtMaxDepth);
 
+        public static double Evaluate(this IState state, int depth, List<IState> passedThroughStates, Player startPlayer)
+        {
+            if (startPlayer == Player.Max || !(state is IAlternateEvaluationState alternateEvaluationState))
+                return state.Evaluate(depth, passedThroughStates);
+
+            return alternateEvaluationState.AlternateEvaluation(depth, passedThroughStates);
+        }
     }
 }

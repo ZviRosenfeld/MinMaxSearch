@@ -5,7 +5,7 @@ namespace MinMaxSearch
 {
     public class SearchContext
     {
-        public SearchContext(int maxDepth, int currentDepth, CancellationToken cancellationToken,
+        public SearchContext(int maxDepth, int currentDepth, CancellationToken cancellationToken, Player startPlayer,
             List<IState> statesUpToNow = null, double alpha = double.MinValue, double bata = double.MaxValue,
             bool pruneAtMaxDepth = false)
         {
@@ -14,6 +14,7 @@ namespace MinMaxSearch
             Alpha = alpha;
             Bata = bata;
             CancellationToken = cancellationToken;
+            StartPlayer = startPlayer;
             StatesUpTillNow = statesUpToNow ?? new List<IState>();
             PruneAtMaxDepth = pruneAtMaxDepth;
         }
@@ -25,5 +26,6 @@ namespace MinMaxSearch
         public CancellationToken CancellationToken { get; set; }
         public List<IState> StatesUpTillNow { get; set; }
         public bool PruneAtMaxDepth { get; set; }
+        public Player StartPlayer { get; }
     }
 }
