@@ -2,7 +2,7 @@
 
 namespace MinMaxSearch
 {
-    class ProbablisticStateWrapper : IDeterministicState
+    public class ProbablisticStateWrapper : IDeterministicState
     {
         private readonly IEnumerable<IState> neighbors;
 

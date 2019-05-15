@@ -85,33 +85,11 @@ namespace MinMaxSearch.Benckmarking
             if (state is IDeterministicState deterministicState)
                 return deterministicState;
             if (state is IProbabilisticState probabilisticState)
-                return ChooseNeigbors(probabilisticState);
+                return probabilisticState.GetNextState();
 
             throw new BadStateTypeException($"State must implement {nameof(IDeterministicState)} or {nameof(IProbabilisticState)}");
         }
-
-        private static ProbablisticStateWrapper ChooseNeigbors(IProbabilisticState probabilisticState)
-        {
-            var sumOfAllPossibilities = probabilisticState.GetNeighbors().Select(t => t.Item1).Sum();
-            var num = GetRandomNumberUpTo(sumOfAllPossibilities);
-            var sum = 0.0;
-            foreach (var neighbor in probabilisticState.GetNeighbors())
-            {
-                sum += neighbor.Item1;
-                if (sum >= num)
-                    return new ProbablisticStateWrapper(neighbor.Item2, probabilisticState);
-            }
-
-            return null;
-        }
-
-        private static double GetRandomNumberUpTo(double end)
-        {
-            var random = new Random();
-            var num = random.NextDouble();
-            return num * end;
-        }
-
+        
         private static bool ContainsNeigbors(IState state)
         {
             if (state is IDeterministicState deterministicState && deterministicState.GetNeighbors().Any())
