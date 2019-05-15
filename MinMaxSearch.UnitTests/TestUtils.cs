@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using FakeItEasy;
+using MinMaxSearch.States;
 
 namespace MinMaxSearch.UnitTests
 {
@@ -7,6 +8,9 @@ namespace MinMaxSearch.UnitTests
     {
         public static void SetEvaluationTo(this IState state, double evaluation) =>
             A.CallTo(() => state.Evaluate(A<int>._, A<List<IState>>._)).Returns(evaluation);
+
+        public static void SetAlternateEvaluationTo(this IAlternateEvaluationState state, double evaluation) =>
+            A.CallTo(() => state.AlternateEvaluation(A<int>._, A<List<IState>>._)).Returns(evaluation);
 
         public static void SetNeigbors(this IDeterministicState state, IEnumerable<IState> neigbors) =>
             A.CallTo(() => state.GetNeighbors()).Returns(neigbors);

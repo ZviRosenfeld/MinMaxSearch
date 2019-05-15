@@ -2,7 +2,7 @@
 
 namespace MinMaxSearch.States
 {
-    interface IAlternateEvaluationState
+    public interface IAlternateEvaluationState
     {
         /// <summary>
         /// returns an alternate evaluation of the state  (how good it is).
