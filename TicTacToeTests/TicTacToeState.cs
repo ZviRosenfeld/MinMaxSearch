@@ -30,7 +30,7 @@ namespace TicTacToeTests
             return 0;
         }
 
-        public IEnumerable<IState> GetNeighbors()
+        public virtual IEnumerable<IState> GetNeighbors()
         {
             var stateEvaluation = Evaluate(0, new List<IState>());
             if (stateEvaluation >= MaxValue || stateEvaluation <= MinValue)

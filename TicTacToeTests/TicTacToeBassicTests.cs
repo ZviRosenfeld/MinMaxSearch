@@ -116,12 +116,7 @@ namespace TicTacToeTests
         [TestMethod]
         public void NewGame_NoOneCanWin(int degreeOfParallelism)
         {
-            TicTacToeState startState = new TicTacToeState(new[,]
-            {
-                { Player.Empty, Player.Empty, Player.Empty},
-                { Player.Empty, Player.Empty, Player.Empty},
-                { Player.Empty, Player.Empty, Player.Empty},
-            }, Player.Max);
+            TicTacToeState startState = GetEmptyTicTacToeState();
 
             var engine = GetSearchEngine(degreeOfParallelism);
             var evaluation = engine.Search(startState, 10);
@@ -151,5 +146,12 @@ namespace TicTacToeTests
                 MinScore = -0.5,
                 MaxScore = 0.5
             };
+
+        public static TicTacToeState GetEmptyTicTacToeState() => new TicTacToeState(new[,]
+        {
+            { Player.Empty, Player.Empty, Player.Empty},
+            { Player.Empty, Player.Empty, Player.Empty},
+            { Player.Empty, Player.Empty, Player.Empty},
+        }, Player.Max);
     }
 }
