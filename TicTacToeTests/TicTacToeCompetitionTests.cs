@@ -29,7 +29,7 @@ namespace TicTacToeTests
             var competitionResult = engine.Compete(TicTacToeBassicTests.GetEmptyTicTacToeState(), 9, (s, d, l) => s.Evaluate(d, l), (s, d, l) => 0);
 
             var finalState = (TicTacToeState)competitionResult.States.Last();
-            Assert.AreEqual(TicTacToeState.MinValue, finalState.Evaluate(0, new List<IState>()), "Max should have won");
+            Assert.AreEqual(TicTacToeState.MaxValue, finalState.Evaluate(0, new List<IState>()), "Max should have won");
         }
     }
 }

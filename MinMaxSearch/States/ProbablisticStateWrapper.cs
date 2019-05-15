@@ -5,15 +5,13 @@ namespace MinMaxSearch
     class ProbablisticStateWrapper : IDeterministicState
     {
         private readonly IEnumerable<IState> neighbors;
-        private readonly Player startPlayer;
 
         public IProbabilisticState InnerState { get; }
 
-        public ProbablisticStateWrapper(IEnumerable<IState> neighbors, IProbabilisticState innerState, Player startPlayer)
+        public ProbablisticStateWrapper(IEnumerable<IState> neighbors, IProbabilisticState innerState)
         {
             this.neighbors = neighbors;
             InnerState = innerState;
-            this.startPlayer = startPlayer;
         }
 
         public double Evaluate(int depth, List<IState> passedThroughStates) =>

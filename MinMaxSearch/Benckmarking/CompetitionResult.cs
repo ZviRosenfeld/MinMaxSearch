@@ -1,21 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MinMaxSearch.Benckmarking
 {
     public class CompetitionResult
     {
-        public CompetitionResult(IState finalState, int gameDepth, List<IState> states, TimeSpan maxTotalTime,
+        public CompetitionResult(int gameDepth, List<IState> states, TimeSpan maxTotalTime,
             TimeSpan minTotalTime)
         {
-            FinalState = finalState;
             GameDepth = gameDepth;
             States = states;
             MaxTotalTime = maxTotalTime;
             MinTotalTime = minTotalTime;
         }
 
-        public IState FinalState { get; }
+        public IState FinalState => States.Last();
 
         public int GameDepth { get; }
 

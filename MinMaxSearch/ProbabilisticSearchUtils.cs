@@ -31,7 +31,7 @@ namespace MinMaxSearch
             var results = new List<Tuple<double, Task<SearchResult>>>();
             foreach (var neighbor in startState.GetNeighbors())
             {
-                var wrappedState = new ProbablisticStateWrapper(neighbor.Item2, startState, searchContext.StartPlayer);
+                var wrappedState = new ProbablisticStateWrapper(neighbor.Item2, startState);
                 var searchResult = threadManager.Invoke(() =>
                     deterministicSearchUtils.EvaluateChildren(wrappedState, searchContext.CloneWithMaxAlphaAndBeta(), storedStates));
                 results.Add(new Tuple<double, Task<SearchResult>>(neighbor.Item1, searchResult));
