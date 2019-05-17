@@ -216,5 +216,38 @@ namespace MinMaxSearch.UnitTests
             Assert.AreEqual(1, result.Evaluation);
             Assert.AreEqual(0, result.StateSequence.Count, "We shouldn't have gotten to state3");
         }
+
+        [TestMethod]
+        public void CloneSearchEngine_NewEngineHasSameValuesAsOld()
+        {
+            var engine = new SearchEngine()
+            {
+                DieEarly = true,
+                FavorShortPaths = false,
+                MaxDegreeOfParallelism = 2,
+                MaxScore = 10,
+                MinScore = 8,
+                PreventLoops = true
+            };
+
+            var cloneEngine = new SearchEngine(engine);
+
+            Assert.AreEqual(engine.DieEarly, cloneEngine.DieEarly);
+            Assert.AreEqual(engine.FavorShortPaths, cloneEngine.FavorShortPaths);
+            Assert.AreEqual(engine.MaxDegreeOfParallelism, cloneEngine.MaxDegreeOfParallelism);
+            Assert.AreEqual(engine.MaxScore, cloneEngine.MaxScore);
+            Assert.AreEqual(engine.MinScore, cloneEngine.MinScore);
+            Assert.AreEqual(engine.PreventLoops, cloneEngine.PreventLoops);
+        }
+
+        [TestMethod]
+        public void CloneSearchEngine_ChangeAFieldOnOriginal_FieldNotChangeOnClone()
+        {
+            var engine = new SearchEngine();
+            var cloneEngine = new SearchEngine(engine);
+            engine.MaxDegreeOfParallelism = 4;
+
+            Assert.AreNotEqual(engine.MaxDegreeOfParallelism, cloneEngine.MaxDegreeOfParallelism);
+        }
     }
 }

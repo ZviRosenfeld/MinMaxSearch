@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -10,6 +9,24 @@ namespace MinMaxSearch
 {
     public class SearchEngine
     {
+
+        public SearchEngine(SearchEngine engine)
+        {
+            AlternateEvaluation = engine.AlternateEvaluation;
+            DieEarly = engine.DieEarly;
+            FavorShortPaths = engine.FavorShortPaths;
+            IsUnstableState = engine.IsUnstableState;
+            MaxDegreeOfParallelism = engine.MaxDegreeOfParallelism;
+            MaxScore = engine.MaxScore;
+            MinScore = engine.MinScore;
+            PreventLoops = engine.PreventLoops;
+            pruners = new List<IPruner>(engine.pruners);
+        }
+
+        public SearchEngine()
+        {
+        }
+
         private readonly List<IPruner> pruners = new List<IPruner>();
         
         public void AddPruner(IPruner pruner) => pruners.Add(pruner);
@@ -47,9 +64,7 @@ namespace MinMaxSearch
                 : throw new BadDegreeOfParallelismException("DegreeOfParallelism must be at least one. Tried to set it to " + maxDegreeOfParallelism);
         }
 
-        public Func<IState, int, List<IState>, double> MinAlternateEvaluation { get; set; }
-
-        public Func<IState, int, List<IState>, double> MaxAlternateEvaluation { get; set; }
+        public Func<IState, int, List<IState>, double> AlternateEvaluation { get; set; }
 
         public SearchResult Search(IDeterministicState startState, int maxDepth) =>
             Search(startState, maxDepth, CancellationToken.None);
@@ -63,7 +78,7 @@ namespace MinMaxSearch
                 throw new NoNeighborsException("start state has no neighbors " + startState);
             
             var searchWorker = new SearchWorker(CreateSearchOptions());
-            var searchContext = new SearchContext(maxDepth, 0, cancellationToken, startState.Turn);
+            var searchContext = new SearchContext(maxDepth, 0, cancellationToken);
             var evaluation = searchWorker.Evaluate(startState, searchContext);
             evaluation.StateSequence.Reverse();
             evaluation.StateSequence.RemoveAt(0); // Removing the top node will make the result "nicer"
@@ -71,7 +86,7 @@ namespace MinMaxSearch
         }
         
         private SearchOptions CreateSearchOptions() => new SearchOptions(pruners, IsUnstableState, PreventLoops,
-            FavorShortPaths, DieEarly, MaxScore, MinScore, MaxDegreeOfParallelism, MinAlternateEvaluation, MaxAlternateEvaluation);
+            FavorShortPaths, DieEarly, MaxScore, MinScore, MaxDegreeOfParallelism, AlternateEvaluation);
 
         public SearchResult IterativeSearch(IDeterministicState startState, int startDepth, int maxDepth, TimeSpan timeout) =>
             IterativeSearch(startState, startDepth, maxDepth, new CancellationTokenSource(timeout).Token);

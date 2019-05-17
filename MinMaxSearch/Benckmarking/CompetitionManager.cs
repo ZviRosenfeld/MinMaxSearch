@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace MinMaxSearch.Benckmarking
 {
@@ -13,12 +14,13 @@ namespace MinMaxSearch.Benckmarking
         /// </summary>
         public static CompetitionResult Compete(this SearchEngine engine, IDeterministicState startState,
             int searchDepth, Func<IState, int, List<IState>, double> maxAlternateEvaluation = null,
-            Func<IState, int, List<IState>, double> minAlternateEvaluation = null, int maxPayDepth = int.MaxValue)
+            Func<IState, int, List<IState>, double> minAlternateEvaluation = null, int maxPayDepth = int.MaxValue,
+            CancellationToken? cancellationToken = null)
         {
             if (maxAlternateEvaluation == null && minAlternateEvaluation == null)
                 throw new ArgumentException($"At least one of {nameof(maxAlternateEvaluation)} or {nameof(minAlternateEvaluation)} shouldn't be null");
             
-            return Compete(engine, engine, startState, searchDepth, searchDepth, maxPayDepth, maxAlternateEvaluation, minAlternateEvaluation);
+            return Compete(engine, new SearchEngine(engine), startState, searchDepth, searchDepth, maxPayDepth, maxAlternateEvaluation, minAlternateEvaluation, cancellationToken);
         }
 
         /// <summary>
@@ -28,12 +30,13 @@ namespace MinMaxSearch.Benckmarking
         /// </summary>
         public static CompetitionResult Compete(this SearchEngine engine, IDeterministicState startState,
             int playerMaxSearchDepth, int playerMinSearchDepth, Func<IState, int, List<IState>, double> maxAlternateEvaluation = null,
-            Func<IState, int, List<IState>, double> minAlternateEvaluation = null, int maxPayDepth = int.MaxValue)
+            Func<IState, int, List<IState>, double> minAlternateEvaluation = null, int maxPayDepth = int.MaxValue,
+            CancellationToken? cancellationToken = null)
         {
             if (maxAlternateEvaluation == null && minAlternateEvaluation == null)
                 throw new ArgumentException($"At least one of {nameof(maxAlternateEvaluation)} or {nameof(minAlternateEvaluation)} shouldn't be null");
 
-            return Compete(engine, engine, startState, playerMaxSearchDepth, playerMinSearchDepth, maxPayDepth, maxAlternateEvaluation, minAlternateEvaluation);
+            return Compete(engine, new SearchEngine(engine), startState, playerMaxSearchDepth, playerMinSearchDepth, maxPayDepth, maxAlternateEvaluation, minAlternateEvaluation, cancellationToken);
         }
 
         /// <summary>
@@ -50,10 +53,10 @@ namespace MinMaxSearch.Benckmarking
         public static CompetitionResult Compete(SearchEngine maxEngine, SearchEngine minEngine,
             IDeterministicState startState, int playerMaxSearchDepth, int playerMinSearchDepth, 
             int maxPayDepth = int.MaxValue, Func<IState, int, List<IState>, double> maxAlternateEvaluation = null,
-            Func<IState, int, List<IState>, double> minAlternateEvaluation = null)
+            Func<IState, int, List<IState>, double> minAlternateEvaluation = null, CancellationToken? cancellationToken = null)
         {
-            maxEngine.MaxAlternateEvaluation = maxAlternateEvaluation;
-            minEngine.MinAlternateEvaluation = minAlternateEvaluation;
+            maxEngine.AlternateEvaluation = maxAlternateEvaluation;
+            minEngine.AlternateEvaluation = minAlternateEvaluation;
 
             var currentState = startState;
             var states = new List<IState>();
@@ -61,10 +64,13 @@ namespace MinMaxSearch.Benckmarking
             TimeSpan maxTime = TimeSpan.Zero, minTime = TimeSpan.Zero;
             while (currentState != null && ContainsNeigbors(currentState) && depth < maxPayDepth)
             {
+                if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
+                    break;
+
                 var startTime = DateTime.Now;
                 var searchResult = currentState.Turn == Player.Max
-                    ? maxEngine.Search(currentState, playerMaxSearchDepth)
-                    : minEngine.Search(currentState, playerMinSearchDepth);
+                    ? maxEngine.Search(currentState, playerMaxSearchDepth, cancellationToken ?? CancellationToken.None)
+                    : minEngine.Search(currentState, playerMinSearchDepth, cancellationToken ?? CancellationToken.None);
                 var runTime = DateTime.Now - startTime;
                 if (currentState.Turn == Player.Max)
                     maxTime += runTime;
@@ -96,7 +102,8 @@ namespace MinMaxSearch.Benckmarking
                 return true;
 
             if (state is IProbabilisticState probabilisticState)
-                return probabilisticState.GetNeighbors().Any() && probabilisticState.GetNeighbors().Any(neighbor => neighbor.Item2.Any());
+                return probabilisticState.GetNeighbors().Any() &&
+                       probabilisticState.GetNeighbors().Any(neighbor => neighbor.Item2.Any());
 
             return false;
         }

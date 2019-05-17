@@ -26,14 +26,14 @@ namespace MinMaxSearch
 
             if (searchOptions.Pruners.Any(pruner => pruner.ShouldPrune(startState, searchContext.CurrentDepth, searchContext.StatesUpTillNow)))
             {
-                var evaluation = startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow, searchContext.StartPlayer, searchOptions);
+                var evaluation = startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow, searchOptions);
                 return new SearchResult(evaluation, new List<IState> { startState }, 1, 0, true);
             }
 
             if (ShouldStop(startState, searchContext))
             {
                 var stoppedDueToPrune = searchContext.PruneAtMaxDepth && searchContext.MaxDepth == searchContext.CurrentDepth;
-                var evaluation = startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow, searchContext.StartPlayer, searchOptions);
+                var evaluation = startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow, searchOptions);
                 return new SearchResult(evaluation, new List<IState> {startState}, 1, 0, stoppedDueToPrune);
             }
 

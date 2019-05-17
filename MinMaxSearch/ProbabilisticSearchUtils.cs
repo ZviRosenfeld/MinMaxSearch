@@ -23,7 +23,7 @@ namespace MinMaxSearch
         {
             if (!startState.GetNeighbors().Any())
             {
-                var evaluation = startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow, searchContext.StartPlayer, searchOptions);
+                var evaluation = startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow, searchOptions);
                 return new SearchResult(evaluation, new List<IState> {startState}, 1, 0, true);
             }
 

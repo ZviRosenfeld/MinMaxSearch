@@ -8,8 +8,7 @@ namespace MinMaxSearch
     {
         public SearchOptions(List<IPruner> pruners, Func<IState, int, List<IState>, bool> isUnstableState,
             bool preventLoops, bool favorShortPaths, bool dieEarly, double maxScore,
-            double minScore, int maxDegreeOfParallelism, Func<IState, int, List<IState>, double> minAlternateEvaluation, 
-            Func<IState, int, List<IState>, double> maxAlternateEvaluation)
+            double minScore, int maxDegreeOfParallelism, Func<IState, int, List<IState>, double> alternateEvaluation)
         {
             Pruners = pruners;
             IsUnstableState = isUnstableState;
@@ -17,8 +16,7 @@ namespace MinMaxSearch
             DieEarly = dieEarly;
             MaxScore = maxScore;
             MinScore = minScore;
-            MinAlternateEvaluation = minAlternateEvaluation;
-            MaxAlternateEvaluation = maxAlternateEvaluation;
+            AlternateEvaluation = alternateEvaluation;
             MaxDegreeOfParallelism = maxDegreeOfParallelism >= 1
                 ? maxDegreeOfParallelism
                 : throw new BadDegreeOfParallelismException(
@@ -33,9 +31,7 @@ namespace MinMaxSearch
 
         public Func<IState, int, List<IState>, bool> IsUnstableState { get; }
 
-        public Func<IState, int, List<IState>, double> MinAlternateEvaluation { get; }
-
-        public Func<IState, int, List<IState>, double> MaxAlternateEvaluation { get; }
+        public Func<IState, int, List<IState>, double> AlternateEvaluation { get; }
 
         public bool FavorShortPaths { get; }
 

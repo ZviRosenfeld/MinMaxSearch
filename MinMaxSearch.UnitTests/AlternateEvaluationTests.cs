@@ -22,44 +22,36 @@ namespace MinMaxSearch.UnitTests
             probabilisticEndState.SetEvaluationTo(0);
 
             A.CallTo(() => startState.ToString()).Returns(nameof(startState));
+            A.CallTo(() => startState.Turn).Returns(Player.Max);
+            A.CallTo(() => deterministicEndState.Turn).Returns(Player.Min);
+            A.CallTo(() => probabilisticEndState.Turn).Returns(Player.Min);
         }
         
-        [DataRow(Player.Max)]
-        [DataRow(Player.Min)]
         [TestMethod]
-        public void DeterministicStateTest(Player startPlayer)
+        public void DeterministicStateTest()
         {
             startState.SetNeigbor(deterministicEndState);
-            A.CallTo(() => startState.Turn).Returns(startPlayer);
-            A.CallTo(() => deterministicEndState.Turn).Returns(startPlayer.GetReversePlayer());
 
             var engine = new SearchEngine()
             {
-                MaxAlternateEvaluation = (s,d,l) => 10,
-                MinAlternateEvaluation = (s,l,d) => -10
+                AlternateEvaluation = (s,d,l) => 10,
             };
             var evaluation = engine.Search(startState, 2);
 
-            Assert.AreEqual(startPlayer == Player.Max ? 10 : -10, evaluation.Evaluation);
+            Assert.AreEqual(10, evaluation.Evaluation);
         }
-
-        [DataRow(Player.Max)]
-        [DataRow(Player.Min)]
+        
         [TestMethod]
-        public void ProbabilisticStateTest(Player startPlayer)
+        public void ProbabilisticStateTest()
         {
             startState.SetNeigbor(probabilisticEndState);
-            A.CallTo(() => startState.Turn).Returns(startPlayer);
-            A.CallTo(() => probabilisticEndState.Turn).Returns(startPlayer.GetReversePlayer());
-
             var engine = new SearchEngine()
             {
-                MaxAlternateEvaluation = (s, d, l) => 10,
-                MinAlternateEvaluation = (s, l, d) => -10
+                AlternateEvaluation = (s, d, l) => 10,
             };
             var evaluation = engine.Search(startState, 2);
 
-            Assert.AreEqual(startPlayer == Player.Max ? 10 : -10, evaluation.Evaluation);
+            Assert.AreEqual(10, evaluation.Evaluation);
         }
     }
 }
