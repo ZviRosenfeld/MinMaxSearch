@@ -9,9 +9,13 @@ namespace MinMaxSearch.Benckmarking
     {
         /// <summary>
         /// With this method you can simulate a complete game and compare different evaluation-strategies.
-        /// maxAlternateEvaluation will be used to evaluate the board on max's turn in stead of the state's regaler Evaluate method
-        /// minAlternateEvaluation will be used to evaluate the board on min's turn in stead of the state's regaler Evaluate method 
         /// </summary>
+        /// <param name="engine"> The engine to use</param>
+        /// <param name="startState"> The starting sate</param>
+        /// <param name="searchDepth"> How deep should we search</param>
+        /// <param name="maxPayDepth"> After how many moves should we terminate the game if no one won</param>
+        /// <param name="maxAlternateEvaluation"> Will be used to evaluate the board on max's turn in stead of the state's regaler Evaluate method</param>
+        /// <param name="minAlternateEvaluation"> Will be used to evaluate the board on min's turn in stead of the state's regaler Evaluate method</param>
         public static CompetitionResult Compete(this SearchEngine engine, IDeterministicState startState,
             int searchDepth, Func<IState, int, List<IState>, double> maxAlternateEvaluation = null,
             Func<IState, int, List<IState>, double> minAlternateEvaluation = null, int maxPayDepth = int.MaxValue,
@@ -24,10 +28,15 @@ namespace MinMaxSearch.Benckmarking
         }
 
         /// <summary>
-        /// With this method you can simulate a complete game and compare different evaluation-strategies.
-        /// maxAlternateEvaluation will be used to evaluate the board on max's turn in stead of the state's regaler Evaluate method
-        /// minAlternateEvaluation will be used to evaluate the board on min's turn in stead of the state's regaler Evaluate method 
+        /// With this method you can simulate a complete game and compare different search-depth or evaluation-strategies.
         /// </summary>
+        /// <param name="engine"> The engine to use</param>
+        /// <param name="startState"> The starting sate</param>
+        /// <param name="playerMaxSearchDepth"> How deep should max search</param>
+        /// <param name="playerMinSearchDepth"> How deep should min search</param>
+        /// <param name="maxPayDepth"> After how many moves should we terminate the game if no one won</param>
+        /// <param name="maxAlternateEvaluation"> Will be used to evaluate the board on max's turn in stead of the state's regaler Evaluate method</param>
+        /// <param name="minAlternateEvaluation"> Will be used to evaluate the board on min's turn in stead of the state's regaler Evaluate method</param>
         public static CompetitionResult Compete(this SearchEngine engine, IDeterministicState startState,
             int playerMaxSearchDepth, int playerMinSearchDepth, Func<IState, int, List<IState>, double> maxAlternateEvaluation = null,
             Func<IState, int, List<IState>, double> minAlternateEvaluation = null, int maxPayDepth = int.MaxValue,
