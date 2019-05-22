@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using FakeItEasy;
 
 namespace MinMaxSearch.UnitTests
@@ -7,7 +8,7 @@ namespace MinMaxSearch.UnitTests
     {
         public static void SetEvaluationTo(this IState state, double evaluation) =>
             A.CallTo(() => state.Evaluate(A<int>._, A<List<IState>>._)).Returns(evaluation);
-
+        
         public static void SetNeigbors(this IDeterministicState state, IEnumerable<IState> neigbors) =>
             A.CallTo(() => state.GetNeighbors()).Returns(neigbors);
 
@@ -15,6 +16,9 @@ namespace MinMaxSearch.UnitTests
             A.CallTo(() => state.GetNeighbors()).Returns(new []{neigbor});
 
         public static void SetAsEndState(this IDeterministicState state) =>
-            A.CallTo(() => state.GetNeighbors()).Returns(new IState[] {});       
+            A.CallTo(() => state.GetNeighbors()).Returns(new IState[] {});
+
+        public static void SetAsEndState(this IProbabilisticState state) =>
+            A.CallTo(() => state.GetNeighbors()).Returns(new List<Tuple<double, List<IState>>>());
     }
 }

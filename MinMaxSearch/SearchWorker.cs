@@ -16,7 +16,7 @@ namespace MinMaxSearch
             this.searchOptions = searchOptions;
             threadManager = new ThreadManager(searchOptions.MaxDegreeOfParallelism);
             deterministicSearchUtils = new DeterministicSearchUtils(this, searchOptions, threadManager);
-            probabilisticSearchUtils = new ProbabilisticSearchUtils(threadManager, deterministicSearchUtils);
+            probabilisticSearchUtils = new ProbabilisticSearchUtils(threadManager, deterministicSearchUtils, searchOptions);
         }
 
         public SearchResult Evaluate(IState startState, SearchContext searchContext)
@@ -25,12 +25,16 @@ namespace MinMaxSearch
                 throw new EmptyPlayerException(nameof(startState.Turn) + " can't be " + nameof(Player.Empty));
 
             if (searchOptions.Pruners.Any(pruner => pruner.ShouldPrune(startState, searchContext.CurrentDepth, searchContext.StatesUpTillNow)))
-                return new SearchResult(startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow), new List<IState> { startState }, 1, 0, true);
+            {
+                var evaluation = startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow, searchOptions);
+                return new SearchResult(evaluation, new List<IState> { startState }, 1, 0, true);
+            }
 
             if (ShouldStop(startState, searchContext))
             {
                 var stoppedDueToPrune = searchContext.PruneAtMaxDepth && searchContext.MaxDepth == searchContext.CurrentDepth;
-                return new SearchResult(startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow), new List<IState> {startState}, 1, 0, stoppedDueToPrune);
+                var evaluation = startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow, searchOptions);
+                return new SearchResult(evaluation, new List<IState> {startState}, 1, 0, stoppedDueToPrune);
             }
 
             if (startState is IDeterministicState deterministicState)

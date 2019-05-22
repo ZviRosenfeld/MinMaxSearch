@@ -25,5 +25,6 @@ namespace MinMaxSearch
         public CancellationToken CancellationToken { get; set; }
         public List<IState> StatesUpTillNow { get; set; }
         public bool PruneAtMaxDepth { get; set; }
+        public Player StartPlayer { get; }
     }
 }

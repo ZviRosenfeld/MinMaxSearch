@@ -2,9 +2,9 @@
 
 namespace MinMaxSearch
 {
-    class ProbablisticStateWrapper : IDeterministicState
+    public class ProbablisticStateWrapper : IDeterministicState
     {
-        private IEnumerable<IState> neighbors;
+        private readonly IEnumerable<IState> neighbors;
 
         public IProbabilisticState InnerState { get; }
 
@@ -14,9 +14,11 @@ namespace MinMaxSearch
             InnerState = innerState;
         }
 
-        public double Evaluate(int depth, List<IState> passedThroughStates) => InnerState.Evaluate(depth, passedThroughStates);
+        public double Evaluate(int depth, List<IState> passedThroughStates) =>
+            InnerState.Evaluate(depth, passedThroughStates);
 
         public Player Turn => InnerState.Turn;
+
         public IEnumerable<IState> GetNeighbors() => neighbors;
     }
 }

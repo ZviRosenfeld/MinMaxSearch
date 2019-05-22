@@ -2,11 +2,8 @@
 
 namespace MinMaxSearch
 {
-    public static class Utils
+    static class SearchUtils
     {
-        public static Player GetReversePlayer(this Player player) =>
-            player == Player.Max ? Player.Min : Player.Max;
-
         public static SearchResult CloneAndAddStateToTop(this SearchResult searchResult, IState state, int leaves, int internalNodes, bool allChildrenAreDeadEnds)
         {
             var sequance = new List<IState>(searchResult.StateSequence) {state};
@@ -18,9 +15,15 @@ namespace MinMaxSearch
             searchContext.StatesUpTillNow, pruneAtMaxDepth: searchContext.PruneAtMaxDepth);
 
         public static SearchContext CloneAndAddState(this SearchContext searchContext, IState newState) =>
-            new SearchContext(searchContext.MaxDepth, searchContext.CurrentDepth + 1, searchContext.CancellationToken,
-                new List<IState>(searchContext.StatesUpTillNow) {newState}, searchContext.Alpha, searchContext.Bata,
-                searchContext.PruneAtMaxDepth);
+            new SearchContext(searchContext.MaxDepth, searchContext.CurrentDepth + 1, searchContext.CancellationToken, 
+                new List<IState>(searchContext.StatesUpTillNow) {newState}, searchContext.Alpha, 
+                searchContext.Bata, searchContext.PruneAtMaxDepth);
 
+        public static double Evaluate(this IState state, int depth, List<IState> passedThroughStates,
+            SearchOptions searchOptions)
+        {
+            return searchOptions.AlternateEvaluation?.Invoke(state, depth, passedThroughStates) ??
+                   state.Evaluate(depth, passedThroughStates);
+        }
     }
 }

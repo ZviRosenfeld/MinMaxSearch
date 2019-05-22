@@ -10,18 +10,23 @@ namespace MinMaxSearch
     {
         private readonly ThreadManager threadManager;
         private readonly DeterministicSearchUtils deterministicSearchUtils;
+        private readonly SearchOptions searchOptions;
 
-        public ProbabilisticSearchUtils(ThreadManager threadManager, DeterministicSearchUtils deterministicSearchUtils)
+        public ProbabilisticSearchUtils(ThreadManager threadManager, DeterministicSearchUtils deterministicSearchUtils, SearchOptions searchOptions)
         {
             this.deterministicSearchUtils = deterministicSearchUtils;
+            this.searchOptions = searchOptions;
             this.threadManager = threadManager;
         }
 
         public SearchResult EvaluateChildren(IProbabilisticState startState, SearchContext searchContext)
         {
             if (!startState.GetNeighbors().Any())
-                return new SearchResult(startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow), new List<IState> {startState}, 1, 0, true);
-            
+            {
+                var evaluation = startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow, searchOptions);
+                return new SearchResult(evaluation, new List<IState> {startState}, 1, 0, true);
+            }
+
             var storedStates = new ConcurrentDictionary<IState, double>();
             var results = new List<Tuple<double, Task<SearchResult>>>();
             foreach (var neighbor in startState.GetNeighbors())
