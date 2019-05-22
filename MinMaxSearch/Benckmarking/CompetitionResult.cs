@@ -7,12 +7,14 @@ namespace MinMaxSearch.Benckmarking
     public class CompetitionResult
     {
         public CompetitionResult(int gameDepth, List<IState> states, TimeSpan maxTotalTime,
-            TimeSpan minTotalTime)
+            TimeSpan minTotalTime, TimeSpan maxLongestSearch, TimeSpan minLongestSearch)
         {
             GameDepth = gameDepth;
             States = states;
             MaxTotalTime = maxTotalTime;
             MinTotalTime = minTotalTime;
+            MaxLongestSearch = maxLongestSearch;
+            MinLongestSearch = minLongestSearch;
         }
 
         public IState FinalState => States.Last();
@@ -24,5 +26,9 @@ namespace MinMaxSearch.Benckmarking
         public TimeSpan MaxTotalTime { get; }
 
         public TimeSpan MinTotalTime { get; }
+
+        public TimeSpan MaxLongestSearch { get;  }
+
+        public TimeSpan MinLongestSearch { get; }
     }
 }

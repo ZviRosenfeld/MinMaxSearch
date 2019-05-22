@@ -42,9 +42,6 @@ namespace MinMaxSearch.Benckmarking
             Func<IState, int, List<IState>, double> minAlternateEvaluation = null, int maxPayDepth = int.MaxValue,
             CancellationToken? cancellationToken = null)
         {
-            if (maxAlternateEvaluation == null && minAlternateEvaluation == null)
-                throw new ArgumentException($"At least one of {nameof(maxAlternateEvaluation)} or {nameof(minAlternateEvaluation)} shouldn't be null");
-
             return Compete(engine, new SearchEngine(engine), startState, playerMaxSearchDepth, playerMinSearchDepth, maxPayDepth, maxAlternateEvaluation, minAlternateEvaluation, cancellationToken);
         }
 
@@ -68,10 +65,8 @@ namespace MinMaxSearch.Benckmarking
             minEngine.AlternateEvaluation = minAlternateEvaluation;
 
             var currentState = startState;
-            var states = new List<IState>();
-            var depth = 0;
-            TimeSpan maxTime = TimeSpan.Zero, minTime = TimeSpan.Zero;
-            while (currentState != null && ContainsNeigbors(currentState) && depth < maxPayDepth)
+            var resultFactory = new CompetitionResultFactory();
+            for (int i = 0; ContainsNeigbors(currentState) && i < maxPayDepth; i++)
             {
                 if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
                     break;
@@ -81,18 +76,13 @@ namespace MinMaxSearch.Benckmarking
                     ? maxEngine.Search(currentState, playerMaxSearchDepth, cancellationToken ?? CancellationToken.None)
                     : minEngine.Search(currentState, playerMinSearchDepth, cancellationToken ?? CancellationToken.None);
                 var runTime = DateTime.Now - startTime;
-                if (currentState.Turn == Player.Max)
-                    maxTime += runTime;
-                else
-                    minTime += runTime;
-
-                states.Add(searchResult.NextMove);
-                depth++;
+                resultFactory.AddState(searchResult.NextMove);
+                resultFactory.AddTime(runTime, currentState.Turn);
 
                 currentState = GetNextState(searchResult.NextMove);
             }
 
-            return new CompetitionResult(depth, states, maxTime, minTime);
+            return resultFactory.GetCompetitionResult();
         }
 
         private static IDeterministicState GetNextState(IState state)

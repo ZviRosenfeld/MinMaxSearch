@@ -136,7 +136,9 @@ Pruners can be implemented by implementing the IPruner interface. Then, the Shou
 ## Benchmarking
 An optimization that will improve one search can hurt another. That's why benchmarking is so impotent. It lets you customize the search to best suite your needs.
 
-MinMaxSearch contains two class that can help you with benchmarking. 
+MinMaxSearch contains two class that can help you with benchmarking:
+
+### BenchmarkManager
 
 ```csharp
 namespace MinMaxSearch.Benckmarking
@@ -154,7 +156,9 @@ namespace MinMaxSearch.Benckmarking
 }
 ```
 
-CompetitionManager can play a complete game in which each player can be using a different engines/search-depths/evaluation-strategies.
+### CompetitionManager
+
+CompetitionManager can play a complete game in which the players can be using a different engines/search-depths/evaluation-strategies.
 CompetitionManager will return statistics on the game, including which player won, and how long each player took searching.
 
 ```CSharp
