@@ -154,6 +154,9 @@ namespace MinMaxSearch.Benckmarking
 }
 ```
 
+CompetitionManager can play a complete game in which each player can be using a different engines/search-depths/evaluation-strategies.
+CompetitionManager will return statistics on the game, including which player won, and how long each player took searching.
+
 ```CSharp
 namespace MinMaxSearch.Benckmarking
 {
@@ -174,7 +177,7 @@ namespace MinMaxSearch.Benckmarking
             CancellationToken? cancellationToken = null)
         {
             ...
-		}
+	}
 
         /// <summary>
         /// With this method you can simulate a complete game and compare different search-depth or evaluation-strategies.
@@ -192,7 +195,7 @@ namespace MinMaxSearch.Benckmarking
             CancellationToken? cancellationToken = null)
         {
             ...
-		}
+	}
 
         /// <summary>
         /// With this method you can simulate a complete game and compare different engines, search-depths or evaluation-strategies.
@@ -211,8 +214,7 @@ namespace MinMaxSearch.Benckmarking
             Func<IState, int, List<IState>, double> minAlternateEvaluation = null, CancellationToken? cancellationToken = null)
         {
             ...
-            }
-		}
-	}
+        }
+    }
 }
 ```
