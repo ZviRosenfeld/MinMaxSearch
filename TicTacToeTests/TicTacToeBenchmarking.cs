@@ -28,8 +28,10 @@ namespace TicTacToeTests
                 { Player.Empty, Player.Empty, Player.Empty},
             }, Player.Max);
 
-            var results = engine.Benchmark(startState, 10);
-            Console.WriteLine(results.ToString());
+            var results = engine.Search(startState, 10);
+            Console.WriteLine("Time: " + results.SearchTime);
+            Console.WriteLine("Leaves: " + results.Leaves);
+            Console.WriteLine("InternalNodes: " + results.InternalNodes);
         }
     }
 }

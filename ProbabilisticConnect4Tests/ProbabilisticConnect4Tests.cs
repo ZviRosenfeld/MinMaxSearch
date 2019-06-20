@@ -78,8 +78,10 @@ namespace ProbabilisticConnect4Tests
             var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism);
             var startState = new StartState(new Connect4State(Connect4TestUtils.GetEmptyBoard(), Player.Max));
 
-            var results = engine.Benchmark(startState, 7);
-            Console.WriteLine(results.ToString());
+            var results = engine.Search(startState, 7);
+            Console.WriteLine("Time: " + results.SearchTime);
+            Console.WriteLine("Leaves: " + results.Leaves);
+            Console.WriteLine("InternalNodes: " + results.InternalNodes);
         }
     }
 }

@@ -70,14 +70,13 @@ namespace MinMaxSearch.Benckmarking
             {
                 if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
                     break;
-
-                var startTime = DateTime.Now;
+                
                 var searchResult = currentState.Turn == Player.Max
                     ? maxEngine.Search(currentState, playerMaxSearchDepth, cancellationToken ?? CancellationToken.None)
                     : minEngine.Search(currentState, playerMinSearchDepth, cancellationToken ?? CancellationToken.None);
-                var runTime = DateTime.Now - startTime;
+                
                 resultFactory.AddState(searchResult.NextMove);
-                resultFactory.AddTime(runTime, currentState.Turn);
+                resultFactory.AddTime(searchResult.SearchTime, currentState.Turn);
 
                 currentState = GetNextState(searchResult.NextMove);
             }

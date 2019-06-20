@@ -27,7 +27,7 @@ namespace MinMaxSearch
             if (searchOptions.Pruners.Any(pruner => pruner.ShouldPrune(startState, searchContext.CurrentDepth, searchContext.StatesUpTillNow)))
             {
                 var evaluation = startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow, searchOptions);
-                return new SearchResult(evaluation, new List<IState> { startState }, 1, 0, true);
+                return new SearchResult(evaluation, startState);
             }
 
             if (ShouldStop(startState, searchContext))

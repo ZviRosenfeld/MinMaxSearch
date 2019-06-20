@@ -24,7 +24,7 @@ namespace MinMaxSearch
             if (!startState.GetNeighbors().Any())
             {
                 var evaluation = startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow, searchOptions);
-                return new SearchResult(evaluation, new List<IState> {startState}, 1, 0, true);
+                return new SearchResult(evaluation, startState);
             }
 
             var pruned = false;
@@ -76,7 +76,7 @@ namespace MinMaxSearch
             IDictionary<IState, double> storedStates, IState state)
         {
             var taskResult = storedStates != null && storedStates.ContainsKey(state)
-                ? Task.FromResult(new SearchResult(storedStates[state], new List<IState> { state }, 1, 0, true))
+                ? Task.FromResult(new SearchResult(storedStates[state], state))
                 : threadManager.Invoke(() =>
                 {
                     var actualStartState = startState is ProbablisticStateWrapper wrapper

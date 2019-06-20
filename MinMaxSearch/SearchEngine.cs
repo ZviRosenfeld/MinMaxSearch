@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -79,10 +80,13 @@ namespace MinMaxSearch
             
             var searchWorker = new SearchWorker(CreateSearchOptions());
             var searchContext = new SearchContext(maxDepth, 0, cancellationToken);
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
             var evaluation = searchWorker.Evaluate(startState, searchContext);
+            stopwatch.Stop();
             evaluation.StateSequence.Reverse();
             evaluation.StateSequence.RemoveAt(0); // Removing the top node will make the result "nicer"
-            return evaluation;
+            return new SearchResult(evaluation, stopwatch.Elapsed);
         }
         
         private SearchOptions CreateSearchOptions() => new SearchOptions(pruners, IsUnstableState, PreventLoops,
@@ -96,6 +100,9 @@ namespace MinMaxSearch
             if (startDepth >= maxDepth)
                 throw new Exception($"{nameof(startDepth)} (== {startDepth}) must be bigger than {nameof(maxDepth)} ( == {maxDepth})");
 
+            var stopewatch = new Stopwatch();
+            stopewatch.Start();
+
             SearchResult bestResultSoFar = null;
             for (int i = startDepth; i < maxDepth; i++)
             { 
@@ -107,7 +114,9 @@ namespace MinMaxSearch
                 if (result.AllChildrenAreDeadEnds)
                     break; // No point searching any deeper
             }
-            return bestResultSoFar;
+            stopewatch.Stop();
+
+            return new SearchResult(bestResultSoFar, stopewatch.Elapsed);
         }
     }
 }

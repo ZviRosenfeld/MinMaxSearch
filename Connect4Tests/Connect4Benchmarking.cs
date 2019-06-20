@@ -25,8 +25,10 @@ namespace Connect4Tests
             var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism);
             var startState = new Connect4State(Connect4TestUtils.GetEmptyBoard(), Player.Max);
 
-            var results = engine.Benchmark(startState, SearchDepth);
-            Console.WriteLine(results.ToString());
+            var results = engine.Search(startState, SearchDepth);
+            Console.WriteLine("Time: " + results.SearchTime);
+            Console.WriteLine("Leaves: " + results.Leaves);
+            Console.WriteLine("InternalNodes: " + results.InternalNodes);
         }
     }
 }
