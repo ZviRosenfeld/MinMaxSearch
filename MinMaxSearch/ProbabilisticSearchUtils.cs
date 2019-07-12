@@ -21,7 +21,8 @@ namespace MinMaxSearch
 
         public SearchResult EvaluateChildren(IProbabilisticState startState, SearchContext searchContext)
         {
-            if (!startState.GetNeighbors().Any())
+            var neighbors = startState.GetNeighbors().ToArray();
+            if (!neighbors.Any())
             {
                 var evaluation = startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow, searchOptions);
                 return new SearchResult(evaluation, startState);
@@ -29,7 +30,7 @@ namespace MinMaxSearch
 
             var storedStates = new ConcurrentDictionary<IState, double>();
             var results = new List<Tuple<double, Task<SearchResult>>>();
-            foreach (var neighbor in startState.GetNeighbors())
+            foreach (var neighbor in neighbors)
             {
                 var wrappedState = new ProbablisticStateWrapper(neighbor.Item2, startState);
                 var searchResult = threadManager.Invoke(() =>

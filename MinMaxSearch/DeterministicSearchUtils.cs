@@ -21,7 +21,8 @@ namespace MinMaxSearch
         public SearchResult EvaluateChildren(IDeterministicState startState, SearchContext searchContext,
             IDictionary<IState, double> storedStates = null)
         {
-            if (!startState.GetNeighbors().Any())
+            var neighbors = startState.GetNeighbors().ToArray();
+            if (!neighbors.Any())
             {
                 var evaluation = startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow, searchOptions);
                 return new SearchResult(evaluation, startState);
@@ -32,7 +33,7 @@ namespace MinMaxSearch
             var results = new List<Task<SearchResult>>();
             var cancellationSource = CancellationTokenSource.CreateLinkedTokenSource(searchContext.CancellationToken);
             searchContext.CancellationToken = cancellationSource.Token;
-            foreach (var state in startState.GetNeighbors())
+            foreach (var state in neighbors)
             {
                 var taskResult = Evaluate(startState, searchContext, storedStates, state);
                 results.Add(taskResult);
