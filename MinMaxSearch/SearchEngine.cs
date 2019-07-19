@@ -97,9 +97,12 @@ namespace MinMaxSearch
 
         private IThreadManager GetThreadManager()
         {
+            if (ParallelismMode == ParallelismMode.FirstLevelOnly)
+                return new FirstLevelOnlyThreadManager();
+
             if (ParallelismMode == ParallelismMode.NonParallelism)
                 return new ThreadManager(1);
-
+            
             return new ThreadManager(maxDegreeOfParallelism);
         }
 
