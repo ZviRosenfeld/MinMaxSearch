@@ -40,11 +40,12 @@ namespace MinMaxSearch.UnitTests
             startState.SetNeigbors(new List<IState> {probabilisticState1, probabilisticState2});  
         }
 
-        [DataRow(1)]
-        [DataRow(2)]
-        [DataRow(8)]
+        [DataRow(1, ParallelismMode.TotalParallelism)]
+        [DataRow(2, ParallelismMode.TotalParallelism)]
+        [DataRow(8, ParallelismMode.TotalParallelism)]
+        [DataRow(1, ParallelismMode.FirstLevelOnly)]
         [TestMethod]
-        public void Search_TowProbabilisticStates_ReturnBetterState(int degreeOfParallelism)
+        public void Search_TowProbabilisticStates_ReturnBetterState(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
             A.CallTo(() => probabilisticState1.GetNeighbors()).Returns(new List<Tuple<double, List<IState>>>()
             {
@@ -58,7 +59,7 @@ namespace MinMaxSearch.UnitTests
                 new Tuple<double, List<IState>>(0.5, new List<IState> {evaluation2State}),
             });
 
-            var searchEngine = new SearchEngine {MaxDegreeOfParallelism = degreeOfParallelism};
+            var searchEngine = new SearchEngine {MaxDegreeOfParallelism = degreeOfParallelism, ParallelismMode = parallelismMode};
             var searchResult = searchEngine.Search(startState, 10);
 
             Assert.AreEqual(probabilisticState2, searchResult.NextMove, $"Should have found {nameof(probabilisticState2)} as the nextState");
@@ -82,11 +83,12 @@ namespace MinMaxSearch.UnitTests
             Assert.AreEqual(2, searchResult.Evaluation);
         }
 
-        [DataRow(1)]
-        [DataRow(2)]
-        [DataRow(8)]
+        [DataRow(1, ParallelismMode.TotalParallelism)]
+        [DataRow(2, ParallelismMode.TotalParallelism)]
+        [DataRow(8, ParallelismMode.TotalParallelism)]
+        [DataRow(1, ParallelismMode.FirstLevelOnly)]
         [TestMethod]
-        public void Search_CheckThatRecordPassThroughStatesIsWorking(int degreeOfParallelism)
+        public void Search_CheckThatRecordPassThroughStatesIsWorking(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
             A.CallTo(() => evaluation2State.Evaluate(A<int>._, A<List<IState>>.That.IsEmpty()))
                 .Throws(new Exception("passedStats list should have been empty"));
@@ -103,7 +105,7 @@ namespace MinMaxSearch.UnitTests
                 new Tuple<double, List<IState>>(1, new List<IState> {evaluation2State, evaluationNagitive2State})
             });
 
-            var searchEngine = new SearchEngine { MaxDegreeOfParallelism = degreeOfParallelism };
+            var searchEngine = new SearchEngine { MaxDegreeOfParallelism = degreeOfParallelism, ParallelismMode = parallelismMode};
             searchEngine.Search(startState, 5);
         }
     }

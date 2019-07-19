@@ -17,24 +17,26 @@ namespace MinMaxSearch.UnitTests
             searchEngine.IterativeSearch(new IncreasingNumberState(1, Player.Max), 2, 2, CancellationToken.None);
         }
 
-        [DataRow(1)]
-        [DataRow(2)]
-        [DataRow(8)]
+        [DataRow(1, ParallelismMode.TotalParallelism)]
+        [DataRow(2, ParallelismMode.TotalParallelism)]
+        [DataRow(8, ParallelismMode.TotalParallelism)]
+        [DataRow(1, ParallelismMode.FirstLevelOnly)]
         [TestMethod]
-        public void IterativeSearch_SearchCanceldBeforeFirstSearchFinished_DontReturnNullResult(int degreeOfParallelism)
+        public void IterativeSearch_SearchCanceldBeforeFirstSearchFinished_DontReturnNullResult(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
             var cancellationSource = new CancellationTokenSource();
             cancellationSource.Cancel();
-            var searchEngine = new SearchEngine {MaxDegreeOfParallelism = degreeOfParallelism};
+            var searchEngine = new SearchEngine {MaxDegreeOfParallelism = degreeOfParallelism, ParallelismMode = parallelismMode};
             var result = searchEngine.IterativeSearch(new IncreasingNumberState(1, Player.Max), 1, 2, cancellationSource.Token);
             Assert.IsNotNull(result, "We should never return a null result");
         }
 
-        [DataRow(1)]
-        [DataRow(2)]
-        [DataRow(8)]
+        [DataRow(1, ParallelismMode.TotalParallelism)]
+        [DataRow(2, ParallelismMode.TotalParallelism)]
+        [DataRow(8, ParallelismMode.TotalParallelism)]
+        [DataRow(1, ParallelismMode.FirstLevelOnly)]
         [TestMethod]
-        public void IterativeSearch_SearchCancled_WeDontContinueLookingAfterSearchCancled(int degreeOfParallelism)
+        public void IterativeSearch_SearchCancled_WeDontContinueLookingAfterSearchCancled(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
             var cancellationSource = new CancellationTokenSource(100);
             var searchEngine = new SearchEngine() {MaxDegreeOfParallelism = degreeOfParallelism};
@@ -45,13 +47,14 @@ namespace MinMaxSearch.UnitTests
             Assert.AreEqual(4, result.Result.Evaluation, "Evaluation should have been 3; found " + result.Result.Evaluation);
         }
 
-        [DataRow(1)]
-        [DataRow(2)]
-        [DataRow(8)]
+        [DataRow(1, ParallelismMode.TotalParallelism)]
+        [DataRow(2, ParallelismMode.TotalParallelism)]
+        [DataRow(8, ParallelismMode.TotalParallelism)]
+        [DataRow(1, ParallelismMode.FirstLevelOnly)]
         [TestMethod]
-        public void IterativeSearch_TimeoutSet_WeDontContinueLookingAfterTimeout(int degreeOfParallelism)
+        public void IterativeSearch_TimeoutSet_WeDontContinueLookingAfterTimeout(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
-            var searchEngine = new SearchEngine() { MaxDegreeOfParallelism = degreeOfParallelism };
+            var searchEngine = new SearchEngine() { MaxDegreeOfParallelism = degreeOfParallelism, ParallelismMode = parallelismMode};
             var result = Task.Run(() => searchEngine.IterativeSearch(new SlowState(0), 1, int.MaxValue, TimeSpan.FromMilliseconds(100)));
             
             Assert.IsFalse(result.IsCompleted, "We shouldn't have stopped running yet");

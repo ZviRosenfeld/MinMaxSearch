@@ -20,7 +20,7 @@ namespace TicTacToeTests
         private void BenchmarkWithDegreeOfParallelism(int degreeOfParallelism)
         {
             Console.WriteLine("Running with degreeOfParallelism: " + degreeOfParallelism);
-            var engine = TicTacToeBassicTests.GetSearchEngine(degreeOfParallelism);
+            var engine = TicTacToeBassicTests.GetSearchEngine(degreeOfParallelism, ParallelismMode.FirstLevelOnly);
             var startState = new TicTacToeState(new[,]
             {
                 { Player.Empty, Player.Empty, Player.Empty},

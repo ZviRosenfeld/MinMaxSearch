@@ -22,7 +22,7 @@ namespace Connect4Tests
         private void BenchmarkWithDegreeOfParallelism(int degreeOfParallelism)
         {
             Console.WriteLine("Running with degreeOfParallelism: " + degreeOfParallelism);
-            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism);
+            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, ParallelismMode.FirstLevelOnly);
             var startState = new Connect4State(Connect4TestUtils.GetEmptyBoard(), Player.Max);
 
             var results = engine.Search(startState, SearchDepth);
