@@ -117,8 +117,8 @@ Note that this will only work if Equals is implement in a meaningful way on your
 If true, the algorithm will favor short solutions over long solutions when they both result in the same score.
 If this option is off, you may experience seemingly weird behavior. Say the algorithm sees that Min can set a trap that will end in Max's defeat in six moves. Without favoring short paths, the algorithm might decide to "give up", causing Max to perform random moves, and possibly lose much sooner - even though its opponent may not have noticed the trap.
 
-**MaxDegreeOfParallelism:**
-Note that a higher degree of parallelism doesn't necessarily equal a faster search. You should probably do some benchmarking to find the degree of parallelism best suited for your problem.
+**ParallelismMode**
+There are 3 ParallelismMode: FirstLevelOnly, which is the recommended mode and normally yeilds the fastest searches. In addition, there're NonParallelism and TotalParallelism modes. In the TotalParallelism mode you can set the degree of parallelisem using the MaxDegreeOfParallelism field.
 
 **DieEarly:**
 If this option is set to true, the algorithm will rerun as soon as it finds a score bigger then SearchEngine.MaxScore for Max or SearchEngine.MinScore for Min.

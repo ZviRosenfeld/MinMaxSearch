@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace MinMaxSearch.ThreadManagment
 {
-    class FirstLevelOnlyThreadManager : IThreadManager
+    public class FirstLevelOnlyThreadManager : IThreadManager
     {
         public Task<T> Invoke<T>(Func<T> func, int depth)
         {

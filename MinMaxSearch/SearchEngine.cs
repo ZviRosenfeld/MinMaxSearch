@@ -58,6 +58,10 @@ namespace MinMaxSearch
         public double MinScore { get; set; } = double.MinValue;
 
         private int maxDegreeOfParallelism = 1;
+
+        /// <summary>
+        /// Note that this will only have an effect if ParallelismMode is set to TotalParallelism
+        /// </summary>
         public int MaxDegreeOfParallelism
         {
             get => maxDegreeOfParallelism;
