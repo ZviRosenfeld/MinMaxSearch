@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MinMaxSearch.Pruners;
+using MinMaxSearch.ThreadManagment;
 
 namespace MinMaxSearch
 {
@@ -65,6 +66,8 @@ namespace MinMaxSearch
                 : throw new BadDegreeOfParallelismException("DegreeOfParallelism must be at least one. Tried to set it to " + maxDegreeOfParallelism);
         }
 
+        public ParallelismMode ParallelismMode { get; set; } = ParallelismMode.FirstLevelOnly;
+
         public Func<IState, int, List<IState>, double> AlternateEvaluation { get; set; }
 
         public SearchResult Search(IDeterministicState startState, int maxDepth) =>
@@ -78,7 +81,7 @@ namespace MinMaxSearch
             if (!startState.GetNeighbors().Any())
                 throw new NoNeighborsException("start state has no neighbors " + startState);
             
-            var searchWorker = new SearchWorker(CreateSearchOptions());
+            var searchWorker = new SearchWorker(CreateSearchOptions(), GetThreadManager());
             var searchContext = new SearchContext(maxDepth, 0, cancellationToken);
             var stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -90,7 +93,15 @@ namespace MinMaxSearch
         }
         
         private SearchOptions CreateSearchOptions() => new SearchOptions(pruners, IsUnstableState, PreventLoops,
-            FavorShortPaths, DieEarly, MaxScore, MinScore, MaxDegreeOfParallelism, AlternateEvaluation);
+            FavorShortPaths, DieEarly, MaxScore, MinScore, AlternateEvaluation);
+
+        private IThreadManager GetThreadManager()
+        {
+            if (ParallelismMode == ParallelismMode.NonParallelism)
+                return new ThreadManager(1);
+
+            return new ThreadManager(maxDegreeOfParallelism);
+        }
 
         public SearchResult IterativeSearch(IDeterministicState startState, int startDepth, int maxDepth, TimeSpan timeout) =>
             IterativeSearch(startState, startDepth, maxDepth, new CancellationTokenSource(timeout).Token);

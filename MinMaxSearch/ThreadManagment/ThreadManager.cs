@@ -2,9 +2,9 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MinMaxSearch
+namespace MinMaxSearch.ThreadManagment
 {
-    public class ThreadManager
+    public class ThreadManager : IThreadManager
     {
         private readonly object threadLock = new object();
         private int threadsRunning = 1;
@@ -15,7 +15,7 @@ namespace MinMaxSearch
             this.maxDegreeOfParallelism = maxDegreeOfParallelism;
         }
 
-        public Task<T> Invoke<T>(Func<T> func)
+        public Task<T> Invoke<T>(Func<T> func, int depth)
         {
             bool startNewThread;
             lock (threadLock)

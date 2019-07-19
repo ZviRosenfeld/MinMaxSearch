@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using MinMaxSearch.ThreadManagment;
 
 namespace MinMaxSearch
 {
@@ -9,9 +10,9 @@ namespace MinMaxSearch
     {
         private readonly SearchOptions searchOptions;
         private readonly SearchWorker searchWorker;
-        private readonly ThreadManager threadManager;
+        private readonly IThreadManager threadManager;
 
-        public DeterministicSearchUtils(SearchWorker searchWorker, SearchOptions searchOptions, ThreadManager threadManager)
+        public DeterministicSearchUtils(SearchWorker searchWorker, SearchOptions searchOptions, IThreadManager threadManager)
         {
             this.searchWorker = searchWorker;
             this.searchOptions = searchOptions;
@@ -84,7 +85,7 @@ namespace MinMaxSearch
                         ? (IState) wrapper.InnerState
                         : startState;
                     return searchWorker.Evaluate(state, searchContext.CloneAndAddState(actualStartState));
-                });
+                }, searchContext.CurrentDepth);
             return taskResult;
         }
 
