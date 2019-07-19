@@ -24,41 +24,47 @@ namespace MinMaxSearch.UnitTests
 
             for (int i = 0; i < 3; i++)
                 results.Add(manager.Invoke(slowAction));
+            manager.Invoke(() => 1).Wait();
 
             foreach (var result in results)
                 Assert.IsTrue(result.IsCompleted, "All tasks should have finished");
         }
 
         [TestMethod]
-        public void Invoke_MaxDegreeOfParallelismIsFour_RunParallel()
+        public void Invoke_MaxDegreeOfParallelismIsGreaterThenThreads_RunAllThreadsParallel()
         {
-            const int degreeOfParallelism = 5;
+            const int degreeOfParallelism = 10;
             var results = new List<Task<int>>();
             var manager = new ThreadManager(degreeOfParallelism);
 
-            for (int i = 0; i < degreeOfParallelism - 1; i++)
+            for (int i = 0; i < 3; i++)
                 results.Add(manager.Invoke(slowAction));
+            manager.Invoke(() => 1).Wait();
 
             foreach (var result in results)
                 Assert.IsFalse(result.IsCompleted, "The tasks shouldn't have finished yet");
         }
 
         [DataRow(2)]
-        [DataRow(8)]
+        [DataRow(4)]
         [TestMethod]
         public void Invoke_CheckThatOnlyMaxDegreeOfParallelismThreadsRunParallel(int degreeOfParallelism)
         {
-            var results = new List<Task<int>>();
+            var startedThreads = new List<int>();
             var manager = new ThreadManager(degreeOfParallelism);
 
             Task.Run(() =>
             {
                 for (int i = 0; i < 50; i++)
-                    results.Add(manager.Invoke(slowAction));
+                    manager.Invoke(() =>
+                    {
+                        startedThreads.Add(1);
+                        return slowAction();
+                    });
             });
             Thread.Sleep(100);
 
-            Assert.AreEqual(degreeOfParallelism - 1, results.Count);
+            Assert.AreEqual(degreeOfParallelism, startedThreads.Count);
         }
     }
 }
