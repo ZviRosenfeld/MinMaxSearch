@@ -21,11 +21,12 @@ namespace MinMaxSearch
             lock (threadLock)
             {
                 startNewThread = threadsRunning < maxDegreeOfParallelism;
+                if (startNewThread)
+                    Interlocked.Increment(ref threadsRunning);
             }
 
             if (startNewThread)
             {
-                Interlocked.Increment(ref threadsRunning);
                 return Task.Run(() =>
                 {
                     try
