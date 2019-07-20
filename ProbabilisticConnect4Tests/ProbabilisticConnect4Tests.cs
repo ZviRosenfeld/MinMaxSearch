@@ -69,15 +69,15 @@ namespace ProbabilisticConnect4Tests
         [TestCategory("Benchmarking")]
         public void BenchmarkProbabilisticConnect4()
         {
-            BenchmarkWithDegreeOfParallelism(1);
-            BenchmarkWithDegreeOfParallelism(2);
-            BenchmarkWithDegreeOfParallelism(8);
+            BenchmarkWithDegreeOfParallelism(1, ParallelismMode.NonParallelism);
+            BenchmarkWithDegreeOfParallelism(1, ParallelismMode.FirstLevelOnly);
+            BenchmarkWithDegreeOfParallelism(4, ParallelismMode.TotalParallelism);
         }
 
-        private void BenchmarkWithDegreeOfParallelism(int degreeOfParallelism)
+        private void BenchmarkWithDegreeOfParallelism(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
-            Console.WriteLine("Running with degreeOfParallelism: " + degreeOfParallelism);
-            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, ParallelismMode.FirstLevelOnly);
+            Console.WriteLine("Running with degreeOfParallelism: " + degreeOfParallelism + ", Mode: " + parallelismMode);
+            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode);
             var startState = new StartState(new Connect4State(Connect4TestUtils.GetEmptyBoard(), Player.Max));
 
             var results = engine.Search(startState, 7);
