@@ -39,7 +39,7 @@ namespace TicTacToeTests
         public void Compete_GameEndsAtMaxDepth()
         {
             var engine = TicTacToeBassicTests.GetSearchEngine(1, ParallelismMode.FirstLevelOnly);
-            var competitionResult = engine.Compete(TicTacToeBassicTests.GetEmptyTicTacToeState(), 2, 2, maxPayDepth: 2);
+            var competitionResult = engine.Compete(TicTacToeBassicTests.GetEmptyTicTacToeState(), 2, 2, maxPlayDepth: 2);
 
             Assert.AreEqual(2, competitionResult.GameDepth);
             Assert.AreEqual(2, competitionResult.States.Count);

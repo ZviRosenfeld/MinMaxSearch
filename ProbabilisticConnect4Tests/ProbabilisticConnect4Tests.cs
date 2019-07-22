@@ -53,6 +53,7 @@ namespace ProbabilisticConnect4Tests
             Assert.AreEqual(Player.Max, newState.Board[0, 4], "Min didn't block the more likely win");
         }
 
+        // Since this runs a probabilistic game, there is a certain chance that the test will fail even if everything is working fine
         [TestMethod]
         public void TestCompeteWorksWithProbabilisticStates()
         {

@@ -118,7 +118,9 @@ If true, the algorithm will favor short solutions over long solutions when they 
 If this option is off, you may experience seemingly weird behavior. Say the algorithm sees that Min can set a trap that will end in Max's defeat in six moves. Without favoring short paths, the algorithm might decide to "give up", causing Max to perform random moves, and possibly lose much sooner - even though its opponent may not have noticed the trap.
 
 **ParallelismMode**
-There are 3 ParallelismMode: FirstLevelOnly, which is the recommended mode and normally yeilds the fastest searches. In addition, there're NonParallelism and TotalParallelism modes. In the TotalParallelism mode you can set the degree of parallelisem using the MaxDegreeOfParallelism field.
+There are 3 ParallelismMode: FirstLevelOnly, which is the recommended mode and normally yields the fastest searches. 
+In addition, there are the NonParallelism and TotalParallelism modes. 
+In the TotalParallelism mode you can set the degree of parallelisem using the MaxDegreeOfParallelism field (this field will be ignored otherwise).
 
 **DieEarly:**
 If this option is set to true, the algorithm will rerun as soon as it finds a score bigger then SearchEngine.MaxScore for Max or SearchEngine.MinScore for Min.
@@ -135,8 +137,10 @@ Pruners can be implemented by implementing the IPruner interface. Then, the Shou
 
 ## CompetitionManager
 
+Want to test the effect of diffrent evaluation-strategies or search options? CompetitionManager is you freind.
+
 CompetitionManager can play a complete game in which the players can be using a different engines/search-depths/evaluation-strategies.
-CompetitionManager will return statistics on the game, including which player won, and how long each player took searching.
+CompetitionManager will return statistics on the game, including which player won, and how long each player took doing his searching.
 
 ```CSharp
 namespace MinMaxSearch.Benckmarking
@@ -149,16 +153,16 @@ namespace MinMaxSearch.Benckmarking
         /// <param name="engine"> The engine to use</param>
         /// <param name="startState"> The starting sate</param>
         /// <param name="searchDepth"> How deep should we search</param>
-        /// <param name="maxPayDepth"> After how many moves should we terminate the game if no one won</param>
+        /// <param name="maxPlayDepth"> After how many moves should we terminate the game if no one won</param>
         /// <param name="maxAlternateEvaluation"> Will be used to evaluate the board on max's turn in stead of the state's regaler Evaluate method</param>
         /// <param name="minAlternateEvaluation"> Will be used to evaluate the board on min's turn in stead of the state's regaler Evaluate method</param>
         public static CompetitionResult Compete(this SearchEngine engine, IDeterministicState startState,
             int searchDepth, Func<IState, int, List<IState>, double> maxAlternateEvaluation = null,
-            Func<IState, int, List<IState>, double> minAlternateEvaluation = null, int maxPayDepth = int.MaxValue,
+            Func<IState, int, List<IState>, double> minAlternateEvaluation = null, int maxPlayDepth = int.MaxValue,
             CancellationToken? cancellationToken = null)
         {
             ...
-	}
+        }
 
         /// <summary>
         /// With this method you can simulate a complete game and compare different search-depth or evaluation-strategies.
@@ -167,16 +171,16 @@ namespace MinMaxSearch.Benckmarking
         /// <param name="startState"> The starting sate</param>
         /// <param name="playerMaxSearchDepth"> How deep should max search</param>
         /// <param name="playerMinSearchDepth"> How deep should min search</param>
-        /// <param name="maxPayDepth"> After how many moves should we terminate the game if no one won</param>
+        /// <param name="maxPlayDepth"> After how many moves should we terminate the game if no one won</param>
         /// <param name="maxAlternateEvaluation"> Will be used to evaluate the board on max's turn in stead of the state's regaler Evaluate method</param>
         /// <param name="minAlternateEvaluation"> Will be used to evaluate the board on min's turn in stead of the state's regaler Evaluate method</param>
         public static CompetitionResult Compete(this SearchEngine engine, IDeterministicState startState,
             int playerMaxSearchDepth, int playerMinSearchDepth, Func<IState, int, List<IState>, double> maxAlternateEvaluation = null,
-            Func<IState, int, List<IState>, double> minAlternateEvaluation = null, int maxPayDepth = int.MaxValue,
+            Func<IState, int, List<IState>, double> minAlternateEvaluation = null, int maxPlayDepth = int.MaxValue,
             CancellationToken? cancellationToken = null)
         {
             ...
-	}
+        }
 
         /// <summary>
         /// With this method you can simulate a complete game and compare different engines, search-depths or evaluation-strategies.
@@ -186,12 +190,12 @@ namespace MinMaxSearch.Benckmarking
         /// <param name="startState"> The starting sate</param>
         /// <param name="playerMaxSearchDepth"> How deep should max search</param>
         /// <param name="playerMinSearchDepth"> How deep should min search</param>
-        /// <param name="maxPayDepth"> After how many moves should we terminate the game if no one won</param>
+        /// <param name="maxPlayDepth"> After how many moves should we terminate the game if no one won</param>
         /// <param name="maxAlternateEvaluation"> Will be used to evaluate the board on max's turn in stead of the state's regaler Evaluate method</param>
         /// <param name="minAlternateEvaluation"> Will be used to evaluate the board on min's turn in stead of the state's regaler Evaluate method</param>
         public static CompetitionResult Compete(SearchEngine maxEngine, SearchEngine minEngine,
             IDeterministicState startState, int playerMaxSearchDepth, int playerMinSearchDepth, 
-            int maxPayDepth = int.MaxValue, Func<IState, int, List<IState>, double> maxAlternateEvaluation = null,
+            int maxPlayDepth = int.MaxValue, Func<IState, int, List<IState>, double> maxAlternateEvaluation = null,
             Func<IState, int, List<IState>, double> minAlternateEvaluation = null, CancellationToken? cancellationToken = null)
         {
             ...
