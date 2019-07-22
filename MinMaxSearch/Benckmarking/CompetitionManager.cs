@@ -13,18 +13,18 @@ namespace MinMaxSearch.Benckmarking
         /// <param name="engine"> The engine to use</param>
         /// <param name="startState"> The starting sate</param>
         /// <param name="searchDepth"> How deep should we search</param>
-        /// <param name="maxPayDepth"> After how many moves should we terminate the game if no one won</param>
+        /// <param name="maxPlayDepth"> After how many moves should we terminate the game if no one won</param>
         /// <param name="maxAlternateEvaluation"> Will be used to evaluate the board on max's turn in stead of the state's regaler Evaluate method</param>
         /// <param name="minAlternateEvaluation"> Will be used to evaluate the board on min's turn in stead of the state's regaler Evaluate method</param>
         public static CompetitionResult Compete(this SearchEngine engine, IDeterministicState startState,
             int searchDepth, Func<IState, int, List<IState>, double> maxAlternateEvaluation = null,
-            Func<IState, int, List<IState>, double> minAlternateEvaluation = null, int maxPayDepth = int.MaxValue,
+            Func<IState, int, List<IState>, double> minAlternateEvaluation = null, int maxPlayDepth = int.MaxValue,
             CancellationToken? cancellationToken = null)
         {
             if (maxAlternateEvaluation == null && minAlternateEvaluation == null)
                 throw new ArgumentException($"At least one of {nameof(maxAlternateEvaluation)} or {nameof(minAlternateEvaluation)} shouldn't be null");
             
-            return Compete(engine, new SearchEngine(engine), startState, searchDepth, searchDepth, maxPayDepth, maxAlternateEvaluation, minAlternateEvaluation, cancellationToken);
+            return Compete(engine, new SearchEngine(engine), startState, searchDepth, searchDepth, maxPlayDepth, maxAlternateEvaluation, minAlternateEvaluation, cancellationToken);
         }
 
         /// <summary>
@@ -34,15 +34,15 @@ namespace MinMaxSearch.Benckmarking
         /// <param name="startState"> The starting sate</param>
         /// <param name="playerMaxSearchDepth"> How deep should max search</param>
         /// <param name="playerMinSearchDepth"> How deep should min search</param>
-        /// <param name="maxPayDepth"> After how many moves should we terminate the game if no one won</param>
+        /// <param name="maxPlayDepth"> After how many moves should we terminate the game if no one won</param>
         /// <param name="maxAlternateEvaluation"> Will be used to evaluate the board on max's turn in stead of the state's regaler Evaluate method</param>
         /// <param name="minAlternateEvaluation"> Will be used to evaluate the board on min's turn in stead of the state's regaler Evaluate method</param>
         public static CompetitionResult Compete(this SearchEngine engine, IDeterministicState startState,
             int playerMaxSearchDepth, int playerMinSearchDepth, Func<IState, int, List<IState>, double> maxAlternateEvaluation = null,
-            Func<IState, int, List<IState>, double> minAlternateEvaluation = null, int maxPayDepth = int.MaxValue,
+            Func<IState, int, List<IState>, double> minAlternateEvaluation = null, int maxPlayDepth = int.MaxValue,
             CancellationToken? cancellationToken = null)
         {
-            return Compete(engine, new SearchEngine(engine), startState, playerMaxSearchDepth, playerMinSearchDepth, maxPayDepth, maxAlternateEvaluation, minAlternateEvaluation, cancellationToken);
+            return Compete(engine, new SearchEngine(engine), startState, playerMaxSearchDepth, playerMinSearchDepth, maxPlayDepth, maxAlternateEvaluation, minAlternateEvaluation, cancellationToken);
         }
 
         /// <summary>
@@ -53,12 +53,12 @@ namespace MinMaxSearch.Benckmarking
         /// <param name="startState"> The starting sate</param>
         /// <param name="playerMaxSearchDepth"> How deep should max search</param>
         /// <param name="playerMinSearchDepth"> How deep should min search</param>
-        /// <param name="maxPayDepth"> After how many moves should we terminate the game if no one won</param>
+        /// <param name="maxPlayDepth"> After how many moves should we terminate the game if no one won</param>
         /// <param name="maxAlternateEvaluation"> Will be used to evaluate the board on max's turn in stead of the state's regaler Evaluate method</param>
         /// <param name="minAlternateEvaluation"> Will be used to evaluate the board on min's turn in stead of the state's regaler Evaluate method</param>
         public static CompetitionResult Compete(SearchEngine maxEngine, SearchEngine minEngine,
             IDeterministicState startState, int playerMaxSearchDepth, int playerMinSearchDepth, 
-            int maxPayDepth = int.MaxValue, Func<IState, int, List<IState>, double> maxAlternateEvaluation = null,
+            int maxPlayDepth = int.MaxValue, Func<IState, int, List<IState>, double> maxAlternateEvaluation = null,
             Func<IState, int, List<IState>, double> minAlternateEvaluation = null, CancellationToken? cancellationToken = null)
         {
             maxEngine.AlternateEvaluation = maxAlternateEvaluation;
@@ -66,7 +66,7 @@ namespace MinMaxSearch.Benckmarking
 
             var currentState = startState;
             var resultFactory = new CompetitionResultFactory();
-            for (int i = 0; ContainsNeigbors(currentState) && i < maxPayDepth; i++)
+            for (int i = 0; ContainsNeigbors(currentState) && i < maxPlayDepth; i++)
             {
                 if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
                     break;
