@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MinMaxSearch.Pruners;
+using MinMaxSearch.ThreadManagment;
 
 namespace MinMaxSearch
 {
@@ -57,6 +58,10 @@ namespace MinMaxSearch
         public double MinScore { get; set; } = double.MinValue;
 
         private int maxDegreeOfParallelism = 1;
+
+        /// <summary>
+        /// Note that this will only have an effect if ParallelismMode is set to TotalParallelism
+        /// </summary>
         public int MaxDegreeOfParallelism
         {
             get => maxDegreeOfParallelism;
@@ -64,6 +69,8 @@ namespace MinMaxSearch
                 ? value
                 : throw new BadDegreeOfParallelismException("DegreeOfParallelism must be at least one. Tried to set it to " + maxDegreeOfParallelism);
         }
+
+        public ParallelismMode ParallelismMode { get; set; } = ParallelismMode.FirstLevelOnly;
 
         public Func<IState, int, List<IState>, double> AlternateEvaluation { get; set; }
 
@@ -78,7 +85,7 @@ namespace MinMaxSearch
             if (!startState.GetNeighbors().Any())
                 throw new NoNeighborsException("start state has no neighbors " + startState);
             
-            var searchWorker = new SearchWorker(CreateSearchOptions());
+            var searchWorker = new SearchWorker(CreateSearchOptions(), GetThreadManager());
             var searchContext = new SearchContext(maxDepth, 0, cancellationToken);
             var stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -90,7 +97,18 @@ namespace MinMaxSearch
         }
         
         private SearchOptions CreateSearchOptions() => new SearchOptions(pruners, IsUnstableState, PreventLoops,
-            FavorShortPaths, DieEarly, MaxScore, MinScore, MaxDegreeOfParallelism, AlternateEvaluation);
+            FavorShortPaths, DieEarly, MaxScore, MinScore, AlternateEvaluation);
+
+        private IThreadManager GetThreadManager()
+        {
+            if (ParallelismMode == ParallelismMode.FirstLevelOnly)
+                return new FirstLevelOnlyThreadManager();
+
+            if (ParallelismMode == ParallelismMode.NonParallelism || maxDegreeOfParallelism == 1)
+                return new SequencelThreadManager();
+            
+            return new ThreadManager(maxDegreeOfParallelism);
+        }
 
         public SearchResult IterativeSearch(IDeterministicState startState, int startDepth, int maxDepth, TimeSpan timeout) =>
             IterativeSearch(startState, startDepth, maxDepth, new CancellationTokenSource(timeout).Token);

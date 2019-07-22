@@ -3,16 +3,17 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MinMaxSearch.ThreadManagment;
 
 namespace MinMaxSearch
 {
     class ProbabilisticSearchUtils
     {
-        private readonly ThreadManager threadManager;
+        private readonly IThreadManager threadManager;
         private readonly DeterministicSearchUtils deterministicSearchUtils;
         private readonly SearchOptions searchOptions;
 
-        public ProbabilisticSearchUtils(ThreadManager threadManager, DeterministicSearchUtils deterministicSearchUtils, SearchOptions searchOptions)
+        public ProbabilisticSearchUtils(IThreadManager threadManager, DeterministicSearchUtils deterministicSearchUtils, SearchOptions searchOptions)
         {
             this.deterministicSearchUtils = deterministicSearchUtils;
             this.searchOptions = searchOptions;
@@ -34,7 +35,7 @@ namespace MinMaxSearch
             {
                 var wrappedState = new ProbablisticStateWrapper(neighbor.Item2, startState);
                 var searchResult = threadManager.Invoke(() =>
-                    deterministicSearchUtils.EvaluateChildren(wrappedState, searchContext.CloneWithMaxAlphaAndBeta(), storedStates));
+                    deterministicSearchUtils.EvaluateChildren(wrappedState, searchContext.CloneWithMaxAlphaAndBeta(), storedStates), searchContext.CurrentDepth);
                 results.Add(new Tuple<double, Task<SearchResult>>(neighbor.Item1, searchResult));
             }
             

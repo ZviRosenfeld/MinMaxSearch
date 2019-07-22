@@ -1,20 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using MinMaxSearch.ThreadManagment;
 
 namespace MinMaxSearch
 {
     class SearchWorker
     {
         private readonly SearchOptions searchOptions;
-        private readonly ThreadManager threadManager;
         private readonly DeterministicSearchUtils deterministicSearchUtils;
         private readonly ProbabilisticSearchUtils probabilisticSearchUtils;
         
-        public SearchWorker(SearchOptions searchOptions)
+        public SearchWorker(SearchOptions searchOptions, IThreadManager threadManager)
         {
             this.searchOptions = searchOptions;
-            threadManager = new ThreadManager(searchOptions.MaxDegreeOfParallelism);
             deterministicSearchUtils = new DeterministicSearchUtils(this, searchOptions, threadManager);
             probabilisticSearchUtils = new ProbabilisticSearchUtils(threadManager, deterministicSearchUtils, searchOptions);
         }

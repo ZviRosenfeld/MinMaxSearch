@@ -9,11 +9,12 @@ namespace Connect4Tests
     [TestClass]
     public class Connect4Tests
     {
-        [DataRow(1)]
-        [DataRow(2)]
-        [DataRow(8)]
+        [DataRow(1, ParallelismMode.TotalParallelism)]
+        [DataRow(2, ParallelismMode.TotalParallelism)]
+        [DataRow(8, ParallelismMode.TotalParallelism)]
+        [DataRow(1, ParallelismMode.FirstLevelOnly)]
         [TestMethod]
-        public void OneStepAwayFromMaxWinning_MaxTurn_MaxWin(int degreeOfParallelism)
+        public void OneStepAwayFromMaxWinning_MaxTurn_MaxWin(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
             var startState = new Connect4State(new[,]
             {
@@ -25,7 +26,7 @@ namespace Connect4Tests
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
             }, Player.Max);
 
-            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism);
+            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode);
             var evaluation = engine.Search(startState, 2);
 
             Assert.IsTrue(BoardEvaluator.IsWin(((Connect4State) evaluation.NextMove).Board, Player.Max),
@@ -33,11 +34,12 @@ namespace Connect4Tests
             Assert.AreEqual(1, evaluation.StateSequence.Count, "StateSequence should only have one state in it");
         }
 
-        [DataRow(1)]
-        [DataRow(2)]
-        [DataRow(8)]
+        [DataRow(1, ParallelismMode.TotalParallelism)]
+        [DataRow(2, ParallelismMode.TotalParallelism)]
+        [DataRow(8, ParallelismMode.TotalParallelism)]
+        [DataRow(1, ParallelismMode.FirstLevelOnly)]
         [TestMethod]
-        public void TwoStepsAwayFromMaxWinning__MinsTurn_DontLetMinMax(int degreeOfParallelism)
+        public void TwoStepsAwayFromMaxWinning__MinsTurn_DontLetMinMax(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
             var startState = new Connect4State(new[,]
             {
@@ -49,17 +51,18 @@ namespace Connect4Tests
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
             }, Player.Min);
 
-            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism);
+            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode);
             var newState = (Connect4State)engine.Search(startState, 2).NextMove;
 
             Assert.AreEqual(Player.Min, newState.Board[3, 1], "Min didn't block Max's win");
         }
 
-        [DataRow(1)]
-        [DataRow(2)]
-        [DataRow(8)]
+        [DataRow(1, ParallelismMode.TotalParallelism)]
+        [DataRow(2, ParallelismMode.TotalParallelism)]
+        [DataRow(8, ParallelismMode.TotalParallelism)]
+        [DataRow(1, ParallelismMode.FirstLevelOnly)]
         [TestMethod]
-        public void ThreeStepsAwayFromMaxWinning_MaxTurn_MaxWin(int degreeOfParallelism)
+        public void ThreeStepsAwayFromMaxWinning_MaxTurn_MaxWin(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
             var startState = new Connect4State(new[,]
             {
@@ -71,17 +74,18 @@ namespace Connect4Tests
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
             }, Player.Max);
 
-            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism);
+            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode);
             var evaluation = engine.Search(startState, 3);
             
             Assert.IsTrue(BoardEvaluator.IsWin(((Connect4State) evaluation.StateSequence.Last()).Board, Player.Max), "Should have found a wining state");
         }
-
-        [DataRow(1)]
-        [DataRow(2)]
-        [DataRow(8)]
+        
+        [DataRow(1, ParallelismMode.TotalParallelism)]
+        [DataRow(2, ParallelismMode.TotalParallelism)]
+        [DataRow(8, ParallelismMode.TotalParallelism)]
+        [DataRow(1, ParallelismMode.FirstLevelOnly)]
         [TestMethod]
-        public void FiveStepsAwayFromMaxWinning_MaxTurn_MaxWin(int degreeOfParallelism)
+        public void FiveStepsAwayFromMaxWinning_MaxTurn_MaxWin(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
             var startState = new Connect4State(new[,]
             {
@@ -93,22 +97,23 @@ namespace Connect4Tests
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
             }, Player.Max);
 
-            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism);
+            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode);
             var evaluation = engine.Search(startState, 5);
 
             Assert.AreEqual(BoardEvaluator.MaxEvaluation, evaluation.Evaluation);
             Assert.IsTrue(BoardEvaluator.IsWin(((Connect4State)evaluation.StateSequence.Last()).Board, Player.Max), "Should have found a wining state");
         }
 
-        [DataRow(1)]
-        [DataRow(2)]
-        [DataRow(8)]
+        [DataRow(1, ParallelismMode.TotalParallelism)]
+        [DataRow(2, ParallelismMode.TotalParallelism)]
+        [DataRow(8, ParallelismMode.TotalParallelism)]
+        [DataRow(2, ParallelismMode.FirstLevelOnly)]
         [TestMethod]
-        public void NewGame_NoOneCanWin(int degreeOfParallelism)
+        public void NewGame_NoOneCanWin(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
             var startState = new Connect4State(Connect4TestUtils.GetEmptyBoard(), Player.Max);
 
-            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism);
+            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode);
             var evaluation = engine.Search(startState, 7);
 
             Assert.IsFalse(BoardEvaluator.IsWin(((Connect4State)evaluation.StateSequence.Last()).Board, Player.Max));
@@ -126,11 +131,12 @@ namespace Connect4Tests
             Assert.IsTrue(evaluation.InternalNodes > 1000, "Too few intarnal nodes in search. Nodes = " + evaluation.InternalNodes);
         }
 
-        [DataRow(1)]
-        [DataRow(2)]
-        [DataRow(8)]
+        [DataRow(1, ParallelismMode.TotalParallelism)]
+        [DataRow(2, ParallelismMode.TotalParallelism)]
+        [DataRow(8, ParallelismMode.TotalParallelism)]
+        [DataRow(1, ParallelismMode.FirstLevelOnly)]
         [TestMethod]
-        public void MaxCanWinNextMoveOrInThree_MaxWinsNextMove(int degreeOfParallelism)
+        public void MaxCanWinNextMoveOrInThree_MaxWinsNextMove(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
             var startState = new Connect4State(new[,]
             {
@@ -142,7 +148,7 @@ namespace Connect4Tests
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
             }, Player.Max);
 
-            var engine = new SearchEngine() { FavorShortPaths = true, MaxDegreeOfParallelism = degreeOfParallelism};
+            var engine = new SearchEngine() { FavorShortPaths = true, MaxDegreeOfParallelism = degreeOfParallelism, ParallelismMode = parallelismMode};
             var evaluation = engine.Search(startState, 5);
 
             Assert.IsTrue(evaluation.StateSequence.Count == 1, "Max should have won in one move");
@@ -150,11 +156,12 @@ namespace Connect4Tests
 
         }
 
-        [DataRow(1)]
-        [DataRow(2)]
-        [DataRow(8)]
+        [DataRow(1, ParallelismMode.TotalParallelism)]
+        [DataRow(2, ParallelismMode.TotalParallelism)]
+        [DataRow(8, ParallelismMode.TotalParallelism)]
+        [DataRow(1, ParallelismMode.FirstLevelOnly)]
         [TestMethod]
-        public void MaxCanWinInFourMovesOrTwo_MinBlocksNearWin(int degreeOfParallelism)
+        public void MaxCanWinInFourMovesOrTwo_MinBlocksNearWin(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
             var startState = new Connect4State(new[,]
             {
@@ -166,22 +173,23 @@ namespace Connect4Tests
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
             }, Player.Min);
 
-            var engine = new SearchEngine() { FavorShortPaths = true, MaxDegreeOfParallelism = degreeOfParallelism};
+            var engine = new SearchEngine() { FavorShortPaths = true, MaxDegreeOfParallelism = degreeOfParallelism, ParallelismMode = parallelismMode};
             var evaluation = engine.Search(startState, 5);
 
             Assert.IsTrue(evaluation.StateSequence.Count > 2, "Min should have blocked the near win");
             Assert.AreEqual(Player.Min, ((Connect4State)evaluation.NextMove).Board[3, 2], "Min didn't block Max's win");
         }
 
-        [DataRow(1)]
-        [DataRow(2)]
-        [DataRow(8)]
+        [DataRow(1, ParallelismMode.TotalParallelism)]
+        [DataRow(2, ParallelismMode.TotalParallelism)]
+        [DataRow(8, ParallelismMode.TotalParallelism)]
+        [DataRow(1, ParallelismMode.FirstLevelOnly)]
         [TestMethod]
-        public void NewGame_CheckCancellationToken(int degreeOfParallelism)
+        public void NewGame_CheckCancellationToken(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
             var startState = new Connect4State(Connect4TestUtils.GetEmptyBoard(), Player.Max);
 
-            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism);
+            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode);
             var cancellationSource = new CancellationTokenSource();
             var searchTask = engine.SearchAsync(startState, 20, cancellationSource.Token);
             Thread.Sleep(500);

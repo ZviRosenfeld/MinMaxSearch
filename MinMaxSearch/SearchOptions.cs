@@ -8,7 +8,7 @@ namespace MinMaxSearch
     {
         public SearchOptions(List<IPruner> pruners, Func<IState, int, List<IState>, bool> isUnstableState,
             bool preventLoops, bool favorShortPaths, bool dieEarly, double maxScore,
-            double minScore, int maxDegreeOfParallelism, Func<IState, int, List<IState>, double> alternateEvaluation)
+            double minScore, Func<IState, int, List<IState>, double> alternateEvaluation)
         {
             Pruners = pruners;
             IsUnstableState = isUnstableState;
@@ -17,10 +17,6 @@ namespace MinMaxSearch
             MaxScore = maxScore;
             MinScore = minScore;
             AlternateEvaluation = alternateEvaluation;
-            MaxDegreeOfParallelism = maxDegreeOfParallelism >= 1
-                ? maxDegreeOfParallelism
-                : throw new BadDegreeOfParallelismException(
-                    "DegreeOfParallelism must be at least one. Tried to set it to " + maxDegreeOfParallelism);
 
             var preventLoopPruner = new PreventLoopPruner();
             if (preventLoops && !pruners.Contains(preventLoopPruner))
@@ -40,7 +36,5 @@ namespace MinMaxSearch
         public double MaxScore { get; }
 
         public double MinScore { get; }
-        
-        public int MaxDegreeOfParallelism { get; }
     }
 }

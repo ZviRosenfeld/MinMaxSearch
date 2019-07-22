@@ -9,11 +9,12 @@ namespace ProbabilisticConnect4Tests
     [TestClass]
     public class ProbabilisticConnect4Tests
     {
-        [DataRow(1)]
-        [DataRow(2)]
-        [DataRow(8)]
+        [DataRow(1, ParallelismMode.TotalParallelism)]
+        [DataRow(2, ParallelismMode.TotalParallelism)]
+        [DataRow(8, ParallelismMode.TotalParallelism)]
+        [DataRow(1, ParallelismMode.FirstLevelOnly)]
         [TestMethod]
-        public void MaxHasTwoWinsNextTurn_MinBlocksTheMoreLikelyOne(int degreeOfParallelism)
+        public void MaxHasTwoWinsNextTurn_MinBlocksTheMoreLikelyOne(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
             var startState = new StartState(new Connect4State(new[,]
             {
@@ -25,16 +26,17 @@ namespace ProbabilisticConnect4Tests
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
             }, Player.Min));
 
-            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism);
+            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode);
             var newState = (ProbabilisticConnect4State) engine.Search(startState, 2).NextMove;
             Assert.AreEqual(Player.Min, newState.Board[3, 4], "Min didn't block the more likely win");
         }
 
-        [DataRow(1)]
-        [DataRow(2)]
-        [DataRow(8)]
+        [DataRow(1, ParallelismMode.TotalParallelism)]
+        [DataRow(2, ParallelismMode.TotalParallelism)]
+        [DataRow(8, ParallelismMode.TotalParallelism)]
+        [DataRow(1, ParallelismMode.FirstLevelOnly)]
         [TestMethod]
-        public void MaxTwoTurnsAwayFromTwoWins_MaxGoesForTheMoreLikilyWin(int degreeOfParallelism)
+        public void MaxTwoTurnsAwayFromTwoWins_MaxGoesForTheMoreLikilyWin(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
             var startState = new StartState(new Connect4State(new[,]
             {
@@ -46,7 +48,7 @@ namespace ProbabilisticConnect4Tests
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
             }, Player.Max));
 
-            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism);
+            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode);
             var newState = (ProbabilisticConnect4State)engine.Search(startState, 3).NextMove;
             Assert.AreEqual(Player.Max, newState.Board[0, 4], "Min didn't block the more likely win");
         }
@@ -54,7 +56,7 @@ namespace ProbabilisticConnect4Tests
         [TestMethod]
         public void TestCompeteWorksWithProbabilisticStates()
         {
-            var engine = Connect4TestUtils.GetSearchEngine(1);
+            var engine = Connect4TestUtils.GetSearchEngine(1, ParallelismMode.FirstLevelOnly);
             var startState = new StartState(new Connect4State(Connect4TestUtils.GetEmptyBoard(), Player.Max));
 
             var results = engine.Compete(startState, 3, (s, d, l) => 0);
@@ -67,15 +69,15 @@ namespace ProbabilisticConnect4Tests
         [TestCategory("Benchmarking")]
         public void BenchmarkProbabilisticConnect4()
         {
-            BenchmarkWithDegreeOfParallelism(1);
-            BenchmarkWithDegreeOfParallelism(2);
-            BenchmarkWithDegreeOfParallelism(8);
+            BenchmarkWithDegreeOfParallelism(1, ParallelismMode.NonParallelism);
+            BenchmarkWithDegreeOfParallelism(1, ParallelismMode.FirstLevelOnly);
+            BenchmarkWithDegreeOfParallelism(4, ParallelismMode.TotalParallelism);
         }
 
-        private void BenchmarkWithDegreeOfParallelism(int degreeOfParallelism)
+        private void BenchmarkWithDegreeOfParallelism(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
-            Console.WriteLine("Running with degreeOfParallelism: " + degreeOfParallelism);
-            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism);
+            Console.WriteLine("Running with degreeOfParallelism: " + degreeOfParallelism + ", Mode: " + parallelismMode);
+            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode);
             var startState = new StartState(new Connect4State(Connect4TestUtils.GetEmptyBoard(), Player.Max));
 
             var results = engine.Search(startState, 7);
