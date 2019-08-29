@@ -74,5 +74,26 @@ namespace MinMaxSearch.UnitTests
             var result = engine.IterativeSearch(new IncreasingNumberState(8, Player.Max), 1, depth, CancellationToken.None);
             Assert.AreEqual(depth, result.SearchDepth, "Got wring depth");
         }
+
+        [TestMethod]
+        public void IterativeSearch_ResultsContainsSearchTime()
+        {
+            var searchEngine = new SearchEngine();
+            var result1 = searchEngine.Search(new IncreasingNumberState(1, Player.Max), 20);
+            var result2 = searchEngine.IterativeSearch(new IncreasingNumberState(1, Player.Max), 1, 20, CancellationToken.None);
+
+            Assert.AreNotEqual(TimeSpan.Zero, result1.SearchTime, $"{nameof(result1)}.{nameof(result1.SearchTime)} shouldn't be zero");
+            Assert.AreNotEqual(TimeSpan.Zero, result2.SearchTime, $"{nameof(result2)}.{nameof(result2.SearchTime)} shouldn't be zero");
+            Assert.IsTrue(result1.SearchTime < result2.SearchTime, $"{nameof(result1)}.{nameof(result1.SearchTime)} = {result1.SearchTime}; {nameof(result2)}.{nameof(result2.SearchTime)} = {result2.SearchTime}");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(Exception), "Shouldn't have gotten so far into the search")]
+        public void Search_CheckThatAfterSettingPreventLoopsToTrueItCanBeTurnedBackToFalse()
+        {
+            var searchEngine = new SearchEngine() { PreventLoops = true, ParallelismMode =  ParallelismMode.NonParallelism};
+            searchEngine.PreventLoops = false;
+            searchEngine.Search(new ThrowExceptionAtDepthThreeState(0, Player.Max), 5);
+        }
     }
 }

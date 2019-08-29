@@ -102,6 +102,9 @@ namespace MinMaxSearch
             if (!startState.GetNeighbors().Any())
                 throw new NoNeighborsException("start state has no neighbors " + startState);
             
+            if (maxDepth < 1)
+                throw new ArgumentException($"{nameof(maxDepth)} must be at least 1. Was {maxDepth}");
+
             var searchWorker = new SearchWorker(CreateSearchOptions(), GetThreadManager());
             var searchContext = new SearchContext(maxDepth, 0, cancellationToken);
             var stopwatch = new Stopwatch();

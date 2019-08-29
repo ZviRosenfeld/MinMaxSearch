@@ -288,18 +288,6 @@ namespace MinMaxSearch.UnitTests
             Assert.AreNotEqual(TimeSpan.Zero, result2.SearchTime, $"{nameof(result2)}.{nameof(result2.SearchTime)} shouldn't be zero");
             Assert.IsTrue(result1.SearchTime < result2.SearchTime, $"{nameof(result1)}.{nameof(result1.SearchTime)} = {result1.SearchTime}; {nameof(result2)}.{nameof(result2.SearchTime)} = {result2.SearchTime}");
         }
-
-        [TestMethod]
-        public void IterativeSearch_ResultsContainsSearchTime()
-        {
-            var searchEngine = new SearchEngine();
-            var result1 = searchEngine.Search(new IncreasingNumberState(1, Player.Max), 20);
-            var result2 = searchEngine.IterativeSearch(new IncreasingNumberState(1, Player.Max), 1, 20, CancellationToken.None);
-
-            Assert.AreNotEqual(TimeSpan.Zero, result1.SearchTime, $"{nameof(result1)}.{nameof(result1.SearchTime)} shouldn't be zero");
-            Assert.AreNotEqual(TimeSpan.Zero, result2.SearchTime, $"{nameof(result2)}.{nameof(result2.SearchTime)} shouldn't be zero");
-            Assert.IsTrue(result1.SearchTime < result2.SearchTime, $"{nameof(result1)}.{nameof(result1.SearchTime)} = {result1.SearchTime}; {nameof(result2)}.{nameof(result2.SearchTime)} = {result2.SearchTime}");
-        }
         
         [DataRow(8, ParallelismMode.TotalParallelism)]
         [DataRow(2, ParallelismMode.FirstLevelOnly)]
