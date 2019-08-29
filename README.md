@@ -41,9 +41,9 @@ public interface IDeterministicState : IState
 
 *In addition, I recommend that your states also implement object's Equals and GetHashCode methods, as many of the algorithm optimizations rely on these methods being implemented in a meaningful way.*
 
-The code contains examples for [Tic-tac-toe](TicTacToeTests/TicTacToeState.cs) and [connect4](Connect4Tests/Connect4State.cs) states.
+The code contains examples of [Tic-tac-toe](TicTacToeTests/TicTacToeState.cs) and [connect4](Connect4Tests/Connect4State.cs) states.
 
-In addition, you can find a tutorial on how to create a tic-tac-toe state [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Tic-Tac-Toe-Tutorial).
+You can find a tutorial on how to create a tic-tac-toe state [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Tic-Tac-Toe-Tutorial).
 
 **IProbabilisticState**
 
@@ -78,6 +78,8 @@ public interface IDeterministicState : IState
 
 *In addition, I recommend that your states also implement object's Equals and GetHashCode methods, as many of the algorithm optimizations rely on these methods being implemented in a meaningful way.*
 
+The code contains an examples of a [Probabilistic Connect-4 State](ProbabilisticConnect4Tests/ProbabilisticConnect4State.cs) (a probabilistic version of Connect-4).
+
 You can find a tutorial on how to create a probabilistic version of tic-tac-toe [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Probabilistic-Tic-Tac-Toe-Tutorial).
 
 ### Examples
@@ -97,13 +99,15 @@ example2:
 ```csharp
 var startState = new Connect4State();
 var searchDepth = 5;
-var cancellationToken = new CancellationTokenSource();
+var CancellationTokenSource = new CancellationTokenSource();
 var engine =  new SearchEngine()
 {
-    MaxDegreeOfParallelism = 2,
-    FavorShortPaths = true
+    FavorShortPaths = true,
+    DieEarly = true,
+    MaxScore = 99,
+    MinScore = -99
 };
-var searchResult = engine.Search(startState, searchDepth, cancellationToken);
+var searchResult = engine.Search(startState, searchDepth, CancellationTokenSource.Token);
 ```
 
 ### SearchEngine options:
