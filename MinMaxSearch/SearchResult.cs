@@ -14,12 +14,14 @@ namespace MinMaxSearch
             Leaves = leaves;
             InternalNodes = internalNodes;
             AllChildrenAreDeadEnds = allChildrenAreDeadEnds;
+            SearchDepth = -1;
             SearchTime = TimeSpan.Zero;
         }
 
         public SearchResult(double evaluation, IState endState)
         {
             Evaluation = evaluation;
+            SearchDepth = 0;
             StateSequence = new List<IState> {endState};
             Leaves = 1;
             InternalNodes = 0;
@@ -27,7 +29,7 @@ namespace MinMaxSearch
             SearchTime = TimeSpan.Zero;
         }
 
-        public SearchResult(SearchResult other, TimeSpan searchTime)
+        public SearchResult(SearchResult other, TimeSpan searchTime, int searchDepth = -1)
         {
             Evaluation = other.Evaluation;
             StateSequence = other.StateSequence.ToList();
@@ -35,6 +37,7 @@ namespace MinMaxSearch
             InternalNodes = other.InternalNodes;
             AllChildrenAreDeadEnds = other.AllChildrenAreDeadEnds;
             SearchTime = searchTime;
+            SearchDepth = searchDepth;
         }
 
         public IState NextMove => StateSequence.First();
@@ -53,5 +56,7 @@ namespace MinMaxSearch
         public bool AllChildrenAreDeadEnds { get; }
 
         public TimeSpan SearchTime { get; }
+
+        public int SearchDepth { get; }
     }
 }

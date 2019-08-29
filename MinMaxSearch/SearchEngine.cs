@@ -74,12 +74,29 @@ namespace MinMaxSearch
 
         public Func<IState, int, List<IState>, double> AlternateEvaluation { get; set; }
 
+        /// <summary>
+        /// Runs a search.
+        /// </summary>
+        /// <param name="startState"> The state that the search will start from</param>
+        /// <param name="maxDepth"> The search will be terminated after maxDepth</param>
         public SearchResult Search(IDeterministicState startState, int maxDepth) =>
             Search(startState, maxDepth, CancellationToken.None);
 
+        /// <summary>
+        /// Runs a search asynchronously.
+        /// </summary>
+        /// <param name="startState"> The state that the search will start from</param>
+        /// <param name="maxDepth"> The search will be terminated after maxDepth</param>
+        /// <param name="cancellationToken"> Used to cancel the search</param>
         public Task<SearchResult> SearchAsync(IDeterministicState startState, int maxDepth, CancellationToken cancellationToken) => 
             Task.Run(() => Search(startState, maxDepth, cancellationToken));
 
+        /// <summary>
+        /// Runs a search.
+        /// </summary>
+        /// <param name="startState"> The state that the search will start from</param>
+        /// <param name="maxDepth"> The search will be terminated after maxDepth</param>
+        /// <param name="cancellationToken"> Used to cancel the search</param>
         public SearchResult Search(IDeterministicState startState, int maxDepth, CancellationToken cancellationToken)
         {
             if (!startState.GetNeighbors().Any())
@@ -93,7 +110,7 @@ namespace MinMaxSearch
             stopwatch.Stop();
             evaluation.StateSequence.Reverse();
             evaluation.StateSequence.RemoveAt(0); // Removing the top node will make the result "nicer"
-            return new SearchResult(evaluation, stopwatch.Elapsed);
+            return new SearchResult(evaluation, stopwatch.Elapsed, maxDepth);
         }
         
         private SearchOptions CreateSearchOptions() => new SearchOptions(pruners, IsUnstableState, PreventLoops,
@@ -110,9 +127,25 @@ namespace MinMaxSearch
             return new ThreadManager(maxDegreeOfParallelism);
         }
 
+        /// <summary>
+        /// Runs an Iterative deepening search.
+        /// In Iterative search, a depth-limited version of depth-first search is run repeatedly with increasing depth limits till some condition is met.
+        /// </summary>
+        /// <param name="startState"> The state that the search will start from</param>
+        /// <param name="startDepth"> The first search's depth</param>
+        /// <param name="maxDepth"> The max search depth</param>
+        /// <param name="timeout"> After timeout time the search will be terminated. We will return the best solution found in the deepest completed search(or null if no search was completed).</param>
         public SearchResult IterativeSearch(IDeterministicState startState, int startDepth, int maxDepth, TimeSpan timeout) =>
             IterativeSearch(startState, startDepth, maxDepth, new CancellationTokenSource(timeout).Token);
 
+        /// <summary>
+        /// Runs an Iterative deepening search.
+        /// In Iterative search, a depth-limited version of depth-first search is run repeatedly with increasing depth limits till some condition is met.
+        /// </summary>
+        /// <param name="startState"> The state that the search will start from</param>
+        /// <param name="startDepth"> The first search's depth</param>
+        /// <param name="maxDepth"> The max search depth</param>
+        /// <param name="cancellationToken"> Used to terminate the search. We will return the best solution found in the deepest completed search (or null if no search was completed).</param>
         public SearchResult IterativeSearch(IDeterministicState startState, int startDepth, int maxDepth, CancellationToken cancellationToken)
         {
             if (startDepth >= maxDepth)
@@ -122,10 +155,11 @@ namespace MinMaxSearch
             stopewatch.Start();
 
             SearchResult bestResultSoFar = null;
-            for (int i = startDepth; i < maxDepth; i++)
+            int i;
+            for (i = startDepth; i < maxDepth; i++)
             { 
                 var result = Search(startState, i, cancellationToken);
-                if (!cancellationToken.IsCancellationRequested || bestResultSoFar == null)
+                if (!cancellationToken.IsCancellationRequested)
                     bestResultSoFar = result;
                 if (cancellationToken.IsCancellationRequested)
                     break;
@@ -134,7 +168,10 @@ namespace MinMaxSearch
             }
             stopewatch.Stop();
 
-            return new SearchResult(bestResultSoFar, stopewatch.Elapsed);
+            return bestResultSoFar == null
+                ? null
+                : new SearchResult(bestResultSoFar, stopewatch.Elapsed,
+                    cancellationToken.IsCancellationRequested ? i - 1 : i);
         }
     }
 }

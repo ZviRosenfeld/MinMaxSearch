@@ -22,13 +22,13 @@ namespace MinMaxSearch.UnitTests
         [DataRow(8, ParallelismMode.TotalParallelism)]
         [DataRow(1, ParallelismMode.FirstLevelOnly)]
         [TestMethod]
-        public void IterativeSearch_SearchCanceldBeforeFirstSearchFinished_DontReturnNullResult(int degreeOfParallelism, ParallelismMode parallelismMode)
+        public void IterativeSearch_SearchCanceldBeforeFirstSearchFinished_ReturnNullResult(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
             var cancellationSource = new CancellationTokenSource();
             cancellationSource.Cancel();
             var searchEngine = new SearchEngine {MaxDegreeOfParallelism = degreeOfParallelism, ParallelismMode = parallelismMode};
             var result = searchEngine.IterativeSearch(new IncreasingNumberState(1, Player.Max), 1, 2, cancellationSource.Token);
-            Assert.IsNotNull(result, "We should never return a null result");
+            Assert.IsNull(result, "We should have return a null result");
         }
 
         [DataRow(1, ParallelismMode.TotalParallelism)]
