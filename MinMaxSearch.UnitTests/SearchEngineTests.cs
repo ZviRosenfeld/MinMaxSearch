@@ -300,5 +300,16 @@ namespace MinMaxSearch.UnitTests
             Assert.AreNotEqual(TimeSpan.Zero, result2.SearchTime, $"{nameof(result2)}.{nameof(result2.SearchTime)} shouldn't be zero");
             Assert.IsTrue(result1.SearchTime < result2.SearchTime, $"{nameof(result1)}.{nameof(result1.SearchTime)} = {result1.SearchTime}; {nameof(result2)}.{nameof(result2.SearchTime)} = {result2.SearchTime}");
         }
+        
+        [DataRow(8, ParallelismMode.TotalParallelism)]
+        [DataRow(2, ParallelismMode.FirstLevelOnly)]
+        [DataRow(8, ParallelismMode.FirstLevelOnly)]
+        [TestMethod]
+        public void Search_SearchDepthIsRight(int depth, ParallelismMode parallelismMode)
+        {
+            var engine = new SearchEngine { MaxDegreeOfParallelism = 8 };
+            var result = engine.Search(new IncreasingNumberState(8, Player.Max), depth);
+            Assert.AreEqual(depth, result.SearchDepth, "Got wring depth");
+        }
     }
 }

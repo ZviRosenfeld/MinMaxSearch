@@ -63,5 +63,16 @@ namespace MinMaxSearch.UnitTests
 
             Assert.IsTrue(result.IsCompleted, "Search should have complated by now");
         }
+
+        [DataRow(8, ParallelismMode.TotalParallelism)]
+        [DataRow(2, ParallelismMode.FirstLevelOnly)]
+        [DataRow(8, ParallelismMode.FirstLevelOnly)]
+        [TestMethod]
+        public void Search_SearchDepthIsRight(int depth, ParallelismMode parallelismMode)
+        {
+            var engine = new SearchEngine() {MaxDegreeOfParallelism = 8};
+            var result = engine.IterativeSearch(new IncreasingNumberState(8, Player.Max), 1, depth, CancellationToken.None);
+            Assert.AreEqual(depth, result.SearchDepth, "Got wring depth");
+        }
     }
 }
