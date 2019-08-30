@@ -1,7 +1,6 @@
 **/[Oo]bj
 **/[Bb]in
 
-*.ide
-*.suo
-*db.lock
-*.nupkg
+**.nupkg
+nuget.exe
+.vs/**
