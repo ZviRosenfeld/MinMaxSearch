@@ -32,10 +32,10 @@ namespace MinMaxSearch.UnitTests
         {
             startState.SetNeigbor(deterministicEndState);
 
-            var engine = new SearchEngine()
+            var engine = new SearchEngineBuilder()
             {
                 AlternateEvaluation = (s,d,l) => 10,
-            };
+            }.Build();
             var evaluation = engine.Search(startState, 2);
 
             Assert.AreEqual(10, evaluation.Evaluation);
@@ -45,10 +45,10 @@ namespace MinMaxSearch.UnitTests
         public void ProbabilisticStateTest()
         {
             startState.SetNeigbor(probabilisticEndState);
-            var engine = new SearchEngine()
+            var engine = new SearchEngineBuilder()
             {
                 AlternateEvaluation = (s, d, l) => 10,
-            };
+            }.Build();
             var evaluation = engine.Search(startState, 2);
 
             Assert.AreEqual(10, evaluation.Evaluation);

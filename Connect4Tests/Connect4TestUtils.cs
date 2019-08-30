@@ -5,7 +5,10 @@ namespace Connect4Tests
     public class Connect4TestUtils
     {
         public static SearchEngine GetSearchEngine(int maxDegreeOfParallelism, ParallelismMode parallelismMode) =>
-            new SearchEngine()
+            GetSearchEngineBuilder(maxDegreeOfParallelism, parallelismMode).Build();
+
+        public static SearchEngineBuilder GetSearchEngineBuilder(int maxDegreeOfParallelism, ParallelismMode parallelismMode) =>
+            new SearchEngineBuilder()
             {
                 MaxDegreeOfParallelism = maxDegreeOfParallelism,
                 DieEarly = true,

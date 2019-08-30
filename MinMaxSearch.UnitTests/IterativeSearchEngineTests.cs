@@ -13,7 +13,7 @@ namespace MinMaxSearch.UnitTests
         [ExpectedException(typeof(Exception))]
         public void IterativeSearch_StartDepthEqualThenMaxDepth_ThrowException()
         {
-            var searchEngine = new SearchEngine();
+            var searchEngine = new SearchEngineBuilder().Build();
             searchEngine.IterativeSearch(new IncreasingNumberState(1, Player.Max), 2, 2, CancellationToken.None);
         }
 
@@ -26,7 +26,7 @@ namespace MinMaxSearch.UnitTests
         {
             var cancellationSource = new CancellationTokenSource();
             cancellationSource.Cancel();
-            var searchEngine = new SearchEngine {MaxDegreeOfParallelism = degreeOfParallelism, ParallelismMode = parallelismMode};
+            var searchEngine = new SearchEngineBuilder { MaxDegreeOfParallelism = degreeOfParallelism, ParallelismMode = parallelismMode}.Build();
             var result = searchEngine.IterativeSearch(new IncreasingNumberState(1, Player.Max), 1, 2, cancellationSource.Token);
             Assert.IsNull(result, "We should have return a null result");
         }
@@ -39,7 +39,7 @@ namespace MinMaxSearch.UnitTests
         public void IterativeSearch_SearchCancled_WeDontContinueLookingAfterSearchCancled(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
             var cancellationSource = new CancellationTokenSource(100);
-            var searchEngine = new SearchEngine() {MaxDegreeOfParallelism = degreeOfParallelism};
+            var searchEngine = new SearchEngineBuilder() {MaxDegreeOfParallelism = degreeOfParallelism}.Build();
             var result = Task.Run(() => searchEngine.IterativeSearch(new CancelAtValue4State(1, cancellationSource, Player.Max), 1, int.MaxValue, cancellationSource.Token));
             result.Wait(200);
 
@@ -54,7 +54,7 @@ namespace MinMaxSearch.UnitTests
         [TestMethod]
         public void IterativeSearch_TimeoutSet_WeDontContinueLookingAfterTimeout(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
-            var searchEngine = new SearchEngine() { MaxDegreeOfParallelism = degreeOfParallelism, ParallelismMode = parallelismMode};
+            var searchEngine = new SearchEngineBuilder() { MaxDegreeOfParallelism = degreeOfParallelism, ParallelismMode = parallelismMode}.Build();
             var result = Task.Run(() => searchEngine.IterativeSearch(new SlowState(0), 1, int.MaxValue, TimeSpan.FromMilliseconds(100)));
             
             Assert.IsFalse(result.IsCompleted, "We shouldn't have stopped running yet");
@@ -70,7 +70,7 @@ namespace MinMaxSearch.UnitTests
         [TestMethod]
         public void Search_SearchDepthIsRight(int depth, ParallelismMode parallelismMode)
         {
-            var engine = new SearchEngine() {MaxDegreeOfParallelism = 8};
+            var engine = new SearchEngineBuilder() {MaxDegreeOfParallelism = 8}.Build();
             var result = engine.IterativeSearch(new IncreasingNumberState(8, Player.Max), 1, depth, CancellationToken.None);
             Assert.AreEqual(depth, result.SearchDepth, "Got wring depth");
         }
@@ -78,22 +78,13 @@ namespace MinMaxSearch.UnitTests
         [TestMethod]
         public void IterativeSearch_ResultsContainsSearchTime()
         {
-            var searchEngine = new SearchEngine();
+            var searchEngine = new SearchEngineBuilder().Build();
             var result1 = searchEngine.Search(new IncreasingNumberState(1, Player.Max), 20);
             var result2 = searchEngine.IterativeSearch(new IncreasingNumberState(1, Player.Max), 1, 20, CancellationToken.None);
 
             Assert.AreNotEqual(TimeSpan.Zero, result1.SearchTime, $"{nameof(result1)}.{nameof(result1.SearchTime)} shouldn't be zero");
             Assert.AreNotEqual(TimeSpan.Zero, result2.SearchTime, $"{nameof(result2)}.{nameof(result2.SearchTime)} shouldn't be zero");
             Assert.IsTrue(result1.SearchTime < result2.SearchTime, $"{nameof(result1)}.{nameof(result1.SearchTime)} = {result1.SearchTime}; {nameof(result2)}.{nameof(result2.SearchTime)} = {result2.SearchTime}");
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(Exception), "Shouldn't have gotten so far into the search")]
-        public void Search_CheckThatAfterSettingPreventLoopsToTrueItCanBeTurnedBackToFalse()
-        {
-            var searchEngine = new SearchEngine() { PreventLoops = true, ParallelismMode =  ParallelismMode.NonParallelism};
-            searchEngine.PreventLoops = false;
-            searchEngine.Search(new ThrowExceptionAtDepthThreeState(0, Player.Max), 5);
         }
     }
 }

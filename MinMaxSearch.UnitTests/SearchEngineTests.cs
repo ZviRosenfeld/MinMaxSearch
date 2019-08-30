@@ -53,14 +53,14 @@ namespace MinMaxSearch.UnitTests
             endState2.SetEvaluationTo(11);
             endState3.SetEvaluationTo(18);
 
-            var engine = new SearchEngine()
+            var engine = new SearchEngineBuilder()
             {
                 MaxDegreeOfParallelism = degreeOfParallelism,
                 FavorShortPaths = true,
                 DieEarly = true,
                 MaxScore = 10,
                 ParallelismMode = parallelismMode
-            };
+            }.Build();
             var result = engine.Search(state1, 5);
 
             Assert.AreEqual(endState1, result.StateSequence.Last(), nameof(endState1) + " should have been good enough");
@@ -78,14 +78,14 @@ namespace MinMaxSearch.UnitTests
             endState1.SetEvaluationTo(15);
             A.CallTo(() => endState2.Evaluate(A<int>._, A<List<IState>>._)).Invokes(() => throw new Exception("We shouldn't have needed to check " + nameof(endState2)));
 
-            var engine = new SearchEngine()
+            var engine = new SearchEngineBuilder()
             {
                 FavorShortPaths = true,
                 DieEarly = true,
                 MaxScore = 10,
                 IsUnstableState = (s, i, l) => unstableState,
                 ParallelismMode = ParallelismMode.NonParallelism
-            };
+            }.Build();
             var result = engine.Search(state1, 6);
 
             Assert.AreEqual(endState1, result.StateSequence.Last(), nameof(endState1) + " should have been good enough");
@@ -104,7 +104,7 @@ namespace MinMaxSearch.UnitTests
             endState2.SetEvaluationTo(1);
             endState3.SetEvaluationTo(3);
 
-            var engine = new SearchEngine { MaxDegreeOfParallelism = degreeOfParallelism, ParallelismMode = parallelismMode};
+            var engine = new SearchEngineBuilder { MaxDegreeOfParallelism = degreeOfParallelism, ParallelismMode = parallelismMode}.Build();
             var result = engine.Search(state1, 5);
 
             Assert.AreEqual(endState3, result.NextMove, "Actually found " + result.NextMove);
@@ -125,7 +125,7 @@ namespace MinMaxSearch.UnitTests
             endState2.SetEvaluationTo(1);
             endState3.SetEvaluationTo(3);
 
-            var engine = new SearchEngine { MaxDegreeOfParallelism = degreeOfParallelism, ParallelismMode = parallelismMode};
+            var engine = new SearchEngineBuilder { MaxDegreeOfParallelism = degreeOfParallelism, ParallelismMode = parallelismMode}.Build();
             var result = engine.Search(state1, 5);
 
             Assert.AreEqual(endState3, result.NextMove, "Actually found " + result.NextMove);
@@ -138,12 +138,12 @@ namespace MinMaxSearch.UnitTests
         [TestMethod]
         public void Search_DontStopWithUnstableState(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
-            var searchEngine = new SearchEngine()
+            var searchEngine = new SearchEngineBuilder()
             {
                 IsUnstableState = (s, d, l) => s.Evaluate(d, l) < 10,
                 MaxDegreeOfParallelism = degreeOfParallelism,
                 ParallelismMode = parallelismMode
-            };
+            }.Build();
             var result = searchEngine.Search(new IncreasingNumberState(0, Player.Max), 1);
 
             Assert.AreEqual(10, result.Evaluation, "Engine seems to have stopped before reaching a stable state");
@@ -169,7 +169,7 @@ namespace MinMaxSearch.UnitTests
 
             A.CallTo(() => endState1.Turn).Returns(Player.Min);
 
-            var searchEngine = new SearchEngine {MaxDegreeOfParallelism = degreeOfParallelism, ParallelismMode = parallelismMode};
+            var searchEngine = new SearchEngineBuilder { MaxDegreeOfParallelism = degreeOfParallelism, ParallelismMode = parallelismMode}.Build();
             searchEngine.Search(state1, 5);
         }
 
@@ -188,14 +188,14 @@ namespace MinMaxSearch.UnitTests
             A.CallTo(() => endState2.Turn).Returns(Player.Min);
             A.CallTo(() => endState3.Turn).Returns(Player.Min);
 
-            var searchEngine = new SearchEngine()
+            var searchEngine = new SearchEngineBuilder()
             {
                 DieEarly = true,
                 MaxScore = 5,
                 MinScore = 5,
                 MaxDegreeOfParallelism = degreeOfParallelism,
                 ParallelismMode = parallelismMode
-            };
+            }.Build();
             var evaluation = searchEngine.Search(state1, 2);
 
             Assert.AreEqual(endState1, evaluation.StateSequence.Last(), "Should have ended with" + nameof(endState1));
@@ -208,12 +208,12 @@ namespace MinMaxSearch.UnitTests
         [TestMethod]
         public void Search_CheckPreventLoopPrunerWorks(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
-            var searchEngine = new SearchEngine()
+            var searchEngine = new SearchEngineBuilder()
             {
                 PreventLoops = true,
                 MaxDegreeOfParallelism = degreeOfParallelism,
                 ParallelismMode = parallelismMode
-            };
+            }.Build();
             searchEngine.Search(new ThrowExceptionAtDepthThreeState(0, Player.Max), 5);
         }
 
@@ -236,8 +236,12 @@ namespace MinMaxSearch.UnitTests
             endState1.SetEvaluationTo(2);
             
             A.CallTo(() => state1.Turn).Returns(Player.Min);
-            
-            var searchEngine = new SearchEngine() { MaxDegreeOfParallelism = degreeOfParallelism, ParallelismMode = parallelismMode};
+
+            var searchEngine = new SearchEngineBuilder()
+            {
+                MaxDegreeOfParallelism = degreeOfParallelism,
+                ParallelismMode = parallelismMode
+            }.Build();
             var result = searchEngine.Search(state1, 5, cancellationSource.Token);
 
             Assert.AreEqual(1, result.Evaluation);
@@ -245,42 +249,9 @@ namespace MinMaxSearch.UnitTests
         }
 
         [TestMethod]
-        public void CloneSearchEngine_NewEngineHasSameValuesAsOld()
-        {
-            var engine = new SearchEngine()
-            {
-                DieEarly = true,
-                FavorShortPaths = false,
-                MaxDegreeOfParallelism = 2,
-                MaxScore = 10,
-                MinScore = 8,
-                PreventLoops = true
-            };
-
-            var cloneEngine = new SearchEngine(engine);
-
-            Assert.AreEqual(engine.DieEarly, cloneEngine.DieEarly);
-            Assert.AreEqual(engine.FavorShortPaths, cloneEngine.FavorShortPaths);
-            Assert.AreEqual(engine.MaxDegreeOfParallelism, cloneEngine.MaxDegreeOfParallelism);
-            Assert.AreEqual(engine.MaxScore, cloneEngine.MaxScore);
-            Assert.AreEqual(engine.MinScore, cloneEngine.MinScore);
-            Assert.AreEqual(engine.PreventLoops, cloneEngine.PreventLoops);
-        }
-
-        [TestMethod]
-        public void CloneSearchEngine_ChangeAFieldOnOriginal_FieldNotChangeOnClone()
-        {
-            var engine = new SearchEngine();
-            var cloneEngine = new SearchEngine(engine);
-            engine.MaxDegreeOfParallelism = 4;
-
-            Assert.AreNotEqual(engine.MaxDegreeOfParallelism, cloneEngine.MaxDegreeOfParallelism);
-        }
-
-        [TestMethod]
         public void Search_ResultsContainsSearchTime()
         {
-            var searchEngine = new SearchEngine();
+            var searchEngine = new SearchEngineBuilder().Build();
             var result1 = searchEngine.Search(new IncreasingNumberState(1, Player.Max), 5);
             var result2 = searchEngine.Search(new IncreasingNumberState(1, Player.Max), 20);
 
@@ -295,7 +266,7 @@ namespace MinMaxSearch.UnitTests
         [TestMethod]
         public void Search_SearchDepthIsRight(int depth, ParallelismMode parallelismMode)
         {
-            var engine = new SearchEngine { MaxDegreeOfParallelism = 8 };
+            var engine = new SearchEngineBuilder { MaxDegreeOfParallelism = 8 }.Build();
             var result = engine.Search(new IncreasingNumberState(8, Player.Max), depth);
             Assert.AreEqual(depth, result.SearchDepth, "Got wring depth");
         }

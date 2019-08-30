@@ -6,7 +6,32 @@ MinMax search is a popular search technique used for finding the next-best move 
 You can find MinMaxSearch library on nuget.org via package name MinMaxSearch.
 
 ## How to Use
-To use, you'll need to create a new instance of SearchEngine. 
+
+You'll need to use the [SearchEngineBuilder](MinMaxSearch/SearchEngineBuilder.cs) to create a new instance of a SearchEngine.
+
+example1:
+```csharp
+var startState = new TicTacToeState();
+var searchDepth = 5;
+var engine = new SearchEngineBuilder().Build();
+var searchResult = engine.Search(startState, searchDepth);
+```
+
+example2:
+```csharp
+var startState = new Connect4State();
+var searchDepth = 5;
+var CancellationTokenSource = new CancellationTokenSource();
+var engine =  new SearchEngineBuilder()
+{
+    FavorShortPaths = true,
+    DieEarly = true,
+    MaxScore = 99,
+    MinScore = -99
+}.Build();
+var searchResult = engine.Search(startState, searchDepth, CancellationTokenSource.Token);
+```
+
 SearchEngine has a number of Search methods that expect different parameters. Most of the parameters are straight-forward. I'd like to elaborate on the IState one.
 
 ### IState
@@ -82,33 +107,9 @@ The code contains an examples of a [Probabilistic Connect-4 State](Probabilistic
 
 You can find a tutorial on how to create a probabilistic version of tic-tac-toe [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Probabilistic-Tic-Tac-Toe-Tutorial).
 
-### Examples
-Following are a few snippets take from the project's unit tests. You can refer to the [Connnect4 Tests](Connect4Tests) or [Tic-tac-toe Tests](TicTacToeTests) for more examples.
+### Tutorials
 
-In addition, you can find a tutorial on how to create a tic-tac-toe state [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Tic-Tac-Toe-Tutorial), and one on a probabilistic version of tic-tac-toe [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Probabilistic-Tic-Tac-Toe-Tutorial).
-
-example1:
-```csharp
-var startState = new TicTacToeState();
-var searchDepth = 5;
-var engine = new SearchEngine();
-var searchResult = engine.Search(startState, searchDepth);
-```
-
-example2:
-```csharp
-var startState = new Connect4State();
-var searchDepth = 5;
-var CancellationTokenSource = new CancellationTokenSource();
-var engine =  new SearchEngine()
-{
-    FavorShortPaths = true,
-    DieEarly = true,
-    MaxScore = 99,
-    MinScore = -99
-};
-var searchResult = engine.Search(startState, searchDepth, CancellationTokenSource.Token);
-```
+You can find a tutorial on how to create a tic-tac-toe state [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Tic-Tac-Toe-Tutorial), and one on a probabilistic version of tic-tac-toe [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Probabilistic-Tic-Tac-Toe-Tutorial).
 
 ### SearchEngine options:
 SearchEngine can be configured with the following options:
@@ -154,13 +155,13 @@ namespace MinMaxSearch.Benckmarking
         /// <summary>
         /// With this method you can simulate a complete game and compare different evaluation-strategies.
         /// </summary>
-        /// <param name="engine"> The engine to use</param>
+        /// <param name="engineBuilder"> A builder for the engine to use</param>
         /// <param name="startState"> The starting sate</param>
         /// <param name="searchDepth"> How deep should we search</param>
         /// <param name="maxPlayDepth"> After how many moves should we terminate the game if no one won</param>
         /// <param name="maxAlternateEvaluation"> Will be used to evaluate the board on max's turn in stead of the state's regaler Evaluate method (if null, will use the defualt state's evaluation method)</param>
         /// <param name="minAlternateEvaluation"> Will be used to evaluate the board on min's turn in stead of the state's regaler Evaluate method (if null, will use the defualt state's evaluation method)</param>
-        public static CompetitionResult Compete(this SearchEngine engine, IDeterministicState startState,
+        public static CompetitionResult Compete(this SearchEngineBuilder engineBuilder, IDeterministicState startState,
             int searchDepth, Func<IState, int, List<IState>, double> maxAlternateEvaluation = null,
             Func<IState, int, List<IState>, double> minAlternateEvaluation = null, int maxPlayDepth = int.MaxValue,
             CancellationToken? cancellationToken = null)
@@ -171,14 +172,14 @@ namespace MinMaxSearch.Benckmarking
         /// <summary>
         /// With this method you can simulate a complete game and compare different search-depth or evaluation-strategies.
         /// </summary>
-        /// <param name="engine"> The engine to use</param>
+        /// <param name="engineBuilder"> A builder for the engine to use</param>
         /// <param name="startState"> The starting sate</param>
         /// <param name="playerMaxSearchDepth"> How deep should max search</param>
         /// <param name="playerMinSearchDepth"> How deep should min search</param>
         /// <param name="maxPlayDepth"> After how many moves should we terminate the game if no one won</param>
         /// <param name="maxAlternateEvaluation"> Will be used to evaluate the board on max's turn in stead of the state's regaler Evaluate method (if null, will use the defualt state's evaluation method)</param>
         /// <param name="minAlternateEvaluation"> Will be used to evaluate the board on min's turn in stead of the state's regaler Evaluate method (if null, will use the defualt state's evaluation method)</param>
-        public static CompetitionResult Compete(this SearchEngine engine, IDeterministicState startState,
+        public static CompetitionResult Compete(this SearchEngineBuilder engineBuilder, IDeterministicState startState,
             int playerMaxSearchDepth, int playerMinSearchDepth, Func<IState, int, List<IState>, double> maxAlternateEvaluation = null,
             Func<IState, int, List<IState>, double> minAlternateEvaluation = null, int maxPlayDepth = int.MaxValue,
             CancellationToken? cancellationToken = null)
@@ -189,15 +190,15 @@ namespace MinMaxSearch.Benckmarking
         /// <summary>
         /// With this method you can simulate a complete game and compare different engines, search-depths or evaluation-strategies.
         /// </summary>
-        /// <param name="maxEngine"> The engine to use for max</param>
-        /// <param name="minEngine"> The engine to use for min</param>
+        /// <param name="maxEngineBuilder"> A builder for the engine to use for max</param>
+        /// <param name="minEngineBuilder"> A builder for the engine to use for min</param>
         /// <param name="startState"> The starting sate</param>
         /// <param name="playerMaxSearchDepth"> How deep should max search</param>
         /// <param name="playerMinSearchDepth"> How deep should min search</param>
         /// <param name="maxPlayDepth"> After how many moves should we terminate the game if no one won</param>
         /// <param name="maxAlternateEvaluation"> Will be used to evaluate the board on max's turn in stead of the state's regaler Evaluate method (if null, will use the defualt state's evaluation method)</param>
         /// <param name="minAlternateEvaluation"> Will be used to evaluate the board on min's turn in stead of the state's regaler Evaluate method (if null, will use the defualt state's evaluation method)</param>
-        public static CompetitionResult Compete(SearchEngine maxEngine, SearchEngine minEngine,
+        public static CompetitionResult Compete(SearchEngineBuilder maxEngineBuilder, SearchEngineBuilder minEngineBuilder,
             IDeterministicState startState, int playerMaxSearchDepth, int playerMinSearchDepth, 
             int maxPlayDepth = int.MaxValue, Func<IState, int, List<IState>, double> maxAlternateEvaluation = null,
             Func<IState, int, List<IState>, double> minAlternateEvaluation = null, CancellationToken? cancellationToken = null)

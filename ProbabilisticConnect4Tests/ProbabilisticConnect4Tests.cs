@@ -57,13 +57,13 @@ namespace ProbabilisticConnect4Tests
         [TestMethod]
         public void TestCompeteWorksWithProbabilisticStates()
         {
-            var engine = Connect4TestUtils.GetSearchEngine(1, ParallelismMode.FirstLevelOnly);
+            var engine = Connect4TestUtils.GetSearchEngineBuilder(1, ParallelismMode.FirstLevelOnly);
             var startState = new StartState(new Connect4State(Connect4TestUtils.GetEmptyBoard(), Player.Max));
 
             var results = engine.Compete(startState, 3, (s, d, l) => 0);
 
             var finalState = (ProbabilisticConnect4State) results.FinalState;
-            Assert.IsTrue(BoardEvaluator.IsWin(finalState.Board, Player.Min), "Min should have won");
+            Assert.IsTrue(BoardEvaluator.IsWin(finalState.Board, Player.Min), "Min should have won; Final state is " + finalState);
         }
 
         [TestMethod]

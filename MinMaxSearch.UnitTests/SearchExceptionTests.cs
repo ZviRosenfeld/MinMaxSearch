@@ -17,7 +17,7 @@ namespace MinMaxSearch.UnitTests
             A.CallTo(() => state.GetNeighbors()).Returns(new List<IDeterministicState>());
             A.CallTo(() => state.Turn).Returns(Player.Empty);
 
-            var searchEngine = new SearchEngine();
+            var searchEngine = new SearchEngineBuilder().Build();
             searchEngine.Search(state, 1);
         }
 
@@ -29,7 +29,7 @@ namespace MinMaxSearch.UnitTests
             A.CallTo(() => state.GetNeighbors()).Returns(new List<IDeterministicState> { state });
             A.CallTo(() => state.Turn).Returns(Player.Empty);
 
-            var searchEngine = new SearchEngine();
+            var searchEngine = new SearchEngineBuilder().Build();
             searchEngine.Search(state, 1);
         }
 
@@ -45,7 +45,7 @@ namespace MinMaxSearch.UnitTests
             A.CallTo(() => startState.GetNeighbors()).Returns(new List<IDeterministicState> { state });
             A.CallTo(() => startState.Turn).Returns(Player.Min);
 
-            var searchEngine = new SearchEngine {ParallelismMode = ParallelismMode.NonParallelism};
+            var searchEngine = new SearchEngineBuilder { ParallelismMode = ParallelismMode.NonParallelism}.Build();
             searchEngine.Search(startState, 1);
         }
 
@@ -57,7 +57,7 @@ namespace MinMaxSearch.UnitTests
             A.CallTo(() => state.GetNeighbors()).Returns(new List<IDeterministicState> { state });
             A.CallTo(() => state.Turn).Returns(Player.Max);
 
-            var searchEngine = new SearchEngine() { MaxDegreeOfParallelism = 0 };
+            var searchEngine = new SearchEngineBuilder() { MaxDegreeOfParallelism = 0 }.Build();
             searchEngine.Search(state, 1);
         }
 
@@ -71,7 +71,7 @@ namespace MinMaxSearch.UnitTests
             A.CallTo(() => state.Turn).Returns(Player.Max);
             A.CallTo(() => istate.Turn).Returns(Player.Max);
 
-            var searchEngine = new SearchEngine() { ParallelismMode = ParallelismMode.NonParallelism };
+            var searchEngine = new SearchEngineBuilder() { ParallelismMode = ParallelismMode.NonParallelism }.Build();
             searchEngine.Search(state, 5);
         }
 
@@ -81,7 +81,7 @@ namespace MinMaxSearch.UnitTests
         [ExpectedException(typeof(ArgumentException))]
         public void Search_NegativeDepth_ThrowException(int depth)
         {
-            var engine = new SearchEngine();
+            var engine = new SearchEngineBuilder().Build();
             engine.Search(new IncreasingNumberState(1, Player.Max), depth);
         }
     }
