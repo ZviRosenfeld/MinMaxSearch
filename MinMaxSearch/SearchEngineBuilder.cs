@@ -9,7 +9,11 @@ namespace MinMaxSearch
     {
         private readonly List<IPruner> pruners = new List<IPruner>();
 
-        public void AddPruner(IPruner pruner) => pruners.Add(pruner);
+        public SearchEngineBuilder AddPruner(IPruner pruner)
+        {
+            pruners.Add(pruner);
+            return this;
+        }
 
         /// <summary>
         /// At unstable states, we'll continue searching even after we've hit the maxDepth limit

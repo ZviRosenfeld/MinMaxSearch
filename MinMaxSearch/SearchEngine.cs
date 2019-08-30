@@ -10,6 +10,7 @@ namespace MinMaxSearch
     {
         private ISearchWorker searchWorker;
         
+        [Obsolete("Please use " + nameof(SearchEngineBuilder))]
         public SearchEngine(ISearchWorker searchWorker)
         {
             this.searchWorker = searchWorker;

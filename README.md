@@ -128,7 +128,7 @@ In addition, there are the NonParallelism and TotalParallelism modes.
 In the TotalParallelism mode you can set the degree of parallelisem using the MaxDegreeOfParallelism field (this field will be ignored otherwise).
 
 **DieEarly:**
-If this option is set to true, the algorithm will rerun as soon as it finds a score bigger then SearchEngine.MaxScore for Max or SearchEngine.MinScore for Min.
+If this option is set to true, the algorithm will rerun as soon as it finds a score bigger then SearchEngineBuilder.MaxScore for Max or SearchEngineBuilder.MinScore for Min.
 The rationale behind this is that once the algorithm finds a win there's no point in more searching. (We assume that a score greater then MaxScore is a win for Max, and one smaller then MinScore is a win for Min).
 Note that this will only work if Equals is implement in a meaningful way on your states.
 
@@ -137,7 +137,7 @@ Some states are more interesting than others. With this delegate you can tell th
 IsUnstableState is a delegate of type Func<IState, int, List<IState>, bool>. It receives a state and a list of the states leading up to it, and decides if it's safe to terminate the search at this state.
 
 **Pruners:**
-You can use the method SearchEngine.AddPruner(IPruner pruner) to add pruners to the search algorithm.
+You can use the method SearchEngineBuilder.AddPruner(IPruner pruner) to add pruners to the search algorithm.
 Pruners can be implemented by implementing the IPruner interface. Then, the ShouldPrune(IState state, int depth, List<IState> passedThroughStates) method will be called on every state the algorithm checks. This can provide you with a lot of customization power over the algorithm.
 
 ## CompetitionManager
