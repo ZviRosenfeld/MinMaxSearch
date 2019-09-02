@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using MinMaxSearch.Range;
 
 namespace MinMaxSearch
 {
@@ -15,7 +17,6 @@ namespace MinMaxSearch
         {
             this.searchWorker = searchWorker;
         }
-
         
         /// <summary>
         /// Runs a search.
@@ -75,26 +76,27 @@ namespace MinMaxSearch
         /// In Iterative search, a depth-limited version of depth-first search is run repeatedly with increasing depth limits till some condition is met.
         /// </summary>
         /// <param name="startState"> The state that the search will start from</param>
-        /// <param name="startDepth"> The first search's depth</param>
-        /// <param name="maxDepth"> The max search depth</param>
+        /// <param name="depths"> A lists of the depths to check</param>
         /// <param name="cancellationToken"> Used to terminate the search. We will return the best solution found in the deepest completed search (or null if no search was completed).</param>
-        public SearchResult IterativeSearch(IDeterministicState startState, int startDepth, int maxDepth, CancellationToken cancellationToken)
+        public SearchResult IterativeSearch(IDeterministicState startState, IEnumerable<int> depths, CancellationToken cancellationToken)
         {
-            if (startDepth >= maxDepth)
-                throw new Exception($"{nameof(startDepth)} (== {startDepth}) must be bigger than {nameof(maxDepth)} ( == {maxDepth})");
-
             var stopewatch = new Stopwatch();
             stopewatch.Start();
 
             SearchResult bestResultSoFar = null;
-            int i;
-            for (i = startDepth; i < maxDepth; i++)
-            { 
-                var result = Search(startState, i, cancellationToken);
+            int maxDepth = -1;
+            foreach (var depth in depths)
+            {
+                if (depth < maxDepth) continue;
+
+                var result = Search(startState, depth, cancellationToken);
                 if (!cancellationToken.IsCancellationRequested)
+                {
                     bestResultSoFar = result;
-                if (cancellationToken.IsCancellationRequested)
-                    break;
+                    maxDepth = depth;
+                }
+                else break;
+
                 if (result.AllChildrenAreDeadEnds)
                     break; // No point searching any deeper
             }
@@ -102,8 +104,24 @@ namespace MinMaxSearch
 
             return bestResultSoFar == null
                 ? null
-                : new SearchResult(bestResultSoFar, stopewatch.Elapsed,
-                    cancellationToken.IsCancellationRequested ? i - 1 : i);
+                : new SearchResult(bestResultSoFar, stopewatch.Elapsed, maxDepth);
+        }
+
+        /// <summary>
+        /// Runs an Iterative deepening search.
+        /// In Iterative search, a depth-limited version of depth-first search is run repeatedly with increasing depth limits till some condition is met.
+        /// </summary>
+        /// <param name="startState"> The state that the search will start from</param>
+        /// <param name="startDepth"> The first search's depth</param>
+        /// <param name="maxDepth"> The max search depth</param>
+        /// <param name="cancellationToken"> Used to terminate the search. We will return the best solution found in the deepest completed search (or null if no search was completed).</param>
+        public SearchResult IterativeSearch(IDeterministicState startState, int startDepth, int maxDepth,
+            CancellationToken cancellationToken)
+        {
+            if (startDepth >= maxDepth)
+                throw new Exception($"{nameof(startDepth)} (== {startDepth}) must be bigger than {nameof(maxDepth)} ( == {maxDepth})");
+
+            return IterativeSearch(startState, new RangeEnumerable(startDepth, maxDepth), cancellationToken);
         }
     }
 }

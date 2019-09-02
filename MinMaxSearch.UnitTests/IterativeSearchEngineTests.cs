@@ -86,5 +86,30 @@ namespace MinMaxSearch.UnitTests
             Assert.AreNotEqual(TimeSpan.Zero, result2.SearchTime, $"{nameof(result2)}.{nameof(result2.SearchTime)} shouldn't be zero");
             Assert.IsTrue(result1.SearchTime < result2.SearchTime, $"{nameof(result1)}.{nameof(result1.SearchTime)} = {result1.SearchTime}; {nameof(result2)}.{nameof(result2.SearchTime)} = {result2.SearchTime}");
         }
+
+        [TestMethod]
+        public void IterativeSearch_MinAndMaxSearch_GetFullRangeOfDepth()
+        {
+            var range = new [] {4, 5, 6, 7};
+            var engine = new SearchEngine(new TestSearchWorkerCheckMaxDepth(range));
+            engine.IterativeSearch(new IncreasingNumberState(2, Player.Max), 4, 7, CancellationToken.None);
+        }
+
+        [TestMethod]
+        public void IterativeSearch_ArrayRange_GetFullRangeOfDepth()
+        {
+            var range = new[] { 1, 3, 5 };
+            var engine = new SearchEngine(new TestSearchWorkerCheckMaxDepth(range));
+            engine.IterativeSearch(new IncreasingNumberState(2, Player.Max), range, CancellationToken.None);
+        }
+
+        [TestMethod]
+        public void IterativeSearch_IgnoreDepthsAlreadyChecked()
+        {
+            var actualRange = new[] { 1, 3, 2, 4, 4 };
+            var expactedRange = new [] { 1, 3, 4};
+            var engine = new SearchEngine(new TestSearchWorkerCheckMaxDepth(expactedRange));
+            engine.IterativeSearch(new IncreasingNumberState(2, Player.Max), actualRange, CancellationToken.None);
+        }
     }
 }
