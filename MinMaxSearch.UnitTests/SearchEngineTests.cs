@@ -290,5 +290,30 @@ namespace MinMaxSearch.UnitTests
             var result = engine.Search(new IncreasingNumberState(8, Player.Max), depth);
             Assert.AreEqual(depth, result.SearchDepth, "Got wring depth");
         }
+
+        [DataRow(1, ParallelismMode.NonParallelism)]
+        [DataRow(8, ParallelismMode.TotalParallelism)]
+        [DataRow(1, ParallelismMode.FirstLevelOnly)]
+        [TestMethod]
+        public void CancelSearch_ReturnBestResultSoFar(int degreeOfParallelism, ParallelismMode parallelismMode)
+        {
+            state1.SetNeigbors(state2, state3);
+            state2.SetNeigbor(state2);
+            state3.SetNeigbor(state3);
+            state2.SetEvaluationTo(1);
+            state3.SetEvaluationTo(3);
+            var cancellationSource = new CancellationTokenSource(20);
+            var engine = new SearchEngineBuilder()
+            {
+                MaxDegreeOfParallelism = degreeOfParallelism,
+                ParallelismMode = parallelismMode
+            }.Build();
+
+            var result = engine.SearchAsync(state1, int.MaxValue, cancellationSource.Token).Result;
+
+            Assert.AreEqual(3, result.Evaluation, "Didn't get a good enough state");
+            if (parallelismMode == ParallelismMode.NonParallelism)
+                A.CallTo(() => state3.GetNeighbors()).MustNotHaveHappened();
+        }
     }
 }

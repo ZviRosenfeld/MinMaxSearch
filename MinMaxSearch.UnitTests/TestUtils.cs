@@ -12,6 +12,9 @@ namespace MinMaxSearch.UnitTests
         public static void SetNeigbors(this IDeterministicState state, IEnumerable<IState> neigbors) =>
             A.CallTo(() => state.GetNeighbors()).Returns(neigbors);
 
+        public static void SetNeigbors(this IDeterministicState state, params IState[] neigbors) =>
+            A.CallTo(() => state.GetNeighbors()).Returns(neigbors);
+
         public static void SetNeigbor(this IDeterministicState state, IState neigbor) =>
             A.CallTo(() => state.GetNeighbors()).Returns(new []{neigbor});
 
