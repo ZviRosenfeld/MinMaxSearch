@@ -48,8 +48,7 @@ namespace MinMaxSearch
             
             if (maxDepth < 1)
                 throw new ArgumentException($"{nameof(maxDepth)} must be at least 1. Was {maxDepth}");
-
-            //var searchWorker = new SearchWorker(CreateSearchOptions(), GetThreadManager());
+            
             var searchContext = new SearchContext(maxDepth, 0, cancellationToken);
             var stopwatch = new Stopwatch();
             stopwatch.Start();

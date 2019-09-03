@@ -19,12 +19,11 @@ namespace MinMaxSearch
         }
 
         public int MaxDepth { get; set; }
-        public int CurrentDepth { get; set; }
+        public int CurrentDepth { get; }
         public double Alpha { get; set; }
         public double Bata { get; set; }
         public CancellationToken CancellationToken { get; set; }
-        public List<IState> StatesUpTillNow { get; set; }
+        public List<IState> StatesUpTillNow { get; }
         public bool PruneAtMaxDepth { get; set; }
-        public Player StartPlayer { get; }
     }
 }
