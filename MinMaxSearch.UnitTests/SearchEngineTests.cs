@@ -43,6 +43,25 @@ namespace MinMaxSearch.UnitTests
         [DataRow(8, ParallelismMode.TotalParallelism)]
         [DataRow(1, ParallelismMode.FirstLevelOnly)]
         [TestMethod]
+        public void Search_IsSearchCompletedTrue(int degreeOfParallelism, ParallelismMode parallelismMode)
+        {
+            state1.SetNeigbor(endState1);
+
+            var engine = new SearchEngineBuilder()
+            {
+                MaxDegreeOfParallelism = degreeOfParallelism,
+                ParallelismMode = parallelismMode
+            }.Build();
+            var result = engine.Search(state1, 5);
+
+            Assert.IsTrue(result.IsSearchCompleted, "Search should have been completed");
+        }
+
+        [DataRow(1, ParallelismMode.TotalParallelism)]
+        [DataRow(2, ParallelismMode.TotalParallelism)]
+        [DataRow(8, ParallelismMode.TotalParallelism)]
+        [DataRow(1, ParallelismMode.FirstLevelOnly)]
+        [TestMethod]
         public void Search_WinMovesTwoAndThreeStepsAway_FindTheNearerOne(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
             state1.SetNeigbors(new[] { state2, endState1, state3 });
@@ -246,6 +265,7 @@ namespace MinMaxSearch.UnitTests
 
             Assert.AreEqual(1, result.Evaluation);
             Assert.AreEqual(0, result.StateSequence.Count, "We shouldn't have gotten to state3");
+            Assert.IsFalse(result.IsSearchCompleted, "The search shouldn't have been completed");
         }
 
         [TestMethod]

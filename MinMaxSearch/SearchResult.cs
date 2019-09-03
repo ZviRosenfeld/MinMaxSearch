@@ -14,6 +14,7 @@ namespace MinMaxSearch
             Leaves = leaves;
             InternalNodes = internalNodes;
             AllChildrenAreDeadEnds = allChildrenAreDeadEnds;
+            IsSearchCompleted = true;
             SearchDepth = -1;
             SearchTime = TimeSpan.Zero;
         }
@@ -21,6 +22,7 @@ namespace MinMaxSearch
         public SearchResult(double evaluation, IState endState)
         {
             Evaluation = evaluation;
+            IsSearchCompleted = true;
             SearchDepth = 0;
             StateSequence = new List<IState> {endState};
             Leaves = 1;
@@ -29,7 +31,7 @@ namespace MinMaxSearch
             SearchTime = TimeSpan.Zero;
         }
 
-        public SearchResult(SearchResult other, TimeSpan searchTime, int searchDepth = -1)
+        public SearchResult(SearchResult other, TimeSpan searchTime, int searchDepth, bool isSearchCompleted)
         {
             Evaluation = other.Evaluation;
             StateSequence = other.StateSequence.ToList();
@@ -37,6 +39,7 @@ namespace MinMaxSearch
             InternalNodes = other.InternalNodes;
             AllChildrenAreDeadEnds = other.AllChildrenAreDeadEnds;
             SearchTime = searchTime;
+            IsSearchCompleted = isSearchCompleted;
             SearchDepth = searchDepth;
         }
 
@@ -58,5 +61,11 @@ namespace MinMaxSearch
         public TimeSpan SearchTime { get; }
 
         public int SearchDepth { get; }
+
+        /// <summary>
+        /// Was the search completed, or stopped early due to a a cancellation token?
+        /// In IterativeSearchs IsSearchCompleted will be true as long as at least the first search was completed (even if deeper searches were canceled).
+        /// </summary>
+        public bool IsSearchCompleted { get; }
     }
 }
