@@ -4,7 +4,7 @@ using MinMaxSearch.ThreadManagment;
 
 namespace MinMaxSearch
 {
-    class SearchWorker : ISearchWorker
+    class SearchWorker
     {
         private readonly SearchOptions searchOptions;
         private readonly DeterministicSearchUtils deterministicSearchUtils;

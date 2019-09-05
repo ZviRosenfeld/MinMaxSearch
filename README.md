@@ -123,7 +123,7 @@ If this option is off, you may experience seemingly weird behavior. Say the algo
 **ParallelismMode**
 There are 3 ParallelismMode: FirstLevelOnly, which is the recommended mode and normally yields the fastest searches. 
 In addition, there are the NonParallelism and TotalParallelism modes. 
-In the TotalParallelism mode you can set the degree of parallelisem using the MaxDegreeOfParallelism field (this field will be ignored otherwise).
+In the TotalParallelism mode you can set the degree of parallelism using the MaxDegreeOfParallelism field (this field will be ignored otherwise).
 
 **DieEarly:**
 If this option is set to true, the algorithm will rerun as soon as it finds a score bigger then SearchEngine.MaxScore for Max or SearchEngine.MinScore for Min.
@@ -138,15 +138,32 @@ IsUnstableState is a delegate of type Func<IState, int, List<IState>, bool>. It 
 You can use the method SearchEngine.AddPruner(IPruner pruner) to add pruners to the search algorithm.
 Pruners can be implemented by implementing the IPruner interface. Then, the ShouldPrune(IState state, int depth, List<IState> passedThroughStates) method will be called on every state the algorithm checks. This can provide you with a lot of customization power over the algorithm.
 
+## IterativeSearch
+
+The [IterativeSearchWrapper](MinMaxSearch/IterativeSearchWrapper.cs) wraps a search engine and can be used to perform [iterative searches](https://en.wikipedia.org/wiki/Iterative_deepening_depth-first_search).
+In Iterative search, a depth-limited version of depth-first search is run repeatedly with increasing depth limits till some condition is met.
+
+example:
+```csharp
+var startState = new TicTacToeState();
+var startDepth = 2;
+var endDepth = 5;
+var CancellationTokenSource = new CancellationTokenSource();
+var engine = new SearchEngine();
+var iterativeEngine = new IterativeSearchWrapper(engine);
+// This will run an IterativeSearch beginning at depth 2, and ending with depth 5 (including)
+var searchResult = engine.IterativeSearch(startState, startDepth, endDepth, CancellationTokenSource.Token);
+```
+
 ## CompetitionManager
 
-Want to test the effect of diffrent evaluation-strategies or search options? CompetitionManager is you freind.
+Want to test the effect of different evaluation-strategies or search options? CompetitionManager is you friend.
 
 CompetitionManager can play a complete game in which the players can be using a different engines/search-depths/evaluation-strategies.
 CompetitionManager will return statistics on the game, including which player won, and how long each player took doing his searching.
 
 ```CSharp
-namespace MinMaxSearch.Benckmarking
+namespace MinMaxSearch.Benchmarking
 {
     public static class CompetitionManager
     {

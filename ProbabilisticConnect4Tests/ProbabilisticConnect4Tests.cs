@@ -2,7 +2,7 @@ using System;
 using Connect4Tests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MinMaxSearch;
-using MinMaxSearch.Benckmarking;
+using MinMaxSearch.Benchmarking;
 
 namespace ProbabilisticConnect4Tests
 {

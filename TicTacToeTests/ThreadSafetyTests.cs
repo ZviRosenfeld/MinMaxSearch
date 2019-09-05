@@ -63,7 +63,8 @@ namespace TicTacToeTests
                 { Player.Empty, Player.Empty, Player.Empty},
             }, Player.Max);
 
-            var result = engine.IterativeSearch(startState, 1, 10, CancellationToken.None);
+            var iterativeEngine = new IterativeSearchWrapper(engine);
+            var result = iterativeEngine.IterativeSearch(startState, 1, 10, CancellationToken.None);
             Assert.AreEqual(TicTacToeState.MaxValue, result.Evaluation);
         }
     }
