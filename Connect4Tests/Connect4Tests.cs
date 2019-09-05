@@ -148,12 +148,12 @@ namespace Connect4Tests
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
             }, Player.Max);
 
-            var engine = new SearchEngineBuilder()
+            var engine = new SearchEngine()
             {
                 FavorShortPaths = true,
                 MaxDegreeOfParallelism = degreeOfParallelism,
                 ParallelismMode = parallelismMode
-            }.Build();
+            };
             var evaluation = engine.Search(startState, 5);
 
             Assert.IsTrue(evaluation.StateSequence.Count == 1, "Max should have won in one move");
@@ -178,12 +178,12 @@ namespace Connect4Tests
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
             }, Player.Min);
 
-            var engine = new SearchEngineBuilder()
+            var engine = new SearchEngine()
             {
                 FavorShortPaths = true,
                 MaxDegreeOfParallelism = degreeOfParallelism,
                 ParallelismMode = parallelismMode
-            }.Build();
+            };
             var evaluation = engine.Search(startState, 5);
 
             Assert.IsTrue(evaluation.StateSequence.Count > 2, "Min should have blocked the near win");

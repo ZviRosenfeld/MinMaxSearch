@@ -143,12 +143,9 @@ namespace TicTacToeTests
             Assert.IsTrue(evaluation.Leaves > 500, "Too few leaves in search.");
             Assert.IsTrue(evaluation.InternalNodes > 500, "Too few intarnal nodes in search.");
         }
-
+        
         public static SearchEngine GetSearchEngine(int degreeOfParallelism, ParallelismMode parallelismMode) =>
-            GetSearchEngineBuilder(degreeOfParallelism, parallelismMode).Build();
-
-        public static SearchEngineBuilder GetSearchEngineBuilder(int degreeOfParallelism, ParallelismMode parallelismMode) =>
-            new SearchEngineBuilder()
+            new SearchEngine()
             {
                 MaxDegreeOfParallelism = degreeOfParallelism,
                 DieEarly = true,

@@ -13,7 +13,7 @@ namespace TicTacToeTests
         [TestMethod]
         public void Compete_EngineNineDepthsBeetsEngineOneDepth()
         {
-            var engine = TicTacToeBassicTests.GetSearchEngineBuilder(1, ParallelismMode.FirstLevelOnly);
+            var engine = TicTacToeBassicTests.GetSearchEngine(1, ParallelismMode.FirstLevelOnly);
             var competitionResult = CompetitionManager.Compete(engine, engine,
                 TicTacToeBassicTests.GetEmptyTicTacToeState(), 1, 9, 100);
 
@@ -28,7 +28,7 @@ namespace TicTacToeTests
         [TestMethod]
         public void Compete_TestAlternateEvaluationStrategie()
         {
-            var engine = TicTacToeBassicTests.GetSearchEngineBuilder(1, ParallelismMode.FirstLevelOnly);
+            var engine = TicTacToeBassicTests.GetSearchEngine(1, ParallelismMode.FirstLevelOnly);
             var competitionResult = engine.Compete(TicTacToeBassicTests.GetEmptyTicTacToeState(), 9, (s, d, l) => s.Evaluate(d, l), (s, d, l) => 0);
 
             var finalState = (TicTacToeState)competitionResult.States.Last();
@@ -38,7 +38,7 @@ namespace TicTacToeTests
         [TestMethod]
         public void Compete_GameEndsAtMaxDepth()
         {
-            var engine = TicTacToeBassicTests.GetSearchEngineBuilder(1, ParallelismMode.FirstLevelOnly);
+            var engine = TicTacToeBassicTests.GetSearchEngine(1, ParallelismMode.FirstLevelOnly);
             var competitionResult = engine.Compete(TicTacToeBassicTests.GetEmptyTicTacToeState(), 2, 2, maxPlayDepth: 2);
 
             Assert.AreEqual(2, competitionResult.GameDepth);
@@ -49,7 +49,7 @@ namespace TicTacToeTests
         [ExpectedException(typeof(ArgumentException))]
         public void Compete_MinAndMaxAlternateEvaluation_ThrowException()
         {
-            var engine = TicTacToeBassicTests.GetSearchEngineBuilder(1, ParallelismMode.FirstLevelOnly);
+            var engine = TicTacToeBassicTests.GetSearchEngine(1, ParallelismMode.FirstLevelOnly);
             engine.Compete(TicTacToeBassicTests.GetEmptyTicTacToeState(), 2);           
         }
     }

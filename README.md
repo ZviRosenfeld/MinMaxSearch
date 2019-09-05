@@ -7,13 +7,11 @@ You can find MinMaxSearch library on nuget.org via package name MinMaxSearch.
 
 ## How to Use
 
-You'll need to use the [SearchEngineBuilder](MinMaxSearch/SearchEngineBuilder.cs) to create a new instance of a SearchEngine.
-
 example1:
 ```csharp
 var startState = new TicTacToeState();
 var searchDepth = 5;
-var engine = new SearchEngineBuilder().Build();
+var engine = new SearchEngine();
 var searchResult = engine.Search(startState, searchDepth);
 ```
 
@@ -22,13 +20,13 @@ example2:
 var startState = new Connect4State();
 var searchDepth = 5;
 var CancellationTokenSource = new CancellationTokenSource();
-var engine =  new SearchEngineBuilder()
+var engine =  new SearchEngine()
 {
     FavorShortPaths = true,
     DieEarly = true,
     MaxScore = 99,
     MinScore = -99
-}.Build();
+};
 var searchResult = engine.Search(startState, searchDepth, CancellationTokenSource.Token);
 ```
 
@@ -128,7 +126,7 @@ In addition, there are the NonParallelism and TotalParallelism modes.
 In the TotalParallelism mode you can set the degree of parallelisem using the MaxDegreeOfParallelism field (this field will be ignored otherwise).
 
 **DieEarly:**
-If this option is set to true, the algorithm will rerun as soon as it finds a score bigger then SearchEngineBuilder.MaxScore for Max or SearchEngineBuilder.MinScore for Min.
+If this option is set to true, the algorithm will rerun as soon as it finds a score bigger then SearchEngine.MaxScore for Max or SearchEngine.MinScore for Min.
 The rationale behind this is that once the algorithm finds a win there's no point in more searching. (We assume that a score greater then MaxScore is a win for Max, and one smaller then MinScore is a win for Min).
 Note that this will only work if Equals is implement in a meaningful way on your states.
 
@@ -137,7 +135,7 @@ Some states are more interesting than others. With this delegate you can tell th
 IsUnstableState is a delegate of type Func<IState, int, List<IState>, bool>. It receives a state and a list of the states leading up to it, and decides if it's safe to terminate the search at this state.
 
 **Pruners:**
-You can use the method SearchEngineBuilder.AddPruner(IPruner pruner) to add pruners to the search algorithm.
+You can use the method SearchEngine.AddPruner(IPruner pruner) to add pruners to the search algorithm.
 Pruners can be implemented by implementing the IPruner interface. Then, the ShouldPrune(IState state, int depth, List<IState> passedThroughStates) method will be called on every state the algorithm checks. This can provide you with a lot of customization power over the algorithm.
 
 ## CompetitionManager
@@ -155,13 +153,13 @@ namespace MinMaxSearch.Benckmarking
         /// <summary>
         /// With this method you can simulate a complete game and compare different evaluation-strategies.
         /// </summary>
-        /// <param name="engineBuilder"> A builder for the engine to use</param>
+        /// <param name="engine"> The engine to use</param>
         /// <param name="startState"> The starting sate</param>
         /// <param name="searchDepth"> How deep should we search</param>
         /// <param name="maxPlayDepth"> After how many moves should we terminate the game if no one won</param>
         /// <param name="maxAlternateEvaluation"> Will be used to evaluate the board on max's turn in stead of the state's regaler Evaluate method (if null, will use the default state's evaluation method)</param>
         /// <param name="minAlternateEvaluation"> Will be used to evaluate the board on min's turn in stead of the state's regaler Evaluate method (if null, will use the default state's evaluation method)</param>
-        public static CompetitionResult Compete(this SearchEngineBuilder engineBuilder, IDeterministicState startState,
+        public static CompetitionResult Compete(this SearchEngine engine, IDeterministicState startState,
             int searchDepth, Func<IState, int, List<IState>, double> maxAlternateEvaluation = null,
             Func<IState, int, List<IState>, double> minAlternateEvaluation = null, int maxPlayDepth = int.MaxValue,
             CancellationToken? cancellationToken = null)
@@ -172,14 +170,14 @@ namespace MinMaxSearch.Benckmarking
         /// <summary>
         /// With this method you can simulate a complete game and compare different search-depth or evaluation-strategies.
         /// </summary>
-        /// <param name="engineBuilder"> A builder for the engine to use</param>
+        /// <param name="engine"> The engine to use</param>
         /// <param name="startState"> The starting sate</param>
         /// <param name="playerMaxSearchDepth"> How deep should max search</param>
         /// <param name="playerMinSearchDepth"> How deep should min search</param>
         /// <param name="maxPlayDepth"> After how many moves should we terminate the game if no one won</param>
         /// <param name="maxAlternateEvaluation"> Will be used to evaluate the board on max's turn in stead of the state's regaler Evaluate method (if null, will use the default state's evaluation method)</param>
         /// <param name="minAlternateEvaluation"> Will be used to evaluate the board on min's turn in stead of the state's regaler Evaluate method (if null, will use the default state's evaluation method)</param>
-        public static CompetitionResult Compete(this SearchEngineBuilder engineBuilder, IDeterministicState startState,
+        public static CompetitionResult Compete(this SearchEngine engine, IDeterministicState startState,
             int playerMaxSearchDepth, int playerMinSearchDepth, Func<IState, int, List<IState>, double> maxAlternateEvaluation = null,
             Func<IState, int, List<IState>, double> minAlternateEvaluation = null, int maxPlayDepth = int.MaxValue,
             CancellationToken? cancellationToken = null)
@@ -190,15 +188,15 @@ namespace MinMaxSearch.Benckmarking
         /// <summary>
         /// With this method you can simulate a complete game and compare different engines, search-depths or evaluation-strategies.
         /// </summary>
-        /// <param name="maxEngineBuilder"> A builder for the engine to use for max</param>
-        /// <param name="minEngineBuilder"> A builder for the engine to use for min</param>
+        /// <param name="maxEngine"> An engine to use for max</param>
+        /// <param name="minEngine"> An engine to use for min</param>
         /// <param name="startState"> The starting sate</param>
         /// <param name="playerMaxSearchDepth"> How deep should max search</param>
         /// <param name="playerMinSearchDepth"> How deep should min search</param>
         /// <param name="maxPlayDepth"> After how many moves should we terminate the game if no one won</param>
         /// <param name="maxAlternateEvaluation"> Will be used to evaluate the board on max's turn in stead of the state's regaler Evaluate method (if null, will use the default state's evaluation method)</param>
         /// <param name="minAlternateEvaluation"> Will be used to evaluate the board on min's turn in stead of the state's regaler Evaluate method (if null, will use the default state's evaluation method)</param>
-        public static CompetitionResult Compete(SearchEngineBuilder maxEngineBuilder, SearchEngineBuilder minEngineBuilder,
+        public static CompetitionResult Compete(SearchEngine maxEngine, SearchEngine minEngine,
             IDeterministicState startState, int playerMaxSearchDepth, int playerMinSearchDepth, 
             int maxPlayDepth = int.MaxValue, Func<IState, int, List<IState>, double> maxAlternateEvaluation = null,
             Func<IState, int, List<IState>, double> minAlternateEvaluation = null, CancellationToken? cancellationToken = null)

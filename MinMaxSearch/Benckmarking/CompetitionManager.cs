@@ -10,13 +10,13 @@ namespace MinMaxSearch.Benckmarking
         /// <summary>
         /// With this method you can simulate a complete game and compare different evaluation-strategies.
         /// </summary>
-        /// <param name="engineBuilder"> A builder for the engine to use</param>
+        /// <param name="engine"> The engine to use</param>
         /// <param name="startState"> The starting sate</param>
         /// <param name="searchDepth"> How deep should we search</param>
         /// <param name="maxPlayDepth"> After how many moves should we terminate the game if no one won</param>
         /// <param name="maxAlternateEvaluation"> Will be used to evaluate the board on max's turn in stead of the state's regaler Evaluate method (if null, will use the default state's evaluation method)</param>
         /// <param name="minAlternateEvaluation"> Will be used to evaluate the board on min's turn in stead of the state's regaler Evaluate method (if null, will use the default state's evaluation method)</param>
-        public static CompetitionResult Compete(this SearchEngineBuilder engineBuilder, IDeterministicState startState,
+        public static CompetitionResult Compete(this SearchEngine engine, IDeterministicState startState,
             int searchDepth, Func<IState, int, List<IState>, double> maxAlternateEvaluation = null,
             Func<IState, int, List<IState>, double> minAlternateEvaluation = null, int maxPlayDepth = int.MaxValue,
             CancellationToken? cancellationToken = null)
@@ -24,49 +24,46 @@ namespace MinMaxSearch.Benckmarking
             if (maxAlternateEvaluation == null && minAlternateEvaluation == null)
                 throw new ArgumentException($"At least one of {nameof(maxAlternateEvaluation)} or {nameof(minAlternateEvaluation)} shouldn't be null");
             
-            return Compete(engineBuilder, engineBuilder.Clone(), startState, searchDepth, searchDepth, maxPlayDepth, maxAlternateEvaluation, minAlternateEvaluation, cancellationToken);
+            return Compete(engine, engine.Clone(), startState, searchDepth, searchDepth, maxPlayDepth, maxAlternateEvaluation, minAlternateEvaluation, cancellationToken);
         }
 
         /// <summary>
         /// With this method you can simulate a complete game and compare different search-depth or evaluation-strategies.
         /// </summary>
-        /// <param name="engineBuilder"> A builder for the engine to use</param>
+        /// <param name="engine"> The engine to use</param>
         /// <param name="startState"> The starting sate</param>
         /// <param name="playerMaxSearchDepth"> How deep should max search</param>
         /// <param name="playerMinSearchDepth"> How deep should min search</param>
         /// <param name="maxPlayDepth"> After how many moves should we terminate the game if no one won</param>
         /// <param name="maxAlternateEvaluation"> Will be used to evaluate the board on max's turn in stead of the state's regaler Evaluate method (if null, will use the default state's evaluation method)</param>
         /// <param name="minAlternateEvaluation"> Will be used to evaluate the board on min's turn in stead of the state's regaler Evaluate method (if null, will use the default state's evaluation method)</param>
-        public static CompetitionResult Compete(this SearchEngineBuilder engineBuilder, IDeterministicState startState,
+        public static CompetitionResult Compete(this SearchEngine engine, IDeterministicState startState,
             int playerMaxSearchDepth, int playerMinSearchDepth, Func<IState, int, List<IState>, double> maxAlternateEvaluation = null,
             Func<IState, int, List<IState>, double> minAlternateEvaluation = null, int maxPlayDepth = int.MaxValue,
             CancellationToken? cancellationToken = null)
         {
-            return Compete(engineBuilder, engineBuilder.Clone(), startState, playerMaxSearchDepth, playerMinSearchDepth, maxPlayDepth, maxAlternateEvaluation, minAlternateEvaluation, cancellationToken);
+            return Compete(engine, engine.Clone(), startState, playerMaxSearchDepth, playerMinSearchDepth, maxPlayDepth, maxAlternateEvaluation, minAlternateEvaluation, cancellationToken);
         }
 
         /// <summary>
         /// With this method you can simulate a complete game and compare different engines, search-depths or evaluation-strategies.
         /// </summary>
-        /// <param name="maxEngineBuilder"> A builder for the engine to use for max</param>
-        /// <param name="minEngineBuilder"> A builder for the engine to use for min</param>
+        /// <param name="maxEngine"> An engine to use for max</param>
+        /// <param name="minEngine"> An engine to use for min</param>
         /// <param name="startState"> The starting sate</param>
         /// <param name="playerMaxSearchDepth"> How deep should max search</param>
         /// <param name="playerMinSearchDepth"> How deep should min search</param>
         /// <param name="maxPlayDepth"> After how many moves should we terminate the game if no one won</param>
         /// <param name="maxAlternateEvaluation"> Will be used to evaluate the board on max's turn in stead of the state's regaler Evaluate method (if null, will use the default state's evaluation method)</param>
         /// <param name="minAlternateEvaluation"> Will be used to evaluate the board on min's turn in stead of the state's regaler Evaluate method (if null, will use the default state's evaluation method)</param>
-        public static CompetitionResult Compete(SearchEngineBuilder maxEngineBuilder, SearchEngineBuilder minEngineBuilder,
+        public static CompetitionResult Compete(SearchEngine maxEngine, SearchEngine minEngine,
             IDeterministicState startState, int playerMaxSearchDepth, int playerMinSearchDepth, 
             int maxPlayDepth = int.MaxValue, Func<IState, int, List<IState>, double> maxAlternateEvaluation = null,
             Func<IState, int, List<IState>, double> minAlternateEvaluation = null, CancellationToken? cancellationToken = null)
         {
-            maxEngineBuilder.AlternateEvaluation = maxAlternateEvaluation;
-            minEngineBuilder.AlternateEvaluation = minAlternateEvaluation;
-
-            var maxEngine = maxEngineBuilder.Build();
-            var minEngine = minEngineBuilder.Build();
-
+            maxEngine.AlternateEvaluation = maxAlternateEvaluation;
+            minEngine.AlternateEvaluation = minAlternateEvaluation;
+            
             var currentState = startState;
             var resultFactory = new CompetitionResultFactory();
             for (int i = 0; ContainsNeigbors(currentState) && i < maxPlayDepth; i++)
