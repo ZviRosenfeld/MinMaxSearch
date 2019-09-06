@@ -33,14 +33,27 @@ namespace MinMaxSearch
         /// <param name="startState"> The state that the search will start from</param>
         /// <param name="startDepth"> The first search's depth</param>
         /// <param name="maxDepth"> The max search depth</param>
-        /// <param name="cancellationToken"> Used to terminate the search. We will return the best solution found in the deepest completed search (or, if the first search wasn't completed, the results found so far in the first search).</param>
+        /// <param name="cancellationToken"> Terminates the search immediately. We will return the best solution found in the deepest completed search (or, if the first search wasn't completed, the results found so far in the first search).</param>
         public SearchResult IterativeSearch(IDeterministicState startState, int startDepth, int maxDepth,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken) =>
+            IterativeSearch(startState, startDepth, maxDepth, cancellationToken, CancellationToken.None);
+
+        /// <summary>
+        /// Runs an iterative deepening search.
+        /// In Iterative search, a depth-limited version of depth-first search is run repeatedly with increasing depth limits till some condition is met.
+        /// </summary>
+        /// <param name="startState"> The state that the search will start from</param>
+        /// <param name="startDepth"> The first search's depth</param>
+        /// <param name="maxDepth"> The max search depth</param>
+        /// <param name="cancellationToken"> Terminates the search immediately. We will return the best solution found in the deepest completed search (or, if the first search wasn't completed, the results found so far in the first search).</param>
+        /// <param name="cancellationTokenAfterFirstSearch">This token will terminate the search once the first search was complete (or immediately if the first search has already been completed).</param>
+        public SearchResult IterativeSearch(IDeterministicState startState, int startDepth, int maxDepth,
+            CancellationToken cancellationToken, CancellationToken cancellationTokenAfterFirstSearch)
         {
             if (startDepth >= maxDepth)
                 throw new Exception($"{nameof(startDepth)} (== {startDepth}) must be bigger than {nameof(maxDepth)} ( == {maxDepth})");
 
-            return IterativeSearch(startState, new RangeEnumerable(startDepth, maxDepth), cancellationToken);
+            return IterativeSearch(startState, new RangeEnumerable(startDepth, maxDepth), cancellationToken, cancellationTokenAfterFirstSearch);
         }
 
         /// <summary>
@@ -49,8 +62,19 @@ namespace MinMaxSearch
         /// </summary>
         /// <param name="startState"> The state that the search will start from</param>
         /// <param name="depths"> A lists of the depths to check</param>
-        /// <param name="cancellationToken"> Used to terminate the search. We will return the best solution found in the deepest completed search (or, if the first search wasn't completed, the results found so far in the first search).</param>
-        public SearchResult IterativeSearch(IDeterministicState startState, IEnumerable<int> depths, CancellationToken cancellationToken)
+        /// <param name="cancellationToken"> Terminates the search immediately. We will return the best solution found in the deepest completed search (or, if the first search wasn't completed, the results found so far in the first search).</param>
+        public SearchResult IterativeSearch(IDeterministicState startState, IEnumerable<int> depths, CancellationToken cancellationToken) =>
+            IterativeSearch(startState, depths, cancellationToken, CancellationToken.None);
+
+        /// <summary>
+        /// Runs an iterative deepening search.
+        /// In Iterative search, a depth-limited version of depth-first search is run repeatedly with increasing depth limits till some condition is met.
+        /// </summary>
+        /// <param name="startState"> The state that the search will start from</param>
+        /// <param name="depths"> A lists of the depths to check</param>
+        /// <param name="cancellationToken"> Terminates the search immediately. We will return the best solution found in the deepest completed search (or, if the first search wasn't completed, the results found so far in the first search).</param>
+        /// <param name="cancellationTokenAfterFirstSearch">This token will terminate the search once the first search was complete (or immediately if the first search has already been completed).</param>
+        public SearchResult IterativeSearch(IDeterministicState startState, IEnumerable<int> depths, CancellationToken cancellationToken, CancellationToken cancellationTokenAfterFirstSearch)
         {
             var stopewatch = new Stopwatch();
             stopewatch.Start();
@@ -60,19 +84,26 @@ namespace MinMaxSearch
             foreach (var depth in depths)
             {
                 if (depth < maxDepth) continue;
+                else maxDepth = depth;
 
                 var result = searchEngine.Search(startState, depth, cancellationToken);
-                if (!cancellationToken.IsCancellationRequested || bestResultSoFar == null)
+                if (cancellationToken.IsCancellationRequested  || cancellationTokenAfterFirstSearch.IsCancellationRequested)
                 {
-                    bestResultSoFar = result;
-                    maxDepth = depth;
+                    if (bestResultSoFar == null)
+                        bestResultSoFar = result;
+
+                    break;
                 }
-                else break;
+
+                bestResultSoFar = result;
 
                 if (result.AllChildrenAreDeadEnds)
                     break; // No point searching any deeper
             }
             stopewatch.Stop();
+
+            if (bestResultSoFar == null)
+                throw new InternalException($"Code 1000 ({nameof(bestResultSoFar)} is null)");
 
             return new SearchResult(bestResultSoFar, stopewatch.Elapsed, maxDepth, bestResultSoFar.IsSearchCompleted);
         }

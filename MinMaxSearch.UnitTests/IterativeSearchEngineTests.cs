@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using FakeItEasy;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MinMaxSearch.UnitTests.TestStates;
 
@@ -16,31 +17,52 @@ namespace MinMaxSearch.UnitTests
             var searchEngine = new IterativeSearchWrapper(new SearchEngine());
             searchEngine.IterativeSearch(new IncreasingNumberState(1, Player.Max), 2, 2, CancellationToken.None);
         }
-
-        [DataRow(1, ParallelismMode.TotalParallelism)]
-        [DataRow(2, ParallelismMode.TotalParallelism)]
-        [DataRow(8, ParallelismMode.TotalParallelism)]
-        [DataRow(1, ParallelismMode.FirstLevelOnly)]
+        
         [TestMethod]
-        public void IterativeSearch_SearchCanceldBeforeFirstSearchFinished_DontReturnNullResult(int degreeOfParallelism, ParallelismMode parallelismMode)
+        public void IterativeSearch_SearchCanceldBeforeFirstSearchFinished_DontReturnNullResult()
         {
             var cancellationSource = new CancellationTokenSource();
             cancellationSource.Cancel();
-            var searchEngine = new IterativeSearchWrapper(new SearchEngine { MaxDegreeOfParallelism = degreeOfParallelism, ParallelismMode = parallelismMode});
+            var searchEngine = new IterativeSearchWrapper(new SearchEngine());
             var result = searchEngine.IterativeSearch(new IncreasingNumberState(1, Player.Max), 1, 2, cancellationSource.Token);
             Assert.IsNotNull(result, "We shouldn't have return a null result");
             Assert.IsFalse(result.IsSearchCompleted, "The search shouldn't have been completed");
         }
-
-        [DataRow(1, ParallelismMode.TotalParallelism)]
-        [DataRow(2, ParallelismMode.TotalParallelism)]
-        [DataRow(8, ParallelismMode.TotalParallelism)]
-        [DataRow(1, ParallelismMode.FirstLevelOnly)]
+        
         [TestMethod]
-        public void IterativeSearch_SearchCancled_WeDontContinueLookingAfterSearchCancled(int degreeOfParallelism, ParallelismMode parallelismMode)
+        public void IterativeSearch_CancellationTokenAfterFirstSearchCanceldBeforeFirstSearchFinished_FinishFirstSearch()
+        {
+            var cancellationSource = new CancellationTokenSource();
+            cancellationSource.Cancel();
+            var searchEngine = new IterativeSearchWrapper(new SearchEngine());
+            var result = searchEngine.IterativeSearch(new IncreasingNumberState(1, Player.Max), 1, 2, CancellationToken.None, cancellationSource.Token);
+            Assert.IsTrue(result.IsSearchCompleted, "The search should have been completed");
+            Assert.AreEqual(1, result.SearchDepth);
+        }
+
+        [TestMethod]
+        public void IterativeSearch_DontContinueLookingAfterCancellationTokenAfterFirstSearchIsCanceld()
+        {
+            var cancellationSource = new CancellationTokenSource();
+            var engine = A.Fake<ISearchEngine>();
+            A.CallTo(() => engine.Search(A<IDeterministicState>._, A<int>._, A<CancellationToken>._)).ReturnsLazily(
+                (IDeterministicState s, int d, CancellationToken c) =>
+                {
+                    cancellationSource.Cancel();
+                    return new SearchResult(2, s, false);
+                });
+            var searchEngine = new IterativeSearchWrapper(engine);
+            var result = searchEngine.IterativeSearch(new IncreasingNumberState(1, Player.Max), 1, 2, CancellationToken.None, cancellationSource.Token);
+            Assert.AreEqual(1, result.SearchDepth);
+            A.CallTo(() => engine.Search(A<IDeterministicState>._, A<int>._, A<CancellationToken>._))
+                .MustHaveHappenedOnceExactly();
+        }
+
+        [TestMethod]
+        public void IterativeSearch_SearchCancled_WeDontContinueLookingAfterSearchCancled()
         {
             var cancellationSource = new CancellationTokenSource(100);
-            var searchEngine = new IterativeSearchWrapper(new SearchEngine() {MaxDegreeOfParallelism = degreeOfParallelism});
+            var searchEngine = new IterativeSearchWrapper(new SearchEngine());
             var result = Task.Run(() => searchEngine.IterativeSearch(new CancelAtValue4State(1, cancellationSource, Player.Max), 1, int.MaxValue, cancellationSource.Token));
             result.Wait(200);
 
@@ -49,18 +71,10 @@ namespace MinMaxSearch.UnitTests
             Assert.IsTrue(result.Result.IsSearchCompleted, "The search should have been completed");
         }
 
-        [DataRow(1, ParallelismMode.TotalParallelism)]
-        [DataRow(2, ParallelismMode.TotalParallelism)]
-        [DataRow(8, ParallelismMode.TotalParallelism)]
-        [DataRow(1, ParallelismMode.FirstLevelOnly)]
         [TestMethod]
-        public void IterativeSearch_TimeoutSet_WeDontContinueLookingAfterTimeout(int degreeOfParallelism, ParallelismMode parallelismMode)
+        public void IterativeSearch_TimeoutSet_WeDontContinueLookingAfterTimeout()
         {
-            var searchEngine = new IterativeSearchWrapper(new SearchEngine()
-            {
-                MaxDegreeOfParallelism = degreeOfParallelism,
-                ParallelismMode = parallelismMode
-            });
+            var searchEngine = new IterativeSearchWrapper(new SearchEngine());
             var result = Task.Run(() => searchEngine.IterativeSearch(new SlowState(0), 1, int.MaxValue, TimeSpan.FromMilliseconds(200)));
             
             Assert.IsFalse(result.IsCompleted, "We shouldn't have stopped running yet");
@@ -71,24 +85,22 @@ namespace MinMaxSearch.UnitTests
             Assert.IsTrue(result.Result.IsSearchCompleted, "The search should have been completed");
         }
 
-        [DataRow(8, ParallelismMode.TotalParallelism)]
-        [DataRow(2, ParallelismMode.FirstLevelOnly)]
-        [DataRow(8, ParallelismMode.FirstLevelOnly)]
+        [DataRow(8)]
+        [DataRow(2)]
         [TestMethod]
-        public void Search_SearchDepthIsRight(int depth, ParallelismMode parallelismMode)
+        public void Search_SearchDepthIsRight(int depth)
         {
-            var engine = new IterativeSearchWrapper(new SearchEngine() {MaxDegreeOfParallelism = 8});
+            var engine = new IterativeSearchWrapper(new SearchEngine());
             var result = engine.IterativeSearch(new IncreasingNumberState(8, Player.Max), 1, depth, CancellationToken.None);
             Assert.AreEqual(depth, result.SearchDepth, "Got wring depth");
         }
 
-        [DataRow(8, ParallelismMode.TotalParallelism)]
-        [DataRow(2, ParallelismMode.FirstLevelOnly)]
-        [DataRow(8, ParallelismMode.FirstLevelOnly)]
+        [DataRow(2)]
+        [DataRow(8)]
         [TestMethod]
-        public void Search_IsSearchCompletedIsRight(int depth, ParallelismMode parallelismMode)
+        public void Search_IsSearchCompletedIsRight(int depth)
         {
-            var engine = new IterativeSearchWrapper(new SearchEngine() { MaxDegreeOfParallelism = 8 });
+            var engine = new IterativeSearchWrapper(new SearchEngine());
             var result = engine.IterativeSearch(new IncreasingNumberState(8, Player.Max), 1, depth, CancellationToken.None);
             Assert.IsTrue(result.IsSearchCompleted, "The search should have been completed");
         }
