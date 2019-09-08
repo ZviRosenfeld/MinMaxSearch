@@ -134,5 +134,14 @@ namespace MinMaxSearch
             result.StateSequence.RemoveAt(0); // Removing the top node will make the result "nicer"
             return new SearchResult(result, stopwatch.Elapsed, maxDepth, !cancellationToken.IsCancellationRequested);
         }
+
+        [Obsolete("Please use " + nameof(IterativeSearchWrapper) + " for iterative searches")]
+        public SearchResult IterativeSearch(IDeterministicState startState, int startDepth, int maxDepth, TimeSpan timeout) =>
+            IterativeSearch(startState, startDepth, maxDepth, new CancellationTokenSource(timeout).Token);
+
+        [Obsolete("Please use " + nameof(IterativeSearchWrapper) + " for iterative searches")]
+        public SearchResult IterativeSearch(IDeterministicState startState, int startDepth, int maxDepth, CancellationToken cancellationToken) =>
+            new IterativeSearchWrapper(this).IterativeSearch(startState, startDepth, maxDepth, cancellationToken);
+
     }
 }
