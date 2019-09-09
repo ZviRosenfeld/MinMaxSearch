@@ -78,6 +78,7 @@ namespace MinMaxSearch
         {
             var stopewatch = new Stopwatch();
             stopewatch.Start();
+            var linkedCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cancellationTokenAfterFirstSearch).Token;
 
             SearchResult bestResultSoFar = null;
             int maxDepth = -1;
@@ -86,8 +87,8 @@ namespace MinMaxSearch
                 if (depth < maxDepth) continue;
                 else maxDepth = depth;
 
-                var result = searchEngine.Search(startState, depth, cancellationToken);
-                if (cancellationToken.IsCancellationRequested  || cancellationTokenAfterFirstSearch.IsCancellationRequested)
+                var result = searchEngine.Search(startState, depth, bestResultSoFar == null ? cancellationToken : linkedCancellationToken);
+                if (linkedCancellationToken.IsCancellationRequested)
                 {
                     if (bestResultSoFar == null)
                         bestResultSoFar = result;
