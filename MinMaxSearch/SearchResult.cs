@@ -14,20 +14,24 @@ namespace MinMaxSearch
             Leaves = leaves;
             InternalNodes = internalNodes;
             AllChildrenAreDeadEnds = allChildrenAreDeadEnds;
+            IsSearchCompleted = true;
+            SearchDepth = -1;
             SearchTime = TimeSpan.Zero;
         }
 
-        public SearchResult(double evaluation, IState endState)
+        public SearchResult(double evaluation, IState endState, bool allResultsAreChildren = true)
         {
             Evaluation = evaluation;
+            IsSearchCompleted = true;
+            SearchDepth = 0;
             StateSequence = new List<IState> {endState};
             Leaves = 1;
             InternalNodes = 0;
-            AllChildrenAreDeadEnds = true;
+            AllChildrenAreDeadEnds = allResultsAreChildren;
             SearchTime = TimeSpan.Zero;
         }
 
-        public SearchResult(SearchResult other, TimeSpan searchTime)
+        public SearchResult(SearchResult other, TimeSpan searchTime, int searchDepth, bool isSearchCompleted)
         {
             Evaluation = other.Evaluation;
             StateSequence = other.StateSequence.ToList();
@@ -35,6 +39,8 @@ namespace MinMaxSearch
             InternalNodes = other.InternalNodes;
             AllChildrenAreDeadEnds = other.AllChildrenAreDeadEnds;
             SearchTime = searchTime;
+            IsSearchCompleted = isSearchCompleted;
+            SearchDepth = searchDepth;
         }
 
         public IState NextMove => StateSequence.First();
@@ -53,5 +59,13 @@ namespace MinMaxSearch
         public bool AllChildrenAreDeadEnds { get; }
 
         public TimeSpan SearchTime { get; }
+
+        public int SearchDepth { get; }
+
+        /// <summary>
+        /// Was the search completed, or stopped early due to a a cancellation token?
+        /// In IterativeSearchs IsSearchCompleted will be true as long as at least the first search was completed (even if deeper searches were canceled).
+        /// </summary>
+        public bool IsSearchCompleted { get; }
     }
 }

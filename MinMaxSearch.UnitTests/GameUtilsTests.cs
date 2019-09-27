@@ -28,7 +28,7 @@ namespace MinMaxSearch.UnitTests
         public void GetReversePlayer_PlayerEmpty_ThrowException() => 
             Player.Empty.GetReversePlayer();
 
-        // This is a probablistic test, so you might need to give it some leeway
+        // This is a probabilistic test, so you might need to give it some leeway
         [TestMethod]
         public void GetNextState_GetLikelyNeigborsMoreOften()
         {

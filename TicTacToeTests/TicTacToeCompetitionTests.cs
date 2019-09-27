@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MinMaxSearch;
-using MinMaxSearch.Benckmarking;
+using MinMaxSearch.Benchmarking;
 
 namespace TicTacToeTests
 {

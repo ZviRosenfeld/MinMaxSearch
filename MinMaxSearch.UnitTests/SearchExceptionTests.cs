@@ -6,7 +6,8 @@ using MinMaxSearch.UnitTests.TestStates;
 
 namespace MinMaxSearch.UnitTests
 {
-    class SearchExceptionTests
+    [TestClass]
+    public class SearchExceptionTests
     {
         [TestMethod]
         [ExpectedException(typeof(NoNeighborsException))]
@@ -44,7 +45,7 @@ namespace MinMaxSearch.UnitTests
             A.CallTo(() => startState.GetNeighbors()).Returns(new List<IDeterministicState> { state });
             A.CallTo(() => startState.Turn).Returns(Player.Min);
 
-            var searchEngine = new SearchEngine();
+            var searchEngine = new SearchEngine { ParallelismMode = ParallelismMode.NonParallelism};
             searchEngine.Search(startState, 1);
         }
 
@@ -70,18 +71,18 @@ namespace MinMaxSearch.UnitTests
             A.CallTo(() => state.Turn).Returns(Player.Max);
             A.CallTo(() => istate.Turn).Returns(Player.Max);
 
-            var searchEngine = new SearchEngine() { MaxDegreeOfParallelism = 1 };
+            var searchEngine = new SearchEngine() { ParallelismMode = ParallelismMode.NonParallelism };
             searchEngine.Search(state, 5);
         }
 
-
         [TestMethod]
-        [ExpectedException(typeof(Exception), "Shouldn't have gotten so far into the search")]
-        public void Search_CheckThatAfterSettingPreventLoopsToTrueItCanBeTurnedBackToFalse()
+        [DataRow(-2)]
+        [DataRow(0)]
+        [ExpectedException(typeof(ArgumentException))]
+        public void Search_NegativeDepth_ThrowException(int depth)
         {
-            var searchEngine = new SearchEngine() { PreventLoops = true };
-            searchEngine.PreventLoops = false;
-            searchEngine.Search(new ThrowExceptionAtDepthThreeState(0, Player.Max), 5);
+            var engine = new SearchEngine();
+            engine.Search(new IncreasingNumberState(1, Player.Max), depth);
         }
     }
 }

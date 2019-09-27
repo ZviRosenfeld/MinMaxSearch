@@ -2,7 +2,7 @@ using System;
 using Connect4Tests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MinMaxSearch;
-using MinMaxSearch.Benckmarking;
+using MinMaxSearch.Benchmarking;
 
 namespace ProbabilisticConnect4Tests
 {
@@ -63,7 +63,7 @@ namespace ProbabilisticConnect4Tests
             var results = engine.Compete(startState, 3, (s, d, l) => 0);
 
             var finalState = (ProbabilisticConnect4State) results.FinalState;
-            Assert.IsTrue(BoardEvaluator.IsWin(finalState.Board, Player.Min), "Min should have won");
+            Assert.IsTrue(BoardEvaluator.IsWin(finalState.Board, Player.Min), "Min should have won; Final state is " + Environment.NewLine + finalState);
         }
 
         [TestMethod]

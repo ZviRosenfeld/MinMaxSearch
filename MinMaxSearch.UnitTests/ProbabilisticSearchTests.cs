@@ -59,7 +59,7 @@ namespace MinMaxSearch.UnitTests
                 new Tuple<double, List<IState>>(0.5, new List<IState> {evaluation2State}),
             });
 
-            var searchEngine = new SearchEngine {MaxDegreeOfParallelism = degreeOfParallelism, ParallelismMode = parallelismMode};
+            var searchEngine = new SearchEngine { MaxDegreeOfParallelism = degreeOfParallelism, ParallelismMode = parallelismMode};
             var searchResult = searchEngine.Search(startState, 10);
 
             Assert.AreEqual(probabilisticState2, searchResult.NextMove, $"Should have found {nameof(probabilisticState2)} as the nextState");

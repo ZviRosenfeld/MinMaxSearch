@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MinMaxSearch.Benckmarking
+namespace MinMaxSearch.Benchmarking
 {
     public class CompetitionResult
     {

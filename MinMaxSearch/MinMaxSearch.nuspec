@@ -2,13 +2,15 @@
 <package >
   <metadata>
     <id>MinMaxSearch</id>
-    <version>1.3.2</version>
-    <description>A MinMax Search Engine</description>
+    <version>1.4.0</version>
+	<title>A MinMax Search Engine</title>
+    <description>A MinMax Search Engine. MinMaxSearch was created to be easily customized and simple to use.</description>
     <authors>Zvi Rosenfeld</authors>
 	<license type="expression">MIT</license>
 	<projectUrl>https://github.com/ZviRosenfeld/MinMaxSearch</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <tags>MinMaxSearch MinMax Minimax Expectiminimax</tags>
+	<copyright>Zvi Rosenfeld</copyright>
   </metadata>
   <files>
         <file src="bin\Release\netstandard2.0\*.dll" target="lib\netstandard2.0" />
