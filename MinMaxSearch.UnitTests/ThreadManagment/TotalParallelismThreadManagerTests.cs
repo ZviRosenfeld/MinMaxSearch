@@ -8,7 +8,7 @@ namespace MinMaxSearch.UnitTests.ThreadManagment
 {
     [TestClass]
     [TestCategory("ThreadManager")]
-    public class ThreadManagerTests
+    public class TotalParallelismThreadManagerTests
     {
         [TestMethod]
         public void Invoke_MaxDegreeOfParallelismIsOne_DontRunParallel()
