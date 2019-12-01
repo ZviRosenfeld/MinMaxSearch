@@ -63,7 +63,7 @@ namespace MinMaxSearch
         private SearchOptions CreateSearchOptions() => new SearchOptions(pruners, IsUnstableState, PreventLoops,
             FavorShortPaths, DieEarly, MaxScore, MinScore, AlternateEvaluation);
 
-        private IThreadManager GetThreadManager()
+        private IThreadManager GetThreadManager(int searchDepth)
         {
             if (ParallelismMode == ParallelismMode.FirstLevelOnly)
                 return new FirstLevelOnlyThreadManager();
@@ -71,7 +71,7 @@ namespace MinMaxSearch
             if (ParallelismMode == ParallelismMode.NonParallelism || maxDegreeOfParallelism == 1)
                 return new SequencelThreadManager();
 
-            return new TotalParallelismThreadManager(maxDegreeOfParallelism);
+            return new TotalParallelismThreadManager(maxDegreeOfParallelism, searchDepth);
         }
 
         public SearchEngine Clone()
@@ -125,7 +125,7 @@ namespace MinMaxSearch
                 throw new ArgumentException($"{nameof(maxDepth)} must be at least 1. Was {maxDepth}");
             
             var searchContext = new SearchContext(maxDepth, 0, cancellationToken);
-            var searchWorker = new SearchWorker(CreateSearchOptions(), GetThreadManager());
+            var searchWorker = new SearchWorker(CreateSearchOptions(), GetThreadManager(maxDepth));
             var stopwatch = new Stopwatch();
             stopwatch.Start();
             var result = searchWorker.Evaluate(startState, searchContext);
