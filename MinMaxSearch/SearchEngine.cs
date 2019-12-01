@@ -71,7 +71,7 @@ namespace MinMaxSearch
             if (ParallelismMode == ParallelismMode.NonParallelism || maxDegreeOfParallelism == 1)
                 return new SequencelThreadManager();
 
-            return new ThreadManager(maxDegreeOfParallelism);
+            return new TotalParallelismThreadManager(maxDegreeOfParallelism);
         }
 
         public SearchEngine Clone()

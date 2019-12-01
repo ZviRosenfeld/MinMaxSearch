@@ -4,13 +4,13 @@ using System.Threading.Tasks;
 
 namespace MinMaxSearch.ThreadManagment
 {
-    public class ThreadManager : IThreadManager
+    public class TotalParallelismThreadManager : IThreadManager
     {
         private readonly object threadLock = new object();
         private int threadsRunning = 1;
         private readonly int maxDegreeOfParallelism;
 
-        public ThreadManager(int maxDegreeOfParallelism)
+        public TotalParallelismThreadManager(int maxDegreeOfParallelism)
         {
             this.maxDegreeOfParallelism = maxDegreeOfParallelism;
         }

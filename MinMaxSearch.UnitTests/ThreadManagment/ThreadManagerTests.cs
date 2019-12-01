@@ -13,14 +13,14 @@ namespace MinMaxSearch.UnitTests.ThreadManagment
         [TestMethod]
         public void Invoke_MaxDegreeOfParallelismIsOne_DontRunParallel()
         {
-            ThreadManagmentTestUtils.TestThatThreadsRunInSequence(new ThreadManager(1));
+            ThreadManagmentTestUtils.TestThatThreadsRunInSequence(new TotalParallelismThreadManager(1));
         }
 
         [TestMethod]
         public void Invoke_MaxDegreeOfParallelismIsGreaterThenThreads_RunAllThreadsParallel()
         {
             const int degreeOfParallelism = 10;
-            var manager = new ThreadManager(degreeOfParallelism);
+            var manager = new TotalParallelismThreadManager(degreeOfParallelism);
 
             ThreadManagmentTestUtils.TestThatAllThreadsRunInParallel(manager);
         }
@@ -30,7 +30,7 @@ namespace MinMaxSearch.UnitTests.ThreadManagment
         public void Invoke_CheckThatOnlyMaxDegreeOfParallelismThreadsRunParallel(int degreeOfParallelism)
         {
             var startedThreads = new List<int>();
-            var manager = new ThreadManager(degreeOfParallelism);
+            var manager = new TotalParallelismThreadManager(degreeOfParallelism);
 
             Task.Run(() =>
             {
