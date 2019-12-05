@@ -9,8 +9,8 @@ namespace Connect4Tests
             {
                 MaxDegreeOfParallelism = maxDegreeOfParallelism,
                 DieEarly = true,
-                MinScore = BoardEvaluator.MinEvaluation + 1,
-                MaxScore = BoardEvaluator.MaxEvaluation - 1,
+                MinScore = BoardEvaluator.MinEvaluation,
+                MaxScore = BoardEvaluator.MaxEvaluation,
                 ParallelismMode = parallelismMode
             };
 

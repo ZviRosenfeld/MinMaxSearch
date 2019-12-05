@@ -126,7 +126,7 @@ In addition, there are the NonParallelism and TotalParallelism modes.
 In the TotalParallelism mode you can set the degree of parallelism using the MaxDegreeOfParallelism field (this field will be ignored otherwise).
 
 **DieEarly:**
-If this option is set to true, the algorithm will rerun as soon as it finds a score bigger then SearchEngine.MaxScore for Max or SearchEngine.MinScore for Min.
+If this option is set to true, the algorithm will rerun as soon as it finds a score bigger then or equal to SearchEngine.MaxScore for Max or smaller or equal to SearchEngine.MinScore for Min.
 The rationale behind this is that once the algorithm finds a win there's no point in more searching. (We assume that a score greater then MaxScore is a win for Max, and one smaller then MinScore is a win for Min).
 Note that this will only work if Equals is implement in a meaningful way on your states.
 

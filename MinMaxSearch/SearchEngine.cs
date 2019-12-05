@@ -35,12 +35,18 @@ namespace MinMaxSearch
         public bool FavorShortPaths { get; set; } = true;
 
         /// <summary>
-        /// The search will end once we find a score better then MaxScore for Max or worse then MinScore for Min
+        /// The search will end once we find a score that is bigger then or equal to SearchEngine.MaxScore for Max or smaller or equal to SearchEngine.MinScore for Min.
         /// </summary>
         public bool DieEarly { get; set; }
 
+        /// <summary>
+        /// Any score equal to or bigger than MaxScore is considered a win for Max
+        /// </summary>
         public double MaxScore { get; set; } = double.MaxValue;
 
+        /// <summary>
+        /// Any score equal to or smaller than MaxScore is considered a win for Min
+        /// </summary>
         public double MinScore { get; set; } = double.MinValue;
 
         private int maxDegreeOfParallelism = 1;

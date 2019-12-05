@@ -137,8 +137,8 @@ namespace MinMaxSearch
             if (!searchOptions.DieEarly)
                 return (false, 0);
             
-            if ((player == Player.Max && evaluation > searchOptions.MaxScore) ||
-                (player == Player.Min && evaluation < searchOptions.MinScore))
+            if ((player == Player.Max && evaluation >= searchOptions.MaxScore) ||
+                (player == Player.Min && evaluation <= searchOptions.MinScore))
             {
                 if (searchOptions.FavorShortPaths && pathLength > 1)
                     return (true, pathLength - 1);
@@ -163,9 +163,9 @@ namespace MinMaxSearch
                 return true;
             if (!searchOptions.FavorShortPaths)
                 return false;
-            if (player == Player.Max && evaluation1 > searchOptions.MaxScore && evaluation2 > searchOptions.MaxScore)
+            if (player == Player.Max && evaluation1 >= searchOptions.MaxScore && evaluation2 >= searchOptions.MaxScore)
                 return true;
-            if (player == Player.Min && evaluation1 < searchOptions.MinScore && evaluation2 < searchOptions.MinScore)
+            if (player == Player.Min && evaluation1 <= searchOptions.MinScore && evaluation2 <= searchOptions.MinScore)
                 return true;
             return false;
         }

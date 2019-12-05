@@ -149,8 +149,8 @@ namespace TicTacToeTests
             {
                 MaxDegreeOfParallelism = degreeOfParallelism,
                 DieEarly = true,
-                MinScore = -0.5,
-                MaxScore = 0.5,
+                MinScore = -1,
+                MaxScore = 1,
                 ParallelismMode = parallelismMode
             };
 
