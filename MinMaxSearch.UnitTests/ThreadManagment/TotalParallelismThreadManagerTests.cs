@@ -49,14 +49,14 @@ namespace MinMaxSearch.UnitTests.ThreadManagment
         [ExpectedException(typeof(BadDegreeOfParallelismException))]
         [DataRow(-1)]
         [DataRow(0)]
-        public void LevelParallelismThreadManager_NagitaveParallelismDegree_ThrowException(int degree) =>
+        public void TotalParallelismThreadManager_NagitaveParallelismDegree_ThrowException(int degree) =>
             new TotalParallelismThreadManager(degree, 10);
 
         [TestMethod]
         [ExpectedException(typeof(InternalException), "Code 1001")]
         [DataRow(-1)]
         [DataRow(0)]
-        public void LevelParallelismThreadManager_NagitaveMaxSearchDepth_ThrowException(int depth) =>
+        public void TotalParallelismThreadManager_NagitaveMaxSearchDepth_ThrowException(int depth) =>
             new TotalParallelismThreadManager(2, depth);
     }
 }

@@ -9,12 +9,16 @@ namespace MinMaxSearch.UnitTests.ThreadManagment
     public class FirstLevelOnlyThreadManagerTests
     {
         [TestMethod]
-        public void Invoke_MaxDegreeOfParallelismIsOne_DontRunParallel() =>
-            ThreadManagmentTestUtils.TestThatThreadsRunInSequence(new LevelParallelismThreadManager(1));
+        [DataRow(1, 1)]
+        [DataRow(3, 2)]
+        public void Invoke_DepthGreaterThanMaxLevel_DontRunParallel(int depth, int levels) =>
+            ThreadManagmentTestUtils.TestThatThreadsRunInSequence(new LevelParallelismThreadManager(levels), depth);
 
         [TestMethod]
-        public void Invoke_MaxDegreeOfParallelismIsGreaterThenThreads_RunAllThreadsParallel() =>
-            ThreadManagmentTestUtils.TestThatAllThreadsRunInParallel(new LevelParallelismThreadManager(1));
+        [DataRow(0, 1)]
+        [DataRow(2, 3)]
+        public void Invoke_DepthEqualeMaxLevel_RunAllThreadsParallel(int depth, int levels) =>
+            ThreadManagmentTestUtils.TestThatAllThreadsRunInParallel(new LevelParallelismThreadManager(levels), depth);
 
         [TestMethod]
         [ExpectedException(typeof(MinMaxSearchException))]
