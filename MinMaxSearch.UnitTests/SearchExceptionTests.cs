@@ -50,18 +50,6 @@ namespace MinMaxSearch.UnitTests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(BadDegreeOfParallelismException))]
-        public void Search_StartWithZeroDegreeOfParallelism_ExceptionThrown()
-        {
-            var state = A.Fake<IDeterministicState>();
-            A.CallTo(() => state.GetNeighbors()).Returns(new List<IDeterministicState> { state });
-            A.CallTo(() => state.Turn).Returns(Player.Max);
-
-            var searchEngine = new SearchEngine() { MaxDegreeOfParallelism = 0 };
-            searchEngine.Search(state, 1);
-        }
-
-        [TestMethod]
         [ExpectedException(typeof(BadStateTypeException))]
         public void Search_ContainsAnIState_ExceptionThrown()
         {

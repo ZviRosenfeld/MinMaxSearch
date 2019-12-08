@@ -45,5 +45,19 @@ namespace MinMaxSearch.UnitTests.ThreadManagment
 
             Assert.AreEqual(degreeOfParallelism, startedThreads.Count);
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(BadDegreeOfParallelismException))]
+        [DataRow(-1)]
+        [DataRow(0)]
+        public void LevelParallelismThreadManager_NagitaveParallelismDegree_ThrowException(int degree) =>
+            new TotalParallelismThreadManager(degree, 10);
+
+        [TestMethod]
+        [ExpectedException(typeof(InternalException), "Code 1001")]
+        [DataRow(-1)]
+        [DataRow(0)]
+        public void LevelParallelismThreadManager_NagitaveMaxSearchDepth_ThrowException(int depth) =>
+            new TotalParallelismThreadManager(2, depth);
     }
 }
