@@ -24,5 +24,19 @@ namespace Connect4Tests
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
             };
+
+        /// <summary>
+        /// Gets an almost full board that we will use for testing.
+        /// </summary>
+        public static Player[,] GetHalfFullBoard() =>
+            new[,]
+            {
+                {Player.Min, Player.Max, Player.Min, Player.Max, Player.Min, Player.Max},
+                {Player.Min, Player.Min, Player.Min, Player.Max, Player.Min, Player.Min},
+                {Player.Max, Player.Max, Player.Max, Player.Min, Player.Max, Player.Max},
+                {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
+                {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
+                {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
+            };
     }
 }
