@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using FakeItEasy;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MinMaxSearch.Exceptions;
 using MinMaxSearch.UnitTests.TestStates;
 
 namespace MinMaxSearch.UnitTests

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using MinMaxSearch.Exceptions;
 using MinMaxSearch.Pruners;
 using MinMaxSearch.ThreadManagment;
 

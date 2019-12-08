@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using MinMaxSearch.Exceptions;
 
 namespace MinMaxSearch.Benchmarking
 {

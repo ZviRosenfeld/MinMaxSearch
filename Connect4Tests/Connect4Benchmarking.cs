@@ -13,9 +13,9 @@ namespace Connect4Tests
         [TestMethod]
         public void BenchmarkConnect4()
         {
-            BenchmarkWithDegreeOfParallelism(1, ParallelismMode.NonParallelism);
+            //BenchmarkWithDegreeOfParallelism(1, ParallelismMode.NonParallelism);
             BenchmarkWithDegreeOfParallelism(1, ParallelismMode.FirstLevelOnly);
-            BenchmarkWithDegreeOfParallelism(4, ParallelismMode.TotalParallelism);
+            //BenchmarkWithDegreeOfParallelism(4, ParallelismMode.TotalParallelism);
         }
 
         private void BenchmarkWithDegreeOfParallelism(int degreeOfParallelism, ParallelismMode parallelismMode)

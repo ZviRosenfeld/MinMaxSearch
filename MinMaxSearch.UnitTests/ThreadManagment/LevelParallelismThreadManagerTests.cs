@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MinMaxSearch.Exceptions;
 using MinMaxSearch.ThreadManagment;
 
 namespace MinMaxSearch.UnitTests.ThreadManagment
