@@ -13,15 +13,16 @@ namespace Connect4Tests
         [TestMethod]
         public void BenchmarkConnect4()
         {
-            //BenchmarkWithDegreeOfParallelism(1, ParallelismMode.NonParallelism);
-            BenchmarkWithDegreeOfParallelism(1, ParallelismMode.FirstLevelOnly);
-            //BenchmarkWithDegreeOfParallelism(4, ParallelismMode.TotalParallelism);
+            BenchmarkWithDegreeOfParallelism(ParallelismMode.NonParallelism);
+            BenchmarkWithDegreeOfParallelism(ParallelismMode.FirstLevelOnly);
+            BenchmarkWithDegreeOfParallelism(ParallelismMode.ParallelismByLevel, levelOfParallelism: 2);
+            BenchmarkWithDegreeOfParallelism(ParallelismMode.TotalParallelism, 4);
         }
 
-        private void BenchmarkWithDegreeOfParallelism(int degreeOfParallelism, ParallelismMode parallelismMode)
+        private void BenchmarkWithDegreeOfParallelism(ParallelismMode parallelismMode, int degreeOfParallelism = 1, int levelOfParallelism = 1)
         {
             Console.WriteLine("Running with degreeOfParallelism: " + degreeOfParallelism + ", Mode: " + parallelismMode);
-            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode);
+            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode, levelOfParallelism);
             var startState = new Connect4State(Connect4TestUtils.GetEmptyBoard(), Player.Max);
 
             var results = engine.Search(startState, SearchDepth);
