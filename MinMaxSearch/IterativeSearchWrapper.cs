@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using MinMaxSearch.Exceptions;
 using MinMaxSearch.Range;
 
 namespace MinMaxSearch

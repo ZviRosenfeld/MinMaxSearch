@@ -9,25 +9,25 @@ You can find MinMaxSearch library on nuget.org via package name MinMaxSearch.
 
 example1:
 ```csharp
-var startState = new TicTacToeState();
-var searchDepth = 5;
-var engine = new SearchEngine();
-var searchResult = engine.Search(startState, searchDepth);
+IDeterministicState startState = new TicTacToeState();
+int searchDepth = 5;
+ISearchEngine engine = new SearchEngine();
+SearchResult searchResult = engine.Search(startState, searchDepth);
 ```
 
 example2:
 ```csharp
-var startState = new Connect4State();
-var searchDepth = 5;
-var CancellationTokenSource = new CancellationTokenSource();
-var engine =  new SearchEngine()
+IDeterministicState startState = new Connect4State();
+int searchDepth = 5;
+CancellationTokenSource CancellationTokenSource = new CancellationTokenSource();
+ISearchEngine engine =  new SearchEngine()
 {
     FavorShortPaths = true,
     DieEarly = true,
     MaxScore = 99,
     MinScore = -99
 };
-var searchResult = engine.Search(startState, searchDepth, CancellationTokenSource.Token);
+SearchResult searchResult = engine.Search(startState, searchDepth, CancellationTokenSource.Token);
 ```
 
 SearchEngine has a number of Search methods that expect different parameters. Most of the parameters are straight-forward. I'd like to elaborate on the IState one.
@@ -74,7 +74,7 @@ States used for indeterministic games (games that have an element of luck in the
 
 Note that even for indeterministic games, the first state will need to be of type IDeterministicState. 
 This reflects the fact that algorithm answers the question "what move should I do next?" and this question has no meaning when the next state's outcome depends on a probability.
-If your implementing a game like backgammon, the first state should "know" what the user rolled, so it should be an IDeterministicState.
+If you're implementing a game like backgammon, the first state should "know" what the user rolled, so it should be an IDeterministicState.
 ```csharp
 public interface IDeterministicState : IState
 {
@@ -120,10 +120,15 @@ Note that this will only work if Equals is implement in a meaningful way on your
 If true, the algorithm will favor short solutions over long solutions when they both result in the same score.
 If this option is off, you may experience seemingly weird behavior. Say the algorithm sees that Min can set a trap that will end in Max's defeat in six moves. Without favoring short paths, the algorithm might decide to "give up", causing Max to perform random moves, and possibly lose much sooner - even though its opponent may not have noticed the trap.
 
-**ParallelismMode**
-There are 3 ParallelismMode: FirstLevelOnly, which is the recommended mode and normally yields the fastest searches. 
-In addition, there are the NonParallelism and TotalParallelism modes. 
-In the TotalParallelism mode you can set the degree of parallelism using the MaxDegreeOfParallelism field (this field will be ignored otherwise).
+**ParallelismMode**:
+
+There are 4 ParallelismMode:
+- *FirstLevelOnly*: In this mode only the first level of the search tree will be calculated in parallel. This is the recommended mode and normally yields the fastest searches.
+- *ParallelismByLevel*: In this mode, the first x levels of the search will be carried out in parallel. You can determine x by setting "MaxLevelOfParallelism" in the SearchEngine. (available since 1.4.3)
+- *NonParallelism*: No parallelism.
+- *TotalParallelism*: In this mode, the entire search tree will be calculated in parallel, up to the "MaxDegreeOfParallelism"
+
+Note that "MaxDegreeOfParallelism" will be ignored in all modes other than "TotalParallelism", and "MaxLevelOfParallelism" will be ignored in all modes other than "ParallelismByLevel".
 
 **DieEarly:**
 If this option is set to true, the algorithm will rerun as soon as it finds a score bigger then or equal to SearchEngine.MaxScore for Max or smaller or equal to SearchEngine.MinScore for Min.
@@ -145,14 +150,14 @@ In Iterative search, a depth-limited version of depth-first search is run repeat
 
 example:
 ```csharp
-var startState = new TicTacToeState();
-var startDepth = 2;
-var endDepth = 5;
-var CancellationTokenSource = new CancellationTokenSource();
-var engine = new SearchEngine();
-var iterativeEngine = new IterativeSearchWrapper(engine);
+IDeterministicState startState = new TicTacToeState();
+int startDepth = 2;
+int endDepth = 5;
+CancellationTokenSource CancellationTokenSource = new CancellationTokenSource();
+ISearchEngine engine = new SearchEngine();
+IterativeSearchWrapper iterativeEngine = new IterativeSearchWrapper(engine);
 // This will run an IterativeSearch beginning at depth 2, and ending with depth 5 (including)
-var searchResult = engine.IterativeSearch(startState, startDepth, endDepth, CancellationTokenSource.Token);
+SearchResult searchResult = engine.IterativeSearch(startState, startDepth, endDepth, CancellationTokenSource.Token);
 ```
 
 ## CompetitionManager

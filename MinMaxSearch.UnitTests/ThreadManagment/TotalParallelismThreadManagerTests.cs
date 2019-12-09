@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MinMaxSearch.Exceptions;
 using MinMaxSearch.ThreadManagment;
 
 namespace MinMaxSearch.UnitTests.ThreadManagment
@@ -11,10 +12,8 @@ namespace MinMaxSearch.UnitTests.ThreadManagment
     public class TotalParallelismThreadManagerTests
     {
         [TestMethod]
-        public void Invoke_MaxDegreeOfParallelismIsOne_DontRunParallel()
-        {
+        public void Invoke_MaxDegreeOfParallelismIsOne_DontRunParallel() =>
             ThreadManagmentTestUtils.TestThatThreadsRunInSequence(new TotalParallelismThreadManager(1, 1000));
-        }
 
         [TestMethod]
         public void Invoke_MaxDegreeOfParallelismIsGreaterThenThreads_RunAllThreadsParallel()
@@ -45,5 +44,19 @@ namespace MinMaxSearch.UnitTests.ThreadManagment
 
             Assert.AreEqual(degreeOfParallelism, startedThreads.Count);
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(BadDegreeOfParallelismException))]
+        [DataRow(-1)]
+        [DataRow(0)]
+        public void TotalParallelismThreadManager_NagitaveParallelismDegree_ThrowException(int degree) =>
+            new TotalParallelismThreadManager(degree, 10);
+
+        [TestMethod]
+        [ExpectedException(typeof(InternalException), "Code 1001")]
+        [DataRow(-1)]
+        [DataRow(0)]
+        public void TotalParallelismThreadManager_NagitaveMaxSearchDepth_ThrowException(int depth) =>
+            new TotalParallelismThreadManager(2, depth);
     }
 }

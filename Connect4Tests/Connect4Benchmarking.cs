@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MinMaxSearch;
 using System;
+using System.Text;
 
 namespace Connect4Tests
 {
@@ -9,32 +10,43 @@ namespace Connect4Tests
     public class Connect4Benchmarking
     {
         [TestMethod]
-        public void BenchmarkConnect4_EmptyBoard()
+        public void BenchmarkConnect4()
         {
-            const int searchDepth = 11;
-            var emptyBoard = Connect4TestUtils.GetEmptyBoard();
-            BenchmarkWithDegreeOfParallelism(1, searchDepth, ParallelismMode.NonParallelism, emptyBoard);
-            BenchmarkWithDegreeOfParallelism(1, searchDepth, ParallelismMode.FirstLevelOnly, emptyBoard);
-            BenchmarkWithDegreeOfParallelism(4, searchDepth, ParallelismMode.TotalParallelism, emptyBoard);
+            var searchDepth = 11;
+            var board = Connect4TestUtils.GetEmptyBoard();
+            BenchmarkWithDegreeOfParallelism(board, searchDepth, ParallelismMode.NonParallelism);
+            BenchmarkWithDegreeOfParallelism(board, searchDepth, ParallelismMode.FirstLevelOnly);
+            BenchmarkWithDegreeOfParallelism(board, searchDepth, ParallelismMode.ParallelismByLevel, levelOfParallelism: 2);
+            BenchmarkWithDegreeOfParallelism(board, searchDepth, ParallelismMode.TotalParallelism, 4);
         }
 
         [TestMethod]
-        public void BenchmarkConnect4_HalfFullBoard()
-        {
-            var board = Connect4TestUtils.GetHalfFullBoard();
-            BenchmarkWithDegreeOfParallelism(1, 12, ParallelismMode.FirstLevelOnly, board);
-        }
+        public void BenchmarkConnect4_HalfFullBoard() =>
+            BenchmarkWithDegreeOfParallelism(Connect4TestUtils.GetHalfFullBoard(), 12);
 
-        private void BenchmarkWithDegreeOfParallelism(int degreeOfParallelism, int searchDepth, ParallelismMode parallelismMode, Player[,] board)
+        private void BenchmarkWithDegreeOfParallelism(Player[,] startBoard, int searchDepth,
+            ParallelismMode parallelismMode = ParallelismMode.FirstLevelOnly, int degreeOfParallelism = 1,
+            int levelOfParallelism = 1)
         {
-            Console.WriteLine("Running with degreeOfParallelism: " + degreeOfParallelism + ", Mode: " + parallelismMode);
-            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode);
-            var startState = new Connect4State(board, Player.Max);
+            Console.WriteLine(GetTestMessage(parallelismMode, degreeOfParallelism, levelOfParallelism));
+            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode, levelOfParallelism);
+            var startState = new Connect4State(startBoard, Player.Max);
 
             var results = engine.Search(startState, searchDepth);
             Console.WriteLine("Time: " + results.SearchTime);
             Console.WriteLine("Leaves: " + results.Leaves);
             Console.WriteLine("InternalNodes: " + results.InternalNodes);
+        }
+
+        private string GetTestMessage(ParallelismMode parallelismMode, int degreeOfParallelism, int levelOfParallelism)
+        {
+            var stringBuilder = new StringBuilder("Running Mode " + parallelismMode);
+            if (parallelismMode == ParallelismMode.TotalParallelism)
+                stringBuilder.Append($" {nameof(degreeOfParallelism)} == {degreeOfParallelism}");
+            if (parallelismMode == ParallelismMode.ParallelismByLevel)
+                stringBuilder.Append($" {nameof(levelOfParallelism)} == {levelOfParallelism}");
+
+            return stringBuilder.ToString();
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using FakeItEasy;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MinMaxSearch.Exceptions;
 using MinMaxSearch.UnitTests.TestStates;
 
 namespace MinMaxSearch.UnitTests
@@ -47,18 +48,6 @@ namespace MinMaxSearch.UnitTests
 
             var searchEngine = new SearchEngine { ParallelismMode = ParallelismMode.NonParallelism};
             searchEngine.Search(startState, 1);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(BadDegreeOfParallelismException))]
-        public void Search_StartWithZeroDegreeOfParallelism_ExceptionThrown()
-        {
-            var state = A.Fake<IDeterministicState>();
-            A.CallTo(() => state.GetNeighbors()).Returns(new List<IDeterministicState> { state });
-            A.CallTo(() => state.Turn).Returns(Player.Max);
-
-            var searchEngine = new SearchEngine() { MaxDegreeOfParallelism = 0 };
-            searchEngine.Search(state, 1);
         }
 
         [TestMethod]

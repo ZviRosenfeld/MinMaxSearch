@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using MinMaxSearch.Exceptions;
 using MinMaxSearch.Pruners;
 using MinMaxSearch.ThreadManagment;
 
@@ -49,18 +50,15 @@ namespace MinMaxSearch
         /// </summary>
         public double MinScore { get; set; } = double.MinValue;
 
-        private int maxDegreeOfParallelism = 1;
-
         /// <summary>
         /// Note that this will only have an effect if ParallelismMode is set to TotalParallelism
         /// </summary>
-        public int MaxDegreeOfParallelism
-        {
-            get => maxDegreeOfParallelism;
-            set => maxDegreeOfParallelism = value > 0
-                ? value
-                : throw new BadDegreeOfParallelismException("DegreeOfParallelism must be at least one. Tried to set it to " + maxDegreeOfParallelism);
-        }
+        public int MaxDegreeOfParallelism { get; set; } = 1;
+
+        /// <summary>
+        /// Note that this will only have an effect if ParallelismMode is set to ParallelismByLevel
+        /// </summary>
+        public int MaxLevelOfParallelism { get; set; } = 1;
 
         public ParallelismMode ParallelismMode { get; set; } = ParallelismMode.FirstLevelOnly;
 
@@ -72,12 +70,15 @@ namespace MinMaxSearch
         private IThreadManager GetThreadManager(int searchDepth)
         {
             if (ParallelismMode == ParallelismMode.FirstLevelOnly)
-                return new FirstLevelOnlyThreadManager();
+                return new LevelParallelismThreadManager(1);
 
-            if (ParallelismMode == ParallelismMode.NonParallelism || maxDegreeOfParallelism == 1)
+            if (ParallelismMode == ParallelismMode.ParallelismByLevel)
+                return new LevelParallelismThreadManager(MaxLevelOfParallelism);
+
+            if (ParallelismMode == ParallelismMode.NonParallelism || MaxDegreeOfParallelism == 1)
                 return new SequencelThreadManager();
 
-            return new TotalParallelismThreadManager(maxDegreeOfParallelism, searchDepth);
+            return new TotalParallelismThreadManager(MaxDegreeOfParallelism, searchDepth);
         }
 
         public SearchEngine Clone()
