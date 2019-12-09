@@ -22,7 +22,7 @@ namespace Connect4Tests
 
         [TestMethod]
         public void BenchmarkConnect4_HalfFullBoard() =>
-            BenchmarkWithDegreeOfParallelism(Connect4TestUtils.GetHalfFullBoard(), 12);
+            BenchmarkWithDegreeOfParallelism(Connect4TestUtils.GetHalfFullBoard(), 13);
 
         private void BenchmarkWithDegreeOfParallelism(Player[,] startBoard, int searchDepth,
             ParallelismMode parallelismMode = ParallelismMode.FirstLevelOnly, int degreeOfParallelism = 1,

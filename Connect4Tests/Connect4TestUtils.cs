@@ -33,11 +33,11 @@ namespace Connect4Tests
             new[,]
             {
                 {Player.Min, Player.Max, Player.Min, Player.Max, Player.Min, Player.Max},
-                {Player.Min, Player.Min, Player.Min, Player.Max, Player.Min, Player.Min},
+                {Player.Max, Player.Min, Player.Max, Player.Min, Player.Max, Player.Min},
                 {Player.Max, Player.Max, Player.Max, Player.Min, Player.Max, Player.Max},
+                {Player.Min, Player.Min, Player.Min, Player.Empty, Player.Min, Player.Min},
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
-                {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
-                {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
+                {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},      
             };
     }
 }
