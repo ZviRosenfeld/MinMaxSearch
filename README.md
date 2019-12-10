@@ -1,4 +1,5 @@
 MinMaxSearch is a MinMax Search Engine that was created to be easily customized and simple to use.
+
 MinMax search is a popular search technique used for finding the next-best move in zero-summed games such as tic-tac-toe, checkers or backgammon.
 
 # Download
@@ -130,6 +131,7 @@ Note that "MaxDegreeOfParallelism" will be ignored in all modes other than "Tota
 
 ### CacheMode
 Caching lets the engine remember stares that lead to certain win, losses or draws, so that it doesn't need to re-search trees it's already searched.
+Caching is available since version 1.4.3.
 
 We support 3 modes of caching:
 - *NoCache*: No Caching.
