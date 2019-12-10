@@ -141,7 +141,11 @@ We support 3 modes of caching:
 - *ReuseCache*: The engine will re-use the same cache between searches. You can clean the cache by calling the CacheManager's Clean method.
 
 You can create a custom cache by implementing [ICacheManager](https://github.com/ZviRosenfeld/MinMaxSearch/blob/master/MinMaxSearch/Cache/ICacheManager.cs), and use the engine's SetCustomCache method to tell the engine to use it.
+You can find a sample custom CacheManager [here](https://github.com/ZviRosenfeld/MinMaxSearch/blob/master/MinMaxSearch/Cache/CustomCacheManager.cs).
 Note that the custom cache will only be used if CacheMode is set to ReuseCache.
+
+If you're using the ReuseCache option, you can use the FillCache extension method to fill the cache while the program is idle (say, while your opponent is considering their next move).
+Just to remember to cancel the FillCache when you're ready to run a search (using the cancellation token).
 
 ### DieEarly
 If this option is set to true, the algorithm will rerun as soon as it finds a score bigger then or equal to SearchEngine.MaxScore for Max or smaller or equal to SearchEngine.MinScore for Min.
