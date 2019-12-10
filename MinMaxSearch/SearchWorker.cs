@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using MinMaxSearch.Cache;
 using MinMaxSearch.Exceptions;
 using MinMaxSearch.ThreadManagment;
 
@@ -10,10 +11,12 @@ namespace MinMaxSearch
         private readonly SearchOptions searchOptions;
         private readonly DeterministicSearchUtils deterministicSearchUtils;
         private readonly ProbabilisticSearchUtils probabilisticSearchUtils;
+        private readonly ICacheManager cache;
         
-        public SearchWorker(SearchOptions searchOptions, IThreadManager threadManager)
+        public SearchWorker(SearchOptions searchOptions, IThreadManager threadManager, ICacheManager cache)
         {
             this.searchOptions = searchOptions;
+            this.cache = cache;
             deterministicSearchUtils = new DeterministicSearchUtils(this, searchOptions, threadManager);
             probabilisticSearchUtils = new ProbabilisticSearchUtils(threadManager, deterministicSearchUtils, searchOptions);
         }
@@ -22,6 +25,9 @@ namespace MinMaxSearch
         {
             if (startState.Turn == Player.Empty)
                 throw new EmptyPlayerException(nameof(startState.Turn) + " can't be " + nameof(Player.Empty));
+
+            if (cache.ContainsState(startState))
+                return new SearchResult(cache.GetStateEvaluation(startState), startState);
 
             if (searchOptions.Pruners.Any(pruner => pruner.ShouldPrune(startState, searchContext.CurrentDepth, searchContext.StatesUpTillNow)))
             {
@@ -36,13 +42,22 @@ namespace MinMaxSearch
                 return new SearchResult(evaluation, new List<IState> {startState}, 1, 0, stoppedDueToPrune);
             }
 
-            if (startState is IDeterministicState deterministicState)
-                return deterministicSearchUtils.EvaluateChildren(deterministicState, searchContext);
+            SearchResult result;
+            switch (startState)
+            {
+                case IDeterministicState deterministicState:
+                    result = deterministicSearchUtils.EvaluateChildren(deterministicState, searchContext);
+                    break;
+                case IProbabilisticState probabilisticState:
+                    result = probabilisticSearchUtils.EvaluateChildren(probabilisticState, searchContext);
+                    break;
+                default:
+                    throw new BadStateTypeException($"State must implement {nameof(IDeterministicState)} or {nameof(IProbabilisticState)}");
+            }
 
-            if (startState is IProbabilisticState probabilisticState)
-                return probabilisticSearchUtils.EvaluateChildren(probabilisticState, searchContext);
-            
-            throw new BadStateTypeException($"State must implement {nameof(IDeterministicState)} or {nameof(IProbabilisticState)}");
+            if (result.AllChildrenAreDeadEnds)
+                cache.Add(startState, result.Evaluation);
+            return result;
         }
         
         private bool ShouldStop(IState state, SearchContext searchContext)

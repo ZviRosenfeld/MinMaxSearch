@@ -19,7 +19,7 @@ namespace MinMaxSearch
             SearchTime = TimeSpan.Zero;
         }
 
-        public SearchResult(double evaluation, IState endState, bool allResultsAreChildren = true)
+        public SearchResult(double evaluation, IState endState, bool allChildrenAreChildren = true)
         {
             Evaluation = evaluation;
             IsSearchCompleted = true;
@@ -27,7 +27,7 @@ namespace MinMaxSearch
             StateSequence = new List<IState> {endState};
             Leaves = 1;
             InternalNodes = 0;
-            AllChildrenAreDeadEnds = allResultsAreChildren;
+            AllChildrenAreDeadEnds = allChildrenAreChildren;
             SearchTime = TimeSpan.Zero;
         }
 

@@ -12,7 +12,7 @@ namespace Connect4Tests
                 DieEarly = true,
                 MinScore = BoardEvaluator.MinEvaluation,
                 MaxScore = BoardEvaluator.MaxEvaluation,
-                ParallelismMode = parallelismMode
+                ParallelismMode = parallelismMode,
             };
 
         public static Player[,] GetEmptyBoard() =>

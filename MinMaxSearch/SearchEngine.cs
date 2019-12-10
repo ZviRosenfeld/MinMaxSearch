@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using MinMaxSearch.Cache;
 using MinMaxSearch.Exceptions;
 using MinMaxSearch.Pruners;
 using MinMaxSearch.ThreadManagment;
@@ -46,10 +47,10 @@ namespace MinMaxSearch
         public double MaxScore { get; set; } = double.MaxValue;
 
         /// <summary>
-        /// Any score equal to or smaller than MaxScore is considered a win for Min
+        /// Any score equal to or smaller than MinScore is considered a win for Min
         /// </summary>
         public double MinScore { get; set; } = double.MinValue;
-
+        
         /// <summary>
         /// Note that this will only have an effect if ParallelismMode is set to TotalParallelism
         /// </summary>
@@ -66,6 +67,18 @@ namespace MinMaxSearch
 
         private SearchOptions CreateSearchOptions() => new SearchOptions(pruners, IsUnstableState, PreventLoops,
             FavorShortPaths, DieEarly, MaxScore, MinScore, AlternateEvaluation);
+
+        /// <summary>
+        /// In some search domains, remembering states that lead to wins losses or draw can improve performance
+        /// </summary>
+        public CacheMode CacheMode { get; set; } = CacheMode.NewCache;
+
+        private ICacheManager cacheManager = new CacheManager();
+
+        /// <summary>
+        /// Note that the cache will only be filled in the first place if CacheMode is set to ReuseCache
+        /// </summary>
+        public void ClearCache() => cacheManager.Clear();
 
         private IThreadManager GetThreadManager(int searchDepth)
         {
@@ -132,7 +145,14 @@ namespace MinMaxSearch
                 throw new ArgumentException($"{nameof(maxDepth)} must be at least 1. Was {maxDepth}");
             
             var searchContext = new SearchContext(maxDepth, 0, cancellationToken);
-            var searchWorker = new SearchWorker(CreateSearchOptions(), GetThreadManager(maxDepth));
+            ICacheManager cacheManager;
+            if (CacheMode == CacheMode.NoCache)
+                cacheManager = new NullCacheManager();
+            else if (CacheMode == CacheMode.NewCache)
+                cacheManager = new CacheManager();
+            else
+                cacheManager = this.cacheManager;
+            var searchWorker = new SearchWorker(CreateSearchOptions(), GetThreadManager(maxDepth), cacheManager);
             var stopwatch = new Stopwatch();
             stopwatch.Start();
             var result = searchWorker.Evaluate(startState, searchContext);
