@@ -69,7 +69,7 @@ namespace MinMaxSearch
             FavorShortPaths, DieEarly, MaxScore, MinScore, AlternateEvaluation);
 
         /// <summary>
-        /// In some search domains, remembering states that lead to wins losses or draw can improve performance
+        /// In some search domains, remembering states that lead to wins, losses or draw can improve performance
         /// </summary>
         public CacheMode CacheMode { get; set; } = CacheMode.NewCache;
 
@@ -79,7 +79,7 @@ namespace MinMaxSearch
         /// Note that the cache will only be filled in the first place if CacheMode is set to ReuseCache
         /// </summary>
         public void ClearCache() => cacheManager.Clear();
-
+        
         private IThreadManager GetThreadManager(int searchDepth)
         {
             if (ParallelismMode == ParallelismMode.FirstLevelOnly)

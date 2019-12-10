@@ -35,6 +35,7 @@ namespace MinMaxSearch.UnitTests
             engine.Search(state1, 10); // This should put all the states in the cache
             var result = engine.Search(state1, 10);
             Assert.AreEqual(result.StateSequence.Count, 0);
+            Assert.IsTrue(result.AllChildrenAreDeadEnds);
         }
 
         [TestMethod]

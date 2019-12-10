@@ -130,6 +130,14 @@ There are 4 ParallelismMode:
 
 Note that "MaxDegreeOfParallelism" will be ignored in all modes other than "TotalParallelism", and "MaxLevelOfParallelism" will be ignored in all modes other than "ParallelismByLevel".
 
+**CacheMode**
+Caching lets the engine remember stares that lead to certain win, losses or draws, so that it doesn't need to re-search trees it's already searched.
+
+We support 3 modes of caching:
+- *NoCache*: No Caching.
+- *NewCache*: The engine will initalize and use a new cache for every search.
+- *ReuseCache*: The engine will re-use the same cache between searches. You can clean the cache by calling the engine's CleanCache method.
+
 **DieEarly:**
 If this option is set to true, the algorithm will rerun as soon as it finds a score bigger then or equal to SearchEngine.MaxScore for Max or smaller or equal to SearchEngine.MinScore for Min.
 The rationale behind this is that once the algorithm finds a win there's no point in more searching. (We assume that a score greater then MaxScore is a win for Max, and one smaller then MinScore is a win for Min).
