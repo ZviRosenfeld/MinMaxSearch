@@ -1,4 +1,4 @@
-A MinMax Search Engine.
+MinMaxSearch is a MinMax Search Engine that was created to be easily customized and simple to use.
 MinMax search is a popular search technique used for finding the next-best move in zero-summed games such as tic-tac-toe, checkers or backgammon.
 
 # Download
