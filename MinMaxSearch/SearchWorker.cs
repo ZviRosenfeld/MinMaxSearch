@@ -26,7 +26,7 @@ namespace MinMaxSearch
             if (startState.Turn == Player.Empty)
                 throw new EmptyPlayerException(nameof(startState.Turn) + " can't be " + nameof(Player.Empty));
 
-            if (cache.ContainsState(startState))
+            if (searchContext.CurrentDepth > 0 && cache.ContainsState(startState))
                 return new SearchResult(cache.GetStateEvaluation(startState), startState);
 
             if (searchOptions.Pruners.Any(pruner => pruner.ShouldPrune(startState, searchContext.CurrentDepth, searchContext.StatesUpTillNow)))

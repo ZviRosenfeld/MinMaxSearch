@@ -120,6 +120,8 @@ Note that this will only work if Equals is implement in a meaningful way on your
 If true, the algorithm will favor short solutions over long solutions when they both result in the same score.
 If this option is off, you may experience seemingly weird behavior. Say the algorithm sees that Min can set a trap that will end in Max's defeat in six moves. Without favoring short paths, the algorithm might decide to "give up", causing Max to perform random moves, and possibly lose much sooner - even though its opponent may not have noticed the trap.
 
+Please note that FavorShortPaths may not work togather with caching. 
+
 ### ParallelismMode
 There are 4 ParallelismMode:
 - *FirstLevelOnly*: In this mode only the first level of the search tree will be calculated in parallel. This is the recommended mode and normally yields the fastest searches.
@@ -136,7 +138,7 @@ Caching is available since version 1.4.3.
 We support 3 modes of caching:
 - *NoCache*: No Caching.
 - *NewCache*: The engine will initialize and use a new cache for every search.
-- *ReuseCache*: The engine will re-use the same cache between searches. You can clean the cache by calling the engine's CleanCache method.
+- *ReuseCache*: The engine will re-use the same cache between searches. You can clean the cache by calling the CacheManager's Clean method.
 
 You can create a custom cache by implementing [ICacheManager](https://github.com/ZviRosenfeld/MinMaxSearch/blob/master/MinMaxSearch/Cache/ICacheManager.cs), and use the engine's SetCustomCache method to tell the engine to use it.
 Note that the custom cache will only be used if CacheMode is set to ReuseCache.

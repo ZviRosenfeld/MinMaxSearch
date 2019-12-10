@@ -85,15 +85,9 @@ namespace MinMaxSearch
         private ICacheManager cacheManager = new CacheManager();
 
         /// <summary>
-        /// Note that the cache will only be filled in the first place if CacheMode is set to ReuseCache
+        /// Note that this is only meaningful if CacheMode is set to ReuseCache
         /// </summary>
-        public void ClearCache() => cacheManager.Clear();
-
-        /// <summary>
-        /// Note that the cache will only be filled in the first place if CacheMode is set to ReuseCache
-        /// </summary>
-        /// <param name="cleanCondition"> State will only be deleted if the conditon is meat</param>
-        public void ClearCache(Func<IState, bool> shouldClean) => cacheManager.Clear(shouldClean);
+        public ICacheManager GetCacheManager() => cacheManager;
 
         private IThreadManager GetThreadManager(int searchDepth)
         {
@@ -109,7 +103,7 @@ namespace MinMaxSearch
             return new TotalParallelismThreadManager(MaxDegreeOfParallelism, searchDepth);
         }
 
-        private ICacheManager GetCacheManager()
+        private ICacheManager BuildCacheManager()
         {
             if (CacheMode == CacheMode.NoCache)
                 return new NullCacheManager();
@@ -128,9 +122,12 @@ namespace MinMaxSearch
                 FavorShortPaths = FavorShortPaths,
                 IsUnstableState = IsUnstableState,
                 MaxDegreeOfParallelism = MaxDegreeOfParallelism,
+                MaxLevelOfParallelism = MaxLevelOfParallelism,
                 MaxScore = MaxScore,
                 MinScore = MinScore,
                 PreventLoops = PreventLoops,
+                CacheMode = CacheMode,
+                ParallelismMode = ParallelismMode,
             };
             foreach (var pruner in pruners)
                 newEngine.AddPruner(pruner);
@@ -170,7 +167,7 @@ namespace MinMaxSearch
                 throw new ArgumentException($"{nameof(maxDepth)} must be at least 1. Was {maxDepth}");
             
             var searchContext = new SearchContext(maxDepth, 0, cancellationToken);
-            var searchWorker = new SearchWorker(CreateSearchOptions(), GetThreadManager(maxDepth), GetCacheManager());
+            var searchWorker = new SearchWorker(CreateSearchOptions(), GetThreadManager(maxDepth), BuildCacheManager());
             var stopwatch = new Stopwatch();
             stopwatch.Start();
             var result = searchWorker.Evaluate(startState, searchContext);

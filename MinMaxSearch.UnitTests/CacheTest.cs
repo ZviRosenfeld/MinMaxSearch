@@ -1,4 +1,5 @@
-﻿using FakeItEasy;
+﻿using System.Threading;
+using FakeItEasy;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MinMaxSearch.Cache;
 
@@ -9,6 +10,7 @@ namespace MinMaxSearch.UnitTests
     {
         private readonly IDeterministicState state1 = A.Fake<IDeterministicState>();
         private readonly IDeterministicState state2 = A.Fake<IDeterministicState>();
+        private readonly IDeterministicState state3 = A.Fake<IDeterministicState>();
         private readonly IDeterministicState endState = A.Fake<IDeterministicState>();
         
         [TestInitialize]
@@ -16,13 +18,16 @@ namespace MinMaxSearch.UnitTests
         {
             A.CallTo(() => state1.ToString()).Returns("State1");
             A.CallTo(() => state2.ToString()).Returns("State2");
+            A.CallTo(() => state3.ToString()).Returns("State3");
             A.CallTo(() => endState.ToString()).Returns("EndState");
             endState.SetAsEndState();
             A.CallTo(() => state1.Turn).Returns(Player.Max);
             A.CallTo(() => state2.Turn).Returns(Player.Max);
+            A.CallTo(() => state3.Turn).Returns(Player.Max);
             A.CallTo(() => endState.Turn).Returns(Player.Max);
             state1.SetNeigbor(state2);
-            state2.SetNeigbor(endState);
+            state2.SetNeigbor(state3);
+            state3.SetNeigbor(endState);
         }
 
         [TestMethod]
@@ -34,7 +39,20 @@ namespace MinMaxSearch.UnitTests
             };
             engine.Search(state1, 10); // This should put all the states in the cache
             var result = engine.Search(state1, 10);
-            Assert.AreEqual(result.StateSequence.Count, 0);
+            Assert.AreEqual(result.StateSequence.Count, 1);
+            Assert.IsTrue(result.AllChildrenAreDeadEnds);
+        }
+
+        [TestMethod]
+        public void FillCache_EngineRemebersCachedStates()
+        {
+            var engine = new SearchEngine()
+            {
+                CacheMode = CacheMode.ReuseCache
+            };
+            engine.FillCache(state1, CancellationToken.None);
+            var result = engine.Search(state1, 10);
+            Assert.AreEqual(1, result.StateSequence.Count);
             Assert.IsTrue(result.AllChildrenAreDeadEnds);
         }
 
@@ -61,9 +79,9 @@ namespace MinMaxSearch.UnitTests
                 CacheMode = CacheMode.ReuseCache
             };
             engine.Search(state1, 10); // This should put all the states in the cache
-            engine.ClearCache(s => s != s);
+            engine.GetCacheManager().Clear(s => s != state2);
             var result = engine.Search(state1, 10);
-            Assert.AreNotEqual(result.StateSequence.Count, 1);
+            Assert.AreNotEqual(result.StateSequence.Count, 2);
         }
 
         [TestMethod]
@@ -74,9 +92,9 @@ namespace MinMaxSearch.UnitTests
                 CacheMode = CacheMode.ReuseCache
             };
             engine.Search(state1, 10); // This should put all the states in the cache
-            engine.ClearCache();
+            engine.GetCacheManager().Clear();
             var result = engine.Search(state1, 10);
-            Assert.AreNotEqual(result.StateSequence.Count, 0);
+            Assert.AreNotEqual(result.StateSequence.Count, 1);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace MinMaxSearch
 {
@@ -67,5 +68,21 @@ namespace MinMaxSearch
         /// In IterativeSearchs IsSearchCompleted will be true as long as at least the first search was completed (even if deeper searches were canceled).
         /// </summary>
         public bool IsSearchCompleted { get; }
+
+        public override string ToString()
+        {
+            var stringBuilder = new StringBuilder();
+            stringBuilder.AppendLine("SearchResult:");
+            stringBuilder.AppendLine(nameof(Evaluation) + " == " + Evaluation);
+            stringBuilder.AppendLine(nameof(SearchTime) + " == " + SearchTime);
+            stringBuilder.AppendLine(nameof(Leaves) + " == " + Leaves);
+            stringBuilder.AppendLine(nameof(InternalNodes) + " == " + InternalNodes);
+            stringBuilder.AppendLine(nameof(SearchDepth) + " == " + SearchDepth);
+            stringBuilder.AppendLine(nameof(AllChildrenAreDeadEnds) + " == " + AllChildrenAreDeadEnds);
+            stringBuilder.AppendLine(nameof(NextMove) + ":");
+            stringBuilder.AppendLine(NextMove.ToString());
+            
+            return stringBuilder.ToString();
+        }
     }
 }
