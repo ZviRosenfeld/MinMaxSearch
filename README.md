@@ -1,11 +1,10 @@
-# MinMaxSearch
 A MinMax Search Engine.
 MinMax search is a popular search technique used for finding the next-best move in zero-summed games such as tic-tac-toe, checkers or backgammon.
 
-## Download
+# Download
 You can find MinMaxSearch library on nuget.org via package name MinMaxSearch.
 
-## How to Use
+# How to Use
 
 example1:
 ```csharp
@@ -32,11 +31,11 @@ SearchResult searchResult = engine.Search(startState, searchDepth, CancellationT
 
 SearchEngine has a number of Search methods that expect different parameters. Most of the parameters are straight-forward. I'd like to elaborate on the IState one.
 
-### IState
+## IState
 
 There are 2 types of states: IDeterministicState and IProbabilisticState. All your game states will need to implement one of these states.
 
-**IDeterministicState**
+### IDeterministicState
 
 States used for deterministic games (games that have no element of luck in them), such as tic-tac-toe or checkers.
 ```csharp
@@ -68,7 +67,7 @@ The code contains examples of [Tic-tac-toe](TicTacToeTests/TicTacToeState.cs) an
 
 You can find a tutorial on how to create a tic-tac-toe state [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Tic-Tac-Toe-Tutorial).
 
-**IProbabilisticState**
+### IProbabilisticState
 
 States used for indeterministic games (games that have an element of luck in them), such as backgammon.
 
@@ -105,23 +104,22 @@ The code contains an examples of a [Probabilistic Connect-4 State](Probabilistic
 
 You can find a tutorial on how to create a probabilistic version of tic-tac-toe [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Probabilistic-Tic-Tac-Toe-Tutorial).
 
-### Tutorials
+## Tutorials
 
 You can find a tutorial on how to create a tic-tac-toe state [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Tic-Tac-Toe-Tutorial), and one on a probabilistic version of tic-tac-toe [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Probabilistic-Tic-Tac-Toe-Tutorial).
 
-### SearchEngine options:
+## SearchEngine options:
 SearchEngine can be configured with the following options:
 
-**PreventLoops:**
+### PreventLoops
 In some games - such as tic-tac-toe or connect 4 - loops are impossible. In others - like chess - loops can be quite common. If this flag is set to true, the program will automatically recognize loop situations and not look any deeper when they occur.
 Note that this will only work if Equals is implement in a meaningful way on your states.
 
-**FavorShortPaths:**
+### FavorShortPaths
 If true, the algorithm will favor short solutions over long solutions when they both result in the same score.
 If this option is off, you may experience seemingly weird behavior. Say the algorithm sees that Min can set a trap that will end in Max's defeat in six moves. Without favoring short paths, the algorithm might decide to "give up", causing Max to perform random moves, and possibly lose much sooner - even though its opponent may not have noticed the trap.
 
-**ParallelismMode**:
-
+### ParallelismMode
 There are 4 ParallelismMode:
 - *FirstLevelOnly*: In this mode only the first level of the search tree will be calculated in parallel. This is the recommended mode and normally yields the fastest searches.
 - *ParallelismByLevel*: In this mode, the first x levels of the search will be carried out in parallel. You can determine x by setting "MaxLevelOfParallelism" in the SearchEngine. (available since 1.4.3)
@@ -130,26 +128,31 @@ There are 4 ParallelismMode:
 
 Note that "MaxDegreeOfParallelism" will be ignored in all modes other than "TotalParallelism", and "MaxLevelOfParallelism" will be ignored in all modes other than "ParallelismByLevel".
 
-**CacheMode**
+### CacheMode
 Caching lets the engine remember stares that lead to certain win, losses or draws, so that it doesn't need to re-search trees it's already searched.
 
 We support 3 modes of caching:
 - *NoCache*: No Caching.
-- *NewCache*: The engine will initalize and use a new cache for every search.
+- *NewCache*: The engine will initialize and use a new cache for every search.
 - *ReuseCache*: The engine will re-use the same cache between searches. You can clean the cache by calling the engine's CleanCache method.
 
-**DieEarly:**
+You can create a custom cache by implementing [ICacheManager](https://github.com/ZviRosenfeld/MinMaxSearch/blob/master/MinMaxSearch/Cache/ICacheManager.cs), and use the engine's SetCustomCache method to tell the engine to use it.
+Note that the custom cache will only be used if CacheMode is set to ReuseCache.
+
+### DieEarly
 If this option is set to true, the algorithm will rerun as soon as it finds a score bigger then or equal to SearchEngine.MaxScore for Max or smaller or equal to SearchEngine.MinScore for Min.
 The rationale behind this is that once the algorithm finds a win there's no point in more searching. (We assume that a score greater then MaxScore is a win for Max, and one smaller then MinScore is a win for Min).
 Note that this will only work if Equals is implement in a meaningful way on your states.
 
-**IsUnstableState:**
+### IsUnstableState
 Some states are more interesting than others. With this delegate you can tell the algorithm to continue searching for "interesting" states even after max search depth is exceeded.
 IsUnstableState is a delegate of type Func<IState, int, List<IState>, bool>. It receives a state and a list of the states leading up to it, and decides if it's safe to terminate the search at this state.
 
-**Pruners:**
+### Pruners
 You can use the method SearchEngine.AddPruner(IPruner pruner) to add pruners to the search algorithm.
-Pruners can be implemented by implementing the IPruner interface. Then, the ShouldPrune(IState state, int depth, List<IState> passedThroughStates) method will be called on every state the algorithm checks. This can provide you with a lot of customization power over the algorithm.
+Pruners can be implemented by implementing the [IPruner](https://github.com/ZviRosenfeld/MinMaxSearch/blob/master/MinMaxSearch/Pruners/IPruner.cs) interface. 
+Then, the ShouldPrune(IState state, int depth, List<IState> passedThroughStates) method will be called on every state the algorithm checks. 
+This can provide you with a lot of customization power over the algorithm.
 
 ## IterativeSearch
 

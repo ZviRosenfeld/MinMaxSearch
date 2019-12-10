@@ -1,4 +1,6 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace MinMaxSearch.Cache
 {
@@ -13,5 +15,15 @@ namespace MinMaxSearch.Cache
         public double GetStateEvaluation(IState state) => cache[state];
 
         public void Clear() => cache.Clear();
+        public void Clear(Func<IState, bool> shouldClean)
+        {
+            var statesToRemove = new HashSet<IState>();
+            foreach (var state in cache.Keys)
+                if (shouldClean(state))
+                    statesToRemove.Add(state);
+
+            foreach (var state in statesToRemove)
+                cache.TryRemove(state, out var _);
+        }
     }
 }

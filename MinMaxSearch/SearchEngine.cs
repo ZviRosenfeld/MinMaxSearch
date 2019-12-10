@@ -73,13 +73,28 @@ namespace MinMaxSearch
         /// </summary>
         public CacheMode CacheMode { get; set; } = CacheMode.NewCache;
 
+        /// <summary>
+        /// Note that the custom cache will only be used if CacheMode is set to ReuseCache
+        /// </summary>
+        public SearchEngine SetCustomCache(ICacheManager cache)
+        {
+            cacheManager = cache;
+            return this;
+        }
+
         private ICacheManager cacheManager = new CacheManager();
 
         /// <summary>
         /// Note that the cache will only be filled in the first place if CacheMode is set to ReuseCache
         /// </summary>
         public void ClearCache() => cacheManager.Clear();
-        
+
+        /// <summary>
+        /// Note that the cache will only be filled in the first place if CacheMode is set to ReuseCache
+        /// </summary>
+        /// <param name="cleanCondition"> State will only be deleted if the conditon is meat</param>
+        public void ClearCache(Func<IState, bool> shouldClean) => cacheManager.Clear(shouldClean);
+
         private IThreadManager GetThreadManager(int searchDepth)
         {
             if (ParallelismMode == ParallelismMode.FirstLevelOnly)

@@ -39,6 +39,34 @@ namespace MinMaxSearch.UnitTests
         }
 
         [TestMethod]
+        public void SetCustomCache_UseCustomCache()
+        {
+            var customCache = A.Fake<ICacheManager>();
+            A.CallTo(() => customCache.ContainsState(A<IState>.That.IsSameAs(state2))).Returns(true);
+            A.CallTo(() => customCache.GetStateEvaluation(A<IState>._)).Returns(1);
+
+            var engine = new SearchEngine()
+            {
+                CacheMode = CacheMode.ReuseCache
+            }.SetCustomCache(customCache);
+            engine.Search(state1, 10);
+            A.CallTo(() => endState.GetNeighbors()).MustNotHaveHappened();
+        }
+
+        [TestMethod]
+        public void ClearCacheWithCondition()
+        {
+            var engine = new SearchEngine()
+            {
+                CacheMode = CacheMode.ReuseCache
+            };
+            engine.Search(state1, 10); // This should put all the states in the cache
+            engine.ClearCache(s => s != s);
+            var result = engine.Search(state1, 10);
+            Assert.AreNotEqual(result.StateSequence.Count, 1);
+        }
+
+        [TestMethod]
         public void ClearCache_CacheCleared()
         {
             var engine = new SearchEngine()
