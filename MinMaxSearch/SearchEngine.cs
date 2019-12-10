@@ -94,6 +94,16 @@ namespace MinMaxSearch
             return new TotalParallelismThreadManager(MaxDegreeOfParallelism, searchDepth);
         }
 
+        private ICacheManager GetCacheManager()
+        {
+            if (CacheMode == CacheMode.NoCache)
+                return new NullCacheManager();
+            if (CacheMode == CacheMode.NewCache)
+                return new CacheManager();
+
+            return cacheManager;
+        }
+
         public SearchEngine Clone()
         {
             var newEngine = new SearchEngine()
@@ -145,14 +155,7 @@ namespace MinMaxSearch
                 throw new ArgumentException($"{nameof(maxDepth)} must be at least 1. Was {maxDepth}");
             
             var searchContext = new SearchContext(maxDepth, 0, cancellationToken);
-            ICacheManager cacheManager;
-            if (CacheMode == CacheMode.NoCache)
-                cacheManager = new NullCacheManager();
-            else if (CacheMode == CacheMode.NewCache)
-                cacheManager = new CacheManager();
-            else
-                cacheManager = this.cacheManager;
-            var searchWorker = new SearchWorker(CreateSearchOptions(), GetThreadManager(maxDepth), cacheManager);
+            var searchWorker = new SearchWorker(CreateSearchOptions(), GetThreadManager(maxDepth), GetCacheManager());
             var stopwatch = new Stopwatch();
             stopwatch.Start();
             var result = searchWorker.Evaluate(startState, searchContext);

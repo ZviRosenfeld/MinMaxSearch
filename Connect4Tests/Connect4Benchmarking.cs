@@ -12,7 +12,7 @@ namespace Connect4Tests
         [TestMethod]
         public void BenchmarkConnect4()
         {
-            var searchDepth = 11;
+            var searchDepth = 12;
             var board = Connect4TestUtils.GetEmptyBoard();
             BenchmarkWithDegreeOfParallelism(board, searchDepth, ParallelismMode.NonParallelism);
             BenchmarkWithDegreeOfParallelism(board, searchDepth, ParallelismMode.FirstLevelOnly);
