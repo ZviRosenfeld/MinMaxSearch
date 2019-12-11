@@ -114,7 +114,7 @@ SearchEngine can be configured with the following options:
 
 ### PreventLoops
 In some games - such as tic-tac-toe or connect 4 - loops are impossible. In others - like chess - loops can be quite common. If this flag is set to true, the program will automatically recognize loop situations and not look any deeper when they occur.
-Note that this will only work if Equals is implement in a meaningful way on your states.
+Note that this will only work if Equals is implement in a meaningful way for your states.
 
 ### FavorShortPaths
 If true, the algorithm will favor short solutions over long solutions when they both result in the same score.
@@ -133,6 +133,7 @@ Note that "MaxDegreeOfParallelism" will be ignored in all modes other than "Tota
 
 ### CacheMode
 Caching lets the engine remember stares that lead to certain win, losses or draws, so that it doesn't need to re-search trees it's already searched.
+Note that caching will only work if you implement Equals and GetHashValue in a meaningful way for your states. 
 Caching is available since version 1.4.3.
 
 We support 3 modes of caching:
@@ -141,15 +142,20 @@ We support 3 modes of caching:
 - *ReuseCache*: The engine will re-use the same cache between searches. You can clean the cache by calling the CacheManager's Clean method.
 
 You can create a custom cache by implementing [ICacheManager](https://github.com/ZviRosenfeld/MinMaxSearch/blob/master/MinMaxSearch/Cache/ICacheManager.cs), and use the engine's SetCustomCache method to tell the engine to use it.
+Please note that your ChacheManager will be accessed by many threads, so it must be thread-safe.
 You can find a sample custom CacheManager [here](https://github.com/ZviRosenfeld/MinMaxSearch/blob/master/MinMaxSearch/Cache/CustomCacheManager.cs).
 Note that the custom cache will only be used if CacheMode is set to ReuseCache.
 
 If you're using the ReuseCache option, you can use the FillCache extension method to fill the cache while the program is idle (say, while your opponent is considering their next move).
 Just to remember to cancel the FillCache when you're ready to run a search (using the cancellation token).
 
+Please note that when using caching, the StateSequence in the SearchResult may be cut off early. 
+This is because the cache remebers the evaluations that states will lead to, but not *how* the state lead to that evaluation.
+So the StateSequence will end at the cached state.
+
 ### DieEarly
-If this option is set to true, the algorithm will rerun as soon as it finds a score bigger then or equal to SearchEngine.MaxScore for Max or smaller or equal to SearchEngine.MinScore for Min.
-The rationale behind this is that once the algorithm finds a win there's no point in more searching. (We assume that a score greater then MaxScore is a win for Max, and one smaller then MinScore is a win for Min).
+If this option is set to true, the algorithm will rerun as soon as it finds a score bigger than or equal to SearchEngine.MaxScore for Max or smaller or equal to SearchEngine.MinScore for Min.
+The rational behind this is that once the algorithm finds a win there's no point in more searching. (We assume that a score greater then MaxScore is a win for Max, and one smaller then MinScore is a win for Min).
 Note that this will only work if Equals is implement in a meaningful way on your states.
 
 ### IsUnstableState

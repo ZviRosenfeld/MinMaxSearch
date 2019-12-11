@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using MinMaxSearch.Exceptions;
 
 namespace MinMaxSearch.Cache
 {
@@ -16,6 +17,9 @@ namespace MinMaxSearch.Cache
         /// </summary>
         public static void FillCache(this SearchEngine searchEngine, IDeterministicState startState, CancellationToken cancellationToken, ParallelismMode parallelismMode = ParallelismMode.NonParallelism, int maxDegreeOfParallelism = 1)
         {
+            if (searchEngine.CacheMode != CacheMode.ReuseCache)
+                throw new MinMaxSearchException($"{nameof(FillCache)} will only work if {nameof(searchEngine.CacheMode)} is set to {CacheMode.ReuseCache}");
+
             var newEngine = searchEngine.Clone();
             newEngine.ParallelismMode = parallelismMode;
             newEngine.MaxDegreeOfParallelism = maxDegreeOfParallelism;

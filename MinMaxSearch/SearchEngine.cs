@@ -27,7 +27,7 @@ namespace MinMaxSearch
         public Func<IState, int, List<IState>, bool> IsUnstableState { get; set; } = ((s, d, l) => false);
 
         /// <summary>
-        /// Note that this will only work if you implement Equals and GetHashValue in a meaningful way in the states. 
+        /// Note that this will only work if you implement Equals and GetHashValue in a meaningful way for your states. 
         /// </summary>
         public bool PreventLoops { get; set; }
 
@@ -37,12 +37,12 @@ namespace MinMaxSearch
         public bool FavorShortPaths { get; set; } = true;
 
         /// <summary>
-        /// The search will end once we find a score that is bigger then or equal to SearchEngine.MaxScore for Max or smaller or equal to SearchEngine.MinScore for Min.
+        /// The search will end once we find a score that is greater than or equal to SearchEngine.MaxScore for Max or smaller or equal to SearchEngine.MinScore for Min.
         /// </summary>
         public bool DieEarly { get; set; }
 
         /// <summary>
-        /// Any score equal to or bigger than MaxScore is considered a win for Max
+        /// Any score equal to or greater than MaxScore is considered a win for Max
         /// </summary>
         public double MaxScore { get; set; } = double.MaxValue;
 
@@ -69,7 +69,8 @@ namespace MinMaxSearch
             FavorShortPaths, DieEarly, MaxScore, MinScore, AlternateEvaluation);
 
         /// <summary>
-        /// In some search domains, remembering states that lead to wins, losses or draw can improve performance
+        /// In some search domains, remembering states that lead to wins, losses or draw can improve performance.
+        /// Note that caching will only work if you implement Equals and GetHashValue in a meaningful way for your states. 
         /// </summary>
         public CacheMode CacheMode { get; set; } = CacheMode.NewCache;
 

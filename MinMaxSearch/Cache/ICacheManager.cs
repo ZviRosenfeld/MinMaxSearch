@@ -5,11 +5,19 @@ namespace MinMaxSearch.Cache
     public interface ICacheManager
     {
         void Add(IState state, double evaluation);
+
         bool ContainsState(IState state);
+
         double GetStateEvaluation(IState state);
+
+        /// <summary>
+        /// Clears all states from the cache
+        /// </summary>
         void Clear();
 
-        /// <param name="shouldClean"> State will only be deleted if the conditon is meat</param>
+        /// <summary>
+        /// State will only be deleted if the 'shouldClean' conditon is meat
+        /// </summary>
         void Clear(Func<IState, bool> shouldClean);
     }
 }

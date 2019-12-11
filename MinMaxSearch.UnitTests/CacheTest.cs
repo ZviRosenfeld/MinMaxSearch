@@ -2,6 +2,7 @@
 using FakeItEasy;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MinMaxSearch.Cache;
+using MinMaxSearch.Exceptions;
 
 namespace MinMaxSearch.UnitTests
 {
@@ -95,6 +96,19 @@ namespace MinMaxSearch.UnitTests
             engine.GetCacheManager().Clear();
             var result = engine.Search(state1, 10);
             Assert.AreNotEqual(result.StateSequence.Count, 1);
+        }
+
+        [TestMethod]
+        [DataRow(CacheMode.NewCache)]
+        [DataRow(CacheMode.NoCache)]
+        [ExpectedException(typeof(MinMaxSearchException))]
+        public void FillCache_CacheModeNotSetToResueCache_ThrowsException(CacheMode cacheMode)
+        {
+            var engine = new SearchEngine()
+            {
+                CacheMode = cacheMode
+            };
+            engine.FillCache(state1, CancellationToken.None);
         }
     }
 }

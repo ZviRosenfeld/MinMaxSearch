@@ -32,7 +32,7 @@ namespace MinMaxSearch
             if (searchOptions.Pruners.Any(pruner => pruner.ShouldPrune(startState, searchContext.CurrentDepth, searchContext.StatesUpTillNow)))
             {
                 var evaluation = startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow, searchOptions);
-                return new SearchResult(evaluation, startState);
+                return new SearchResult(evaluation, startState, false);
             }
 
             if (ShouldStop(startState, searchContext))
