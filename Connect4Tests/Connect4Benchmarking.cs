@@ -14,17 +14,17 @@ namespace Connect4Tests
         {
             var searchDepth = 12;
             var board = Connect4TestUtils.GetEmptyBoard();
-            BenchmarkWithDegreeOfParallelism(board, searchDepth, ParallelismMode.NonParallelism);
-            BenchmarkWithDegreeOfParallelism(board, searchDepth, ParallelismMode.FirstLevelOnly);
-            BenchmarkWithDegreeOfParallelism(board, searchDepth, ParallelismMode.ParallelismByLevel, levelOfParallelism: 2);
-            BenchmarkWithDegreeOfParallelism(board, searchDepth, ParallelismMode.TotalParallelism, 4);
+            Benchmark(board, searchDepth, ParallelismMode.NonParallelism);
+            Benchmark(board, searchDepth, ParallelismMode.FirstLevelOnly);
+            Benchmark(board, searchDepth, ParallelismMode.ParallelismByLevel, levelOfParallelism: 2);
+            Benchmark(board, searchDepth, ParallelismMode.TotalParallelism, 4);
         }
 
         [TestMethod]
         public void BenchmarkConnect4_HalfFullBoard() =>
-            BenchmarkWithDegreeOfParallelism(Connect4TestUtils.GetHalfFullBoard(), 13);
+            Benchmark(Connect4TestUtils.GetHalfFullBoard(), 20);
 
-        private void BenchmarkWithDegreeOfParallelism(Player[,] startBoard, int searchDepth,
+        private void Benchmark(Player[,] startBoard, int searchDepth,
             ParallelismMode parallelismMode = ParallelismMode.FirstLevelOnly, int degreeOfParallelism = 1,
             int levelOfParallelism = 1)
         {

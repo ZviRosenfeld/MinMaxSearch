@@ -47,14 +47,21 @@ namespace MinMaxSearch
         public IState NextMove => StateSequence.First();
 
         public double Evaluation { get; }
-        
+
         /// <summary>
-        /// Note that this will be empty for probabilistic states 
+        /// Note that this will be empty for probabilistic states.
+        /// Also, this might be cut off if you're using caching (the default is to use caching).
         /// </summary>
         public List<IState> StateSequence { get; }
-
+        
+        /// <summary>
+        /// The number of leaves in the search tree
+        /// </summary>
         public int Leaves { get; }
 
+        /// <summary>
+        /// The number of InternalNodes in the search tree
+        /// </summary>
         public int InternalNodes { get; }
 
         public bool AllChildrenAreDeadEnds { get; }
