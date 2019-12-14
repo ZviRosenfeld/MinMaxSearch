@@ -39,5 +39,16 @@ namespace Connect4Tests
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
             };
+
+        public static Connect4State GetMaxFiveMovesAwayFromWinningState() =>
+            new Connect4State(new[,]
+            {
+                {Player.Empty, Player.Min, Player.Max, Player.Empty, Player.Max, Player.Empty},
+                {Player.Empty, Player.Max, Player.Min, Player.Empty, Player.Empty, Player.Empty},
+                {Player.Empty, Player.Max, Player.Max, Player.Empty, Player.Empty, Player.Empty},
+                {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
+                {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
+                {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
+            }, Player.Max);
     }
 }

@@ -109,9 +109,11 @@ namespace MinMaxSearch
                 }
             }
 
-            return bestResult.CloneAndAddStateToTop(startState, leaves, internalNodes + 1, allChildrenAreDeadEnds || pruned);
+            var childrenContainWiningPosition = bestEvaluation >= searchOptions.MaxScore || bestEvaluation <= searchOptions.MinScore;
+            allChildrenAreDeadEnds = allChildrenAreDeadEnds || pruned || (childrenContainWiningPosition && searchOptions.DieEarly);
+            return bestResult.CloneAndAddStateToTop(startState, leaves, internalNodes + 1, allChildrenAreDeadEnds);
         }
-
+        
         private bool AlphaBataShouldPrune(double alpha, double bata, double evaluation, Player player)
         {
             if (player == Player.Min && evaluation < alpha)

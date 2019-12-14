@@ -9,8 +9,8 @@ namespace MinMaxSearch.Pruners
     /// </summary>
     class PreventLoopPruner : IPruner
     {
-        public bool ShouldPrune(IState state, int depth, List<IState> passedThroughStates) => 
-            Enumerable.Contains(passedThroughStates, state);
+        public bool ShouldPrune(IState state, int depth, List<IState> passedThroughStates) =>
+            passedThroughStates.Contains(state);
 
         public override bool Equals(object obj) => obj is PreventLoopPruner;
 

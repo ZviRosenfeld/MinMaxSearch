@@ -25,5 +25,7 @@ namespace MinMaxSearch.Cache
             foreach (var state in statesToRemove)
                 cache.TryRemove(state, out var _);
         }
+
+        public int Count => cache.Count;
     }
 }
