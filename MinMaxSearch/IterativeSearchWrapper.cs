@@ -99,7 +99,7 @@ namespace MinMaxSearch
 
                 bestResultSoFar = result;
 
-                if (result.AllChildrenAreDeadEnds)
+                if (result.FullTreeSearched)
                     break; // No point searching any deeper
             }
             stopewatch.Stop();

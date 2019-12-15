@@ -92,13 +92,14 @@ namespace MinMaxSearch
             var bestEvaluation = player == Player.Max ? double.MinValue : double.MaxValue;
             SearchResult bestResult = null;
             int leaves = 0, internalNodes = 0;
-            var allChildrenAreDeadEnds = true;
+            bool allChildrenAreDeadEnds = true, fullTreeSearched = true;
             foreach (var result in results)
             {
                 var actualResult = result.Result;
                 leaves += actualResult.Leaves;
                 internalNodes += actualResult.InternalNodes;
                 allChildrenAreDeadEnds = allChildrenAreDeadEnds && actualResult.AllChildrenAreDeadEnds;
+                fullTreeSearched = fullTreeSearched && actualResult.FullTreeSearched;
                 if (IsBetterThen(actualResult.Evaluation, bestEvaluation, actualResult.StateSequence.Count,
                     bestResult?.StateSequence?.Count, player))
                 {
@@ -108,7 +109,7 @@ namespace MinMaxSearch
             }
 
             var childrenContainWiningPosition = bestEvaluation >= searchOptions.MaxScore || bestEvaluation <= searchOptions.MinScore;
-            return bestResult.CloneAndAddStateToTop(startState, leaves, internalNodes + 1, allChildrenAreDeadEnds || childrenContainWiningPosition);
+            return bestResult.CloneAndAddStateToTop(startState, leaves, internalNodes + 1, fullTreeSearched || childrenContainWiningPosition, allChildrenAreDeadEnds || childrenContainWiningPosition);
         }
         
         private bool AlphaBataShouldPrune(double alpha, double bata, double evaluation, Player player)

@@ -49,7 +49,7 @@ namespace MinMaxSearch.UnitTests
                 (IDeterministicState s, int d, CancellationToken c) =>
                 {
                     cancellationSource.Cancel();
-                    return new SearchResult(2, s, false);
+                    return new SearchResult(2, s, false, false);
                 });
             var searchEngine = new IterativeSearchWrapper(engine);
             var result = searchEngine.IterativeSearch(new IncreasingNumberState(1, Player.Max), 1, 2, CancellationToken.None, cancellationSource.Token);

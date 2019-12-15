@@ -2,25 +2,30 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using MinMaxSearch.Exceptions;
 
 namespace MinMaxSearch
 {
     public class SearchResult
     {
         public SearchResult(double evaluation, List<IState> stateSequence, int leaves, int internalNodes,
-            bool allChildrenAreDeadEnds)
+            bool fullTreeSearched, bool allChildrenAreDeadEnds)
         {
             Evaluation = evaluation;
             StateSequence = stateSequence;
             Leaves = leaves;
             InternalNodes = internalNodes;
+            FullTreeSearched = fullTreeSearched;
             AllChildrenAreDeadEnds = allChildrenAreDeadEnds;
+            if (allChildrenAreDeadEnds && !fullTreeSearched)
+                throw new InternalException($"Code 1002 ({nameof(allChildrenAreDeadEnds)} but not {nameof(fullTreeSearched)})");
+
             IsSearchCompleted = true;
             SearchDepth = -1;
             SearchTime = TimeSpan.Zero;
         }
 
-        public SearchResult(double evaluation, IState endState, bool allChildrenAreChildren = true)
+        public SearchResult(double evaluation, IState endState, bool fullTreeSearched = true, bool allChildrenAreDeadEnds = true)
         {
             Evaluation = evaluation;
             IsSearchCompleted = true;
@@ -28,7 +33,11 @@ namespace MinMaxSearch
             StateSequence = new List<IState> {endState};
             Leaves = 1;
             InternalNodes = 0;
-            AllChildrenAreDeadEnds = allChildrenAreChildren;
+            FullTreeSearched = fullTreeSearched;
+            AllChildrenAreDeadEnds = allChildrenAreDeadEnds;
+            if (allChildrenAreDeadEnds && !fullTreeSearched)
+                throw new InternalException($"Code 1003 ({nameof(allChildrenAreDeadEnds)} but not {nameof(fullTreeSearched)})");
+
             SearchTime = TimeSpan.Zero;
         }
 
@@ -38,6 +47,7 @@ namespace MinMaxSearch
             StateSequence = other.StateSequence.ToList();
             Leaves = other.Leaves;
             InternalNodes = other.InternalNodes;
+            FullTreeSearched = other.FullTreeSearched;
             AllChildrenAreDeadEnds = other.AllChildrenAreDeadEnds;
             SearchTime = searchTime;
             IsSearchCompleted = isSearchCompleted;
@@ -64,6 +74,14 @@ namespace MinMaxSearch
         /// </summary>
         public int InternalNodes { get; }
 
+        /// <summary>
+        /// Returns true if the full tree was searched. This will return true even if some of the branches were prunned.
+        /// </summary>
+        public bool FullTreeSearched { get; }
+
+        /// <summary>
+        /// Returns true only if all paths lead to daed ends. If part of the tree was prunned, this will return false.
+        /// </summary>
         public bool AllChildrenAreDeadEnds { get; }
 
         public TimeSpan SearchTime { get; }
@@ -85,6 +103,7 @@ namespace MinMaxSearch
             stringBuilder.AppendLine(nameof(Leaves) + " == " + Leaves);
             stringBuilder.AppendLine(nameof(InternalNodes) + " == " + InternalNodes);
             stringBuilder.AppendLine(nameof(SearchDepth) + " == " + SearchDepth);
+            stringBuilder.AppendLine(nameof(FullTreeSearched) + " == " + FullTreeSearched);
             stringBuilder.AppendLine(nameof(AllChildrenAreDeadEnds) + " == " + AllChildrenAreDeadEnds);
             stringBuilder.AppendLine(nameof(NextMove) + ":");
             stringBuilder.AppendLine(NextMove.ToString());

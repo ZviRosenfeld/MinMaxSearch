@@ -29,21 +29,24 @@ namespace MinMaxSearch
             if (searchContext.CurrentDepth > 0)
             {
                 var evaluation = cache.GetStateEvaluation(startState);
+                if (evaluation != null && evaluation.MaxEvaluation == evaluation.MinEvaluation)
+                    return new SearchResult(evaluation.MaxEvaluation, startState);
+
                 if (evaluation != null && (evaluation.MinEvaluation >= searchOptions.MaxScore || evaluation.MaxEvaluation <= searchOptions.MinScore || evaluation.MinEvaluation >= searchContext.Bata || evaluation.MaxEvaluation <= searchContext.Alpha))
-                    return new SearchResult(startState.Turn == Player.Max ? evaluation.MinEvaluation : evaluation.MaxEvaluation, startState);
+                    return new SearchResult(startState.Turn == Player.Max ? evaluation.MinEvaluation : evaluation.MaxEvaluation, startState, true, false);
             }
 
             if (searchOptions.Pruners.Any(pruner => pruner.ShouldPrune(startState, searchContext.CurrentDepth, searchContext.StatesUpTillNow)))
             {
                 var evaluation = startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow, searchOptions);
-                return new SearchResult(evaluation, startState, false);
+                return new SearchResult(evaluation, startState, true, false);
             }
 
             if (ShouldStop(startState, searchContext))
             {
                 var stoppedDueToPrune = searchContext.PruneAtMaxDepth && searchContext.MaxDepth == searchContext.CurrentDepth;
                 var evaluation = startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow, searchOptions);
-                return new SearchResult(evaluation, new List<IState> {startState}, 1, 0, stoppedDueToPrune);
+                return new SearchResult(evaluation, new List<IState> {startState}, 1, 0, stoppedDueToPrune, false);
             }
 
             SearchResult result;
@@ -60,6 +63,8 @@ namespace MinMaxSearch
             }
 
             if (result.AllChildrenAreDeadEnds)
+                cache.AddExactEvaluation(startState, result.Evaluation);
+            else if (result.FullTreeSearched)
             {
                 if (startState.Turn == Player.Max)
                     cache.AddMinEvaluation(startState, result.Evaluation);

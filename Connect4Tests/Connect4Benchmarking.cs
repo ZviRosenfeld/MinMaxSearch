@@ -31,7 +31,7 @@ namespace Connect4Tests
         {
             Console.WriteLine(GetTestMessage(parallelismMode, degreeOfParallelism, levelOfParallelism));
             var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode, levelOfParallelism);
-            engine.CacheMode = CacheMode.NoCache;
+            engine.CacheMode = CacheMode.NewCache;
             var startState = new Connect4State(startBoard, Player.Max);
 
             var results = engine.Search(startState, searchDepth);
