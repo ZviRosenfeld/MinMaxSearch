@@ -28,8 +28,7 @@ namespace MinMaxSearch
                 var evaluation = startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow, searchOptions);
                 return new SearchResult(evaluation, startState);
             }
-
-            var pruned = false;
+            
             var player = startState.Turn;
             var results = new List<Task<SearchResult>>();
             var cancellationSource = CancellationTokenSource.CreateLinkedTokenSource(searchContext.CancellationToken);
@@ -41,13 +40,12 @@ namespace MinMaxSearch
 
                 if (ProcessResultAndReturnWhetherWeShouldBreak(taskResult, searchContext, storedStates, state, player))
                 {
-                    pruned = true;
                     cancellationSource.Cancel();
                     break;
                 }
             }
             
-            return Reduce(results, player, startState, pruned);
+            return Reduce(results, player, startState);
         }
 
         private bool ProcessResultAndReturnWhetherWeShouldBreak(Task<SearchResult> taskResult, SearchContext searchContext, IDictionary<IState, double> storedStates, IState state, Player player)
@@ -89,7 +87,7 @@ namespace MinMaxSearch
             return taskResult;
         }
 
-        private SearchResult Reduce(List<Task<SearchResult>> results, Player player, IState startState, bool pruned)
+        private SearchResult Reduce(List<Task<SearchResult>> results, Player player, IState startState)
         {
             var bestEvaluation = player == Player.Max ? double.MinValue : double.MaxValue;
             SearchResult bestResult = null;
@@ -110,8 +108,7 @@ namespace MinMaxSearch
             }
 
             var childrenContainWiningPosition = bestEvaluation >= searchOptions.MaxScore || bestEvaluation <= searchOptions.MinScore;
-            allChildrenAreDeadEnds = allChildrenAreDeadEnds || pruned || (childrenContainWiningPosition && searchOptions.DieEarly);
-            return bestResult.CloneAndAddStateToTop(startState, leaves, internalNodes + 1, allChildrenAreDeadEnds);
+            return bestResult.CloneAndAddStateToTop(startState, leaves, internalNodes + 1, allChildrenAreDeadEnds || childrenContainWiningPosition);
         }
         
         private bool AlphaBataShouldPrune(double alpha, double bata, double evaluation, Player player)

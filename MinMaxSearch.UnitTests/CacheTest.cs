@@ -61,8 +61,7 @@ namespace MinMaxSearch.UnitTests
         public void SetCustomCache_UseCustomCache()
         {
             var customCache = A.Fake<ICacheManager>();
-            A.CallTo(() => customCache.ContainsState(A<IState>.That.IsSameAs(state2))).Returns(true);
-            A.CallTo(() => customCache.GetStateEvaluation(A<IState>._)).Returns(1);
+            A.CallTo(() => customCache.GetStateEvaluation(A<IState>._)).Returns(new EvaluationRange(1));
 
             var engine = new SearchEngine()
             {

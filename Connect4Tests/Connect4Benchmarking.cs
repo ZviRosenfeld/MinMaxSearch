@@ -2,6 +2,7 @@
 using MinMaxSearch;
 using System;
 using System.Text;
+using MinMaxSearch.Cache;
 
 namespace Connect4Tests
 {
@@ -12,7 +13,7 @@ namespace Connect4Tests
         [TestMethod]
         public void BenchmarkConnect4()
         {
-            var searchDepth = 12;
+            var searchDepth = 11;
             var board = Connect4TestUtils.GetEmptyBoard();
             Benchmark(board, searchDepth, ParallelismMode.NonParallelism);
             Benchmark(board, searchDepth, ParallelismMode.FirstLevelOnly);
@@ -30,6 +31,7 @@ namespace Connect4Tests
         {
             Console.WriteLine(GetTestMessage(parallelismMode, degreeOfParallelism, levelOfParallelism));
             var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode, levelOfParallelism);
+            engine.CacheMode = CacheMode.NoCache;
             var startState = new Connect4State(startBoard, Player.Max);
 
             var results = engine.Search(startState, searchDepth);

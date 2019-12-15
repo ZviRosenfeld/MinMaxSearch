@@ -141,16 +141,11 @@ We support 3 modes of caching:
 - *NewCache*: The engine will initialize and use a new cache for every search.
 - *ReuseCache*: The engine will re-use the same cache between searches. You can clean the cache by calling the CacheManager's Clean method.
 
-You can create a custom cache by implementing [ICacheManager](https://github.com/ZviRosenfeld/MinMaxSearch/blob/master/MinMaxSearch/Cache/ICacheManager.cs), and use the engine's SetCustomCache method to tell the engine to use it.
-Please note that your ChacheManager will be accessed by many threads, so it must be thread-safe.
-You can find a sample custom CacheManager [here](https://github.com/ZviRosenfeld/MinMaxSearch/blob/master/MinMaxSearch/Cache/CustomCacheManager.cs).
-Note that the custom cache will only be used if CacheMode is set to ReuseCache.
-
 If you're using the ReuseCache option, you can use the FillCache extension method to fill the cache while the program is idle (say, while your opponent is considering their next move).
 Just to remember to cancel the FillCache when you're ready to run a search (using the cancellation token).
 
 Please note that when using caching, the StateSequence in the SearchResult may be cut off early. 
-This is because the cache remebers the evaluations that states will lead to, but not *how* the state lead to that evaluation.
+This is because the cache remembers the evaluations that states will lead to, but not *how* the state lead to that evaluation.
 So the StateSequence will end at the cached state.
 
 ### DieEarly

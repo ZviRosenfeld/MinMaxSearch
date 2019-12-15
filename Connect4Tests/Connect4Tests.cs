@@ -112,7 +112,7 @@ namespace Connect4Tests
             engine.CacheMode = CacheMode.ReuseCache;
             engine.Search(startState, 5);
             Assert.IsTrue(((CacheManager)engine.GetCacheManager()).Count > 0, "The cache dosn't contain any states");
-            Assert.IsTrue(engine.GetCacheManager().ContainsState(startState), "The cache dosn't contain the start state");
+            Assert.IsNotNull(engine.GetCacheManager().GetStateEvaluation(startState), "The cache dosn't contain the start state");
 
             var evaluation = engine.Search(startState, 5);
 
@@ -132,7 +132,7 @@ namespace Connect4Tests
             engine.CacheMode = CacheMode.ReuseCache;
             engine.FillCache(startState, CancellationToken.None);
             Assert.IsTrue(((CacheManager) engine.GetCacheManager()).Count > 0, "The cache dosn't contain any states");
-            Assert.IsTrue(engine.GetCacheManager().ContainsState(startState), "The cache dosn't contain the start state");
+            Assert.IsNotNull(engine.GetCacheManager().GetStateEvaluation(startState), "The cache dosn't contain the start state");
 
             var evaluation = engine.Search(startState, 5);
 
@@ -144,7 +144,7 @@ namespace Connect4Tests
         [DataRow(8, ParallelismMode.TotalParallelism)]
         [DataRow(1, ParallelismMode.FirstLevelOnly)]
         [TestMethod]
-        public void FiveStepsAwayFromMaxWinning_IterativeSearch_FillCache_MaxWin(int degreeOfParallelism, ParallelismMode parallelismMode)
+        public void FiveStepsAwayFromMaxWinning_IterativeSearch_ReuseCache_MaxWin(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
             var startState = Connect4TestUtils.GetMaxFiveMovesAwayFromWinningState();
 

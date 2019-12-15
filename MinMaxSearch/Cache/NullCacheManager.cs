@@ -5,16 +5,23 @@ namespace MinMaxSearch.Cache
 {
     class NullCacheManager : ICacheManager
     {
-        public void Add(IState state, double evaluation)
+        public void AddExactEvaluation(IState state, double evaluation)
         {
             // Do nothing
         }
 
-        public bool ContainsState(IState state) => false; 
+        public void AddMinEvaluation(IState state, double minEvaluation)
+        {
+            // Do nothing
+        }
 
-        public double GetStateEvaluation(IState state) =>
-            throw new InternalException($"Code 1002 ({nameof(NullCacheManager)}.{nameof(GetStateEvaluation)} was called)");
+        public void AddMaxEvaluation(IState state, double maxEvaluation)
+        {
+            // Do nothing
+        }
 
+        EvaluationRange ICacheManager.GetStateEvaluation(IState state) => null;
+        
         public void Clear()
         {
             // Do nothing

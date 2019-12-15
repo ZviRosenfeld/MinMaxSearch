@@ -4,11 +4,13 @@ namespace MinMaxSearch.Cache
 {
     public interface ICacheManager
     {
-        void Add(IState state, double evaluation);
+        void AddExactEvaluation(IState state, double evaluation);
 
-        bool ContainsState(IState state);
+        void AddMinEvaluation(IState state, double minEvaluation);
 
-        double GetStateEvaluation(IState state);
+        void AddMaxEvaluation(IState state, double maxEvaluation);
+        
+        EvaluationRange GetStateEvaluation(IState state);
 
         /// <summary>
         /// Clears all states from the cache

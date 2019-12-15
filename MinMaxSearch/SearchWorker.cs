@@ -26,8 +26,12 @@ namespace MinMaxSearch
             if (startState.Turn == Player.Empty)
                 throw new EmptyPlayerException(nameof(startState.Turn) + " can't be " + nameof(Player.Empty));
 
-            if (searchContext.CurrentDepth > 0 && cache.ContainsState(startState))
-                return new SearchResult(cache.GetStateEvaluation(startState), startState);
+            if (searchContext.CurrentDepth > 0)
+            {
+                var evaluation = cache.GetStateEvaluation(startState);
+                if (evaluation != null && (evaluation.MinEvaluation >= searchOptions.MaxScore || evaluation.MaxEvaluation <= searchOptions.MinScore || evaluation.MinEvaluation >= searchContext.Bata || evaluation.MaxEvaluation <= searchContext.Alpha))
+                    return new SearchResult(startState.Turn == Player.Max ? evaluation.MinEvaluation : evaluation.MaxEvaluation, startState);
+            }
 
             if (searchOptions.Pruners.Any(pruner => pruner.ShouldPrune(startState, searchContext.CurrentDepth, searchContext.StatesUpTillNow)))
             {
@@ -56,7 +60,12 @@ namespace MinMaxSearch
             }
 
             if (result.AllChildrenAreDeadEnds)
-                cache.Add(startState, result.Evaluation);
+            {
+                if (startState.Turn == Player.Max)
+                    cache.AddMinEvaluation(startState, result.Evaluation);
+                else 
+                    cache.AddMaxEvaluation(startState, result.Evaluation);
+            }
             return result;
         }
         
