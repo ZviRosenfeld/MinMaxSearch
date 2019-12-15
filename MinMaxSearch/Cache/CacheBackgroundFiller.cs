@@ -23,7 +23,7 @@ namespace MinMaxSearch.Cache
             var newEngine = searchEngine.Clone();
             newEngine.ParallelismMode = parallelismMode;
             newEngine.MaxDegreeOfParallelism = maxDegreeOfParallelism;
-            newEngine.SetCustomCache(searchEngine.GetCacheManager());
+            newEngine.CacheManager = searchEngine.CacheManager;
 
             // Running this will fill the cache
             new IterativeSearchWrapper(newEngine).IterativeSearch(startState, 1, 100, cancellationToken);

@@ -65,8 +65,9 @@ namespace MinMaxSearch.UnitTests
 
             var engine = new SearchEngine()
             {
-                CacheMode = CacheMode.ReuseCache
-            }.SetCustomCache(customCache);
+                CacheMode = CacheMode.ReuseCache,
+                CacheManager = customCache
+            };
             engine.Search(state1, 10);
             A.CallTo(() => endState.GetNeighbors()).MustNotHaveHappened();
         }
@@ -79,7 +80,7 @@ namespace MinMaxSearch.UnitTests
                 CacheMode = CacheMode.ReuseCache
             };
             engine.Search(state1, 10); // This should put all the states in the cache
-            engine.GetCacheManager().Clear(s => s != state2);
+            engine.CacheManager.Clear(s => s != state2);
             var result = engine.Search(state1, 10);
             Assert.AreNotEqual(result.StateSequence.Count, 2);
         }
@@ -92,7 +93,7 @@ namespace MinMaxSearch.UnitTests
                 CacheMode = CacheMode.ReuseCache
             };
             engine.Search(state1, 10); // This should put all the states in the cache
-            engine.GetCacheManager().Clear();
+            engine.CacheManager.Clear();
             var result = engine.Search(state1, 10);
             Assert.AreNotEqual(result.StateSequence.Count, 1);
         }

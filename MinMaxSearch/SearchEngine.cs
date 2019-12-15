@@ -75,21 +75,10 @@ namespace MinMaxSearch
         public CacheMode CacheMode { get; set; } = CacheMode.NewCache;
 
         /// <summary>
-        /// Note that the custom cache will only be used if CacheMode is set to ReuseCache
+        /// Note that this CacheManager will only be used if CacheMode is set to ReuseCache
         /// </summary>
-        public SearchEngine SetCustomCache(ICacheManager cache)
-        {
-            cacheManager = cache;
-            return this;
-        }
-
-        private ICacheManager cacheManager = new CacheManager();
-
-        /// <summary>
-        /// Note that this is only meaningful if CacheMode is set to ReuseCache
-        /// </summary>
-        public ICacheManager GetCacheManager() => cacheManager;
-
+        public ICacheManager CacheManager { get; set; }= new CacheManager();
+        
         private IThreadManager GetThreadManager(int searchDepth)
         {
             if (ParallelismMode == ParallelismMode.FirstLevelOnly)
@@ -111,7 +100,7 @@ namespace MinMaxSearch
             if (CacheMode == CacheMode.NewCache)
                 return new CacheManager();
 
-            return cacheManager;
+            return CacheManager;
         }
 
         public SearchEngine Clone()

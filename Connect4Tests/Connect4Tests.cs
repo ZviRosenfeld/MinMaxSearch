@@ -111,8 +111,8 @@ namespace Connect4Tests
             var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode);
             engine.CacheMode = CacheMode.ReuseCache;
             engine.Search(startState, 5);
-            Assert.IsTrue(((CacheManager)engine.GetCacheManager()).Count > 0, "The cache dosn't contain any states");
-            Assert.IsNotNull(engine.GetCacheManager().GetStateEvaluation(startState), "The cache dosn't contain the start state");
+            Assert.IsTrue(((CacheManager)engine.CacheManager).Count > 0, "The cache dosn't contain any states");
+            Assert.IsNotNull(engine.CacheManager.GetStateEvaluation(startState), "The cache dosn't contain the start state");
 
             var evaluation = engine.Search(startState, 5);
 
@@ -130,9 +130,10 @@ namespace Connect4Tests
 
             var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode);
             engine.CacheMode = CacheMode.ReuseCache;
+            engine.DieEarly = true;
             engine.FillCache(startState, CancellationToken.None);
-            Assert.IsTrue(((CacheManager) engine.GetCacheManager()).Count > 0, "The cache dosn't contain any states");
-            Assert.IsNotNull(engine.GetCacheManager().GetStateEvaluation(startState), "The cache dosn't contain the start state");
+            Assert.IsTrue(((CacheManager) engine.CacheManager).Count > 0, "The cache dosn't contain any states");
+            Assert.IsNotNull(engine.CacheManager.GetStateEvaluation(startState), "The cache dosn't contain the start state");
 
             var evaluation = engine.Search(startState, 5);
 
@@ -169,7 +170,7 @@ namespace Connect4Tests
             engine.CacheMode = CacheMode.ReuseCache;
             engine.DieEarly = false;
             engine.Search(startState, 5);
-            Assert.IsTrue(((CacheManager)engine.GetCacheManager()).Count > 0, "The cache dosn't contain any states");
+            Assert.IsTrue(((CacheManager)engine.CacheManager).Count > 0, "The cache dosn't contain any states");
             
             var evaluation = engine.Search(startState, 5);
 
