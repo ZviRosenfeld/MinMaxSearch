@@ -52,15 +52,15 @@ namespace Connect4Tests
 
         public override bool Equals(object obj)
         {
-            if (!(obj is Connect4State ticTacToeState))
+            if (!(obj is Connect4State connect4State))
                 return false;
 
-            if (Turn != ticTacToeState.Turn)
+            if (Turn != connect4State.Turn)
                 return false;
 
             for (var i = 0; i < BoardSize; i++)
             for (var j = 0; j < BoardSize; j++)
-                if (Board[i, j] != ticTacToeState.Board[i, j])
+                if (Board[i, j] != connect4State.Board[i, j])
                     return false;
 
             return true;
