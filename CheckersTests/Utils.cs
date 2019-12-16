@@ -29,7 +29,7 @@ namespace CheckersTests
             { CheckerPiece.Empty, CheckerPiece.Empty, CheckerPiece.Empty, CheckerPiece.Empty, CheckerPiece.Empty, CheckerPiece.Empty, CheckerPiece.Empty, CheckerPiece.Empty},
         };
 
-        public static SearchEngine GetSearchEngine(int maxDegreeOfParallelism = 1, ParallelismMode parallelismMode = ParallelismMode.NonParallelism, int levelOfParallelism = 1) =>
+        public static SearchEngine GetCheckersSearchEngine(int maxDegreeOfParallelism = 1, ParallelismMode parallelismMode = ParallelismMode.NonParallelism, int levelOfParallelism = 1) =>
             new SearchEngine()
             {
                 MaxDegreeOfParallelism = maxDegreeOfParallelism,
@@ -49,9 +49,9 @@ namespace CheckersTests
                 newBoard[(i_from + i_to) / 2, (j_from + j_to) / 2] = CheckerPiece.Empty;
 
             // King pieces if needed
-            if (pieceToMove == CheckerPiece.MaxChecker && j_to == newBoard.GetLength(1))
+            if (pieceToMove == CheckerPiece.MaxChecker && i_to == newBoard.GetLength(0) - 1)
                 newBoard[i_to, j_to] = CheckerPiece.MaxKing;
-            if (pieceToMove == CheckerPiece.MinChecker && j_to == 0)
+            if (pieceToMove == CheckerPiece.MinChecker && i_to == 0)
                 newBoard[i_to, j_to] = CheckerPiece.MinKing;
 
             return newBoard;

@@ -16,6 +16,10 @@ namespace CheckersTests
             this.turn = turn;
         }
 
+        // For this class we mark cells as [i, j].
+        // Cells of type [0, x] will king Min, while cells of type [7, x] will king Max
+        // This means that Max is moving up (i is increasing), and Min is moving down (i decreasing)
+
         public IEnumerable<CheckersState> GenerateNextMoves()
         {
             List<CheckersState> nextMoves = new List<CheckersState>();
@@ -35,7 +39,7 @@ namespace CheckersTests
             for (int j = 0; j < board.GetLength(1); j++)
             {
                 var piece = board[i, j];
-                if (piece.IsSameColor(turn)) continue;
+                if (!piece.IsSameColor(turn)) continue;
 
                 nextMoves.AddRange(GetMoves(piece, i, j, false));
             }
@@ -73,19 +77,19 @@ namespace CheckersTests
         {
             var moveBy = isJump ? 2 : 1;
             var nextMoves = new List<CheckersState>();
-            if (CanMove(i, j, i + moveBy, j + direction * moveBy, isJump))
+            if (CanMove(i, j, i + direction * moveBy, j + moveBy, isJump))
             {
-                var nextBoard = board.Move(piece, i, j, i + moveBy, j + direction * moveBy, isJump);
+                var nextBoard = board.Move(piece, i, j, i + direction * moveBy, j + moveBy, isJump);
                 nextMoves.Add(nextBoard.ToState(turn.GetReversePlayer()));
                 if (isJump) // Add double jumps
-                    nextMoves.AddRange(MovePiece(i + moveBy, j + direction * moveBy, piece, isJump, direction));
+                    nextMoves.AddRange(MovePiece(i + direction * moveBy, j + moveBy, piece, isJump, direction));
             }
-            if (CanMove(i, j, i - moveBy, j + direction * moveBy, isJump))
+            if (CanMove(i, j, i + direction * moveBy, j - moveBy, isJump))
             {
-                var nextBoard = board.Move(piece, i, j, i - moveBy, j + direction * moveBy, isJump);
+                var nextBoard = board.Move(piece, i, j, i + direction * moveBy, j - moveBy, isJump);
                 nextMoves.Add(nextBoard.ToState(turn.GetReversePlayer()));
                 if (isJump) // Add double jumps
-                    nextMoves.AddRange(MovePiece(i - moveBy, j + direction * moveBy, piece, isJump, direction));
+                    nextMoves.AddRange(MovePiece(i + direction * moveBy, j - moveBy, piece, isJump, direction));
             }
 
             return nextMoves;
@@ -93,8 +97,7 @@ namespace CheckersTests
 
         private bool CanMove(int from_i, int from_j, int to_i, int to_j, bool isJump)
         {
-            if (!(IsInBoardBounds(to_i) && IsInBoardBounds(to_j) && IsInRange(from_i, to_i) &&
-                IsInRange(from_j, to_j) && IsEmpty(to_i, to_j)))
+            if (!(IsInBoardBounds(to_i) && IsInBoardBounds(to_j) && IsEmpty(to_i, to_j)))
                 return false;
             if (!isJump)
                 return true;
@@ -104,9 +107,7 @@ namespace CheckersTests
         }
 
         private bool IsInBoardBounds(int value) => value >= 0 && value < 8;
-
-        private bool IsInRange(int from, int to) => Math.Abs(from - to) == 2;
-
+        
         private bool IsEmpty(int i, int j) => board[i, j] == CheckerPiece.Empty;
     }
 }
