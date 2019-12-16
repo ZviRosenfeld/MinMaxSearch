@@ -24,11 +24,20 @@ namespace CheckersTests
             for (int j = 0; j < board.GetLength(1); j++)
             {
                 var piece = board[i, j];
-                if (AreSameColor(turn, piece)) continue;
+                if (!piece.IsSameColor(turn)) continue;
 
-                nextMoves.AddRange(GetMoves(piece, i, j, true));
-                if (!nextMoves.Any()) // Only add regualer moves if we can't jump
-                    nextMoves.AddRange(GetMoves(piece, i, j, false)); 
+                nextMoves.AddRange(GetMoves(piece, i, j, true));   
+            }
+            if (nextMoves.Any()) // Only add regualer moves if we can't jump
+                return nextMoves;
+
+            for (int i = 0; i < board.GetLength(0); i++)
+            for (int j = 0; j < board.GetLength(1); j++)
+            {
+                var piece = board[i, j];
+                if (piece.IsSameColor(turn)) continue;
+
+                nextMoves.AddRange(GetMoves(piece, i, j, false));
             }
 
             return nextMoves;
@@ -91,7 +100,7 @@ namespace CheckersTests
                 return true;
 
             var pieceToJumpOver = board[(from_i + to_i) / 2, (from_j + to_j) / 2];
-            return AreSameColor(turn.GetReversePlayer(), pieceToJumpOver);
+            return pieceToJumpOver.IsSameColor(turn.GetReversePlayer());
         }
 
         private bool IsInBoardBounds(int value) => value >= 0 && value < 8;
@@ -99,9 +108,5 @@ namespace CheckersTests
         private bool IsInRange(int from, int to) => Math.Abs(from - to) == 2;
 
         private bool IsEmpty(int i, int j) => board[i, j] == CheckerPiece.Empty;
-
-        private bool AreSameColor(Player player, CheckerPiece piece) =>
-            (player == Player.Max && (piece == CheckerPiece.MaxChecker || piece == CheckerPiece.MaxChecker)) ||
-            (player == Player.Min && (piece == CheckerPiece.MinKing || piece == CheckerPiece.MinChecker));
     }
 }

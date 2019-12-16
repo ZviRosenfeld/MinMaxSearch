@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using MinMaxSearch;
 
@@ -7,6 +8,9 @@ namespace CheckersTests
 {
     class CheckersState : IDeterministicState
     {
+        public const int MAX_WIN = 100;
+        public const int MIN_WIN = -100;
+
         public CheckersState(CheckerPiece[,] board, Player turn)
         {
             Turn = turn;
@@ -20,27 +24,52 @@ namespace CheckersTests
         public double Evaluate(int depth, List<IState> passedThroughStates)
         {
             var sum = 0;
+            bool isMaxWin = true, isMinWin = true;
             foreach (var cell in Board)
             {
                 if (cell == CheckerPiece.MaxChecker)
+                {
                     sum += 1;
+                    isMinWin = false;
+                }
                 if (cell == CheckerPiece.MinChecker)
+                {
                     sum -= 1;
+                    isMaxWin = false;
+                }
                 if (cell == CheckerPiece.MaxKing)
+                {
                     sum += 3;
+                    isMinWin = false;
+                }
                 if (cell == CheckerPiece.MinKing)
+                {
                     sum -= 3;
+                    isMaxWin = false;
+                }
             }
 
+            if (isMinWin)
+                return -100;
+            if (isMaxWin)
+                return 100;
             return sum;
         }
+
+        private bool IsWin(Player player) => 
+            Board.Cast<CheckerPiece>().All(cell => !cell.IsSameColor(player));
 
         public Player Turn { get; }
 
         public CheckerPiece[,] Board { get; }
 
-        public IEnumerable<IState> GetNeighbors() => 
-            new NextMovesGenerator(Board, Turn).GenerateNextMoves();
+        public IEnumerable<IState> GetNeighbors()
+        {
+            if (IsWin(Turn.GetReversePlayer()))
+                return new List<IState>();
+
+            return new NextMovesGenerator(Board, Turn).GenerateNextMoves();
+        }
 
         public override string ToString()
         {
