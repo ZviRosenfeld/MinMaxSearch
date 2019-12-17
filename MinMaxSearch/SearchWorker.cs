@@ -28,18 +28,9 @@ namespace MinMaxSearch
 
             if (searchContext.CurrentDepth > 0)
             {
-                var evaluation = cache.GetStateEvaluation(startState);
-                if (evaluation != null && evaluation.MaxEvaluation == evaluation.MinEvaluation)
-                    return new SearchResult(evaluation.MaxEvaluation, startState);
-                
-                if (evaluation != null && evaluation.MinEvaluation >= searchOptions.MaxScore)
-                    return new SearchResult(evaluation.MinEvaluation, startState);
-
-                if (evaluation != null && evaluation.MaxEvaluation <= searchOptions.MinScore)
-                    return new SearchResult(evaluation.MaxEvaluation, startState);
-
-                if (evaluation != null && (evaluation.MinEvaluation >= searchContext.Bata || evaluation.MaxEvaluation <= searchContext.Alpha))
-                    return new SearchResult(startState.Turn == Player.Max ? evaluation.MinEvaluation : evaluation.MaxEvaluation, startState, true, false);
+                var cachedResult = CheckCacheForEvaluation(startState, searchContext);
+                if (cachedResult != null)
+                    return cachedResult;
             }
 
             if (searchOptions.Pruners.Any(pruner => pruner.ShouldPrune(startState, searchContext.CurrentDepth, searchContext.StatesUpTillNow)))
@@ -68,18 +59,44 @@ namespace MinMaxSearch
                     throw new BadStateTypeException($"State must implement {nameof(IDeterministicState)} or {nameof(IProbabilisticState)}");
             }
 
-            if (result.AllChildrenAreDeadEnds)
-                cache.AddExactEvaluation(startState, result.Evaluation);
-            else if (result.FullTreeSearched)
-            {
-                if (startState.Turn == Player.Max)
-                    cache.AddMinEvaluation(startState, result.Evaluation);
-                else 
-                    cache.AddMaxEvaluation(startState, result.Evaluation);
-            }
+            AddResultToCach(startState, result);
             return result;
         }
-        
+
+        private void AddResultToCach(IState state, SearchResult result)
+        {
+            if (result.AllChildrenAreDeadEnds)
+                cache.AddExactEvaluation(state, result.Evaluation);
+            else if (result.FullTreeSearched)
+            {
+                if (state.Turn == Player.Max)
+                    cache.AddMinEvaluation(state, result.Evaluation);
+                else
+                    cache.AddMaxEvaluation(state, result.Evaluation);
+            }
+        }
+
+        private SearchResult CheckCacheForEvaluation(IState startState, SearchContext searchContext)
+        {
+            var evaluation = cache.GetStateEvaluation(startState);
+            if (evaluation == null)
+                return null;
+
+            if (evaluation.MaxEvaluation == evaluation.MinEvaluation)
+                return new SearchResult(evaluation.MaxEvaluation, startState);
+
+            if (evaluation.MinEvaluation >= searchOptions.MaxScore)
+                return new SearchResult(evaluation.MinEvaluation, startState);
+
+            if (evaluation.MaxEvaluation <= searchOptions.MinScore)
+                return new SearchResult(evaluation.MaxEvaluation, startState);
+
+            if (evaluation.MinEvaluation >= searchContext.Bata || evaluation.MaxEvaluation <= searchContext.Alpha)
+                return new SearchResult(startState.Turn == Player.Max ? evaluation.MinEvaluation : evaluation.MaxEvaluation, startState, true, false);
+
+            return null;
+        }
+
         private bool ShouldStop(IState state, SearchContext searchContext)
         {
             if (searchContext.CurrentDepth >= searchContext.MaxDepth)
