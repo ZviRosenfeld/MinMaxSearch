@@ -1,11 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Threading;
+﻿using System.Threading;
 using FakeItEasy;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MinMaxSearch.Cache;
 using MinMaxSearch.Exceptions;
-using MinMaxSearch.Pruners;
-using MinMaxSearch.UnitTests;
 
 namespace MinMaxSearch.UnitTests.CacheTests
 {
@@ -13,7 +10,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
     public class BasicCacheTests
     {
         // This class uses the folowing tree:
-        // stat1 -> sate2 -> state3 -> endState1
+        // stat1 -> sate2 -> state3 -> EndState1
 
         private readonly IDeterministicState state1 = A.Fake<IDeterministicState>();
         private readonly IDeterministicState state2 = A.Fake<IDeterministicState>();

@@ -31,8 +31,14 @@ namespace MinMaxSearch
                 var evaluation = cache.GetStateEvaluation(startState);
                 if (evaluation != null && evaluation.MaxEvaluation == evaluation.MinEvaluation)
                     return new SearchResult(evaluation.MaxEvaluation, startState);
+                
+                if (evaluation != null && evaluation.MinEvaluation >= searchOptions.MaxScore)
+                    return new SearchResult(evaluation.MinEvaluation, startState);
 
-                if (evaluation != null && (evaluation.MinEvaluation >= searchOptions.MaxScore || evaluation.MaxEvaluation <= searchOptions.MinScore || evaluation.MinEvaluation >= searchContext.Bata || evaluation.MaxEvaluation <= searchContext.Alpha))
+                if (evaluation != null && evaluation.MaxEvaluation <= searchOptions.MinScore)
+                    return new SearchResult(evaluation.MaxEvaluation, startState);
+
+                if (evaluation != null && (evaluation.MinEvaluation >= searchContext.Bata || evaluation.MaxEvaluation <= searchContext.Alpha))
                     return new SearchResult(startState.Turn == Player.Max ? evaluation.MinEvaluation : evaluation.MaxEvaluation, startState, true, false);
             }
 
