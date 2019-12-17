@@ -125,7 +125,7 @@ Please note that FavorShortPaths may not work togather with caching.
 ### ParallelismMode
 There are 4 ParallelismMode:
 - *FirstLevelOnly*: In this mode only the first level of the search tree will be calculated in parallel. This is the recommended mode and normally yields the fastest searches.
-- *ParallelismByLevel*: In this mode, the first x levels of the search will be carried out in parallel. You can determine x by setting "MaxLevelOfParallelism" in the SearchEngine. (available since 1.4.3)
+- *ParallelismByLevel*: In this mode, the first x levels of the search will be carried out in parallel. You can determine x by setting "MaxLevelOfParallelism" in the SearchEngine. (available since 1.5.0)
 - *NonParallelism*: No parallelism.
 - *TotalParallelism*: In this mode, the entire search tree will be calculated in parallel, up to the "MaxDegreeOfParallelism"
 
@@ -134,7 +134,7 @@ Note that "MaxDegreeOfParallelism" will be ignored in all modes other than "Tota
 ### CacheMode
 Caching lets the engine remember stares that lead to certain win, losses or draws, so that it doesn't need to re-search trees it's already searched.
 Note that caching will only work if you implement Equals and GetHashValue in a meaningful way for your states. 
-Caching is available since version 1.4.3.
+Caching is available since version 1.5.0.
 
 We support 3 modes of caching:
 - *NoCache*: No Caching.
@@ -162,6 +162,12 @@ You can use the method SearchEngine.AddPruner(IPruner pruner) to add pruners to 
 Pruners can be implemented by implementing the [IPruner](https://github.com/ZviRosenfeld/MinMaxSearch/blob/master/MinMaxSearch/Pruners/IPruner.cs) interface. 
 Then, the ShouldPrune(IState state, int depth, List<IState> passedThroughStates) method will be called on every state the algorithm checks. 
 This can provide you with a lot of customization power over the algorithm.
+
+### SkipEvaluationForFirstNodeSingleNeighbor
+If this is set to true, in the case that the *first* node has a single neighbor, the engine will return that neighbor rather than evaluation the search tree.
+The default of this setting is true. (Available since 1.5.0).
+
+Note that this only applies to the first node.
 
 ## IterativeSearch
 

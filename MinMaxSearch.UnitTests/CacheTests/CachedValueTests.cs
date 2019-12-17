@@ -186,7 +186,8 @@ namespace MinMaxSearch.UnitTests.CacheTests
                 MaxScore = MAX_EVALUATION,
                 MinScore = MIN_EVALUATION,
                 DieEarly = dieEarly,
-                FavorShortPaths = favorShortPaths
+                FavorShortPaths = favorShortPaths,
+                SkipEvaluationForFirstNodeSingleNeighbor = false
             };
 
         private EvaluationRange GetEvaluation(SearchEngine engine, IState state) =>

@@ -41,7 +41,8 @@ namespace MinMaxSearch.UnitTests.CacheTests
         {
             var engine = new SearchEngine()
             {
-                CacheMode = CacheMode.ReuseCache
+                CacheMode = CacheMode.ReuseCache,
+                SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             engine.Search(state1, 10); // This should put all the states in the cache
             var result = engine.Search(state1, 10);
@@ -54,7 +55,8 @@ namespace MinMaxSearch.UnitTests.CacheTests
         {
             var engine = new SearchEngine()
             {
-                CacheMode = CacheMode.ReuseCache
+                CacheMode = CacheMode.ReuseCache,
+                SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             engine.FillCache(state1, CancellationToken.None);
             var result = engine.Search(state1, 10);
@@ -71,7 +73,8 @@ namespace MinMaxSearch.UnitTests.CacheTests
             var engine = new SearchEngine()
             {
                 CacheMode = CacheMode.ReuseCache,
-                CacheManager = customCache
+                CacheManager = customCache,
+                SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             engine.Search(state1, 10);
             A.CallTo(() => endState1.GetNeighbors()).MustNotHaveHappened();
@@ -82,7 +85,8 @@ namespace MinMaxSearch.UnitTests.CacheTests
         {
             var engine = new SearchEngine()
             {
-                CacheMode = CacheMode.ReuseCache
+                CacheMode = CacheMode.ReuseCache,
+                SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             engine.Search(state1, 10); // This should put all the states in the cache
             engine.CacheManager.Clear(s => s != state2);
@@ -95,7 +99,8 @@ namespace MinMaxSearch.UnitTests.CacheTests
         {
             var engine = new SearchEngine()
             {
-                CacheMode = CacheMode.ReuseCache
+                CacheMode = CacheMode.ReuseCache,
+                SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             engine.Search(state1, 10); // This should put all the states in the cache
             engine.CacheManager.Clear();
@@ -111,7 +116,8 @@ namespace MinMaxSearch.UnitTests.CacheTests
         {
             var engine = new SearchEngine()
             {
-                CacheMode = cacheMode
+                CacheMode = cacheMode,
+                SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             engine.FillCache(state1, CancellationToken.None);
         }

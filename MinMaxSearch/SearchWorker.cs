@@ -86,10 +86,10 @@ namespace MinMaxSearch
                 return new SearchResult(evaluation.MaxEvaluation, startState);
 
             if (evaluation.MinEvaluation >= searchOptions.MaxScore)
-                return new SearchResult(evaluation.MinEvaluation, startState);
+                return new SearchResult(evaluation.MinEvaluation, startState, true, false);
 
             if (evaluation.MaxEvaluation <= searchOptions.MinScore)
-                return new SearchResult(evaluation.MaxEvaluation, startState);
+                return new SearchResult(evaluation.MaxEvaluation, startState, true, false);
 
             if (evaluation.MinEvaluation >= searchContext.Bata || evaluation.MaxEvaluation <= searchContext.Alpha)
                 return new SearchResult(startState.Turn == Player.Max ? evaluation.MinEvaluation : evaluation.MaxEvaluation, startState, true, false);

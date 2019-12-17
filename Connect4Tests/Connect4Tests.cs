@@ -225,7 +225,8 @@ namespace Connect4Tests
             {
                 FavorShortPaths = true,
                 MaxDegreeOfParallelism = degreeOfParallelism,
-                ParallelismMode = parallelismMode
+                ParallelismMode = parallelismMode,
+                SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             var evaluation = engine.Search(startState, 5);
 
@@ -255,7 +256,8 @@ namespace Connect4Tests
             {
                 FavorShortPaths = true,
                 MaxDegreeOfParallelism = degreeOfParallelism,
-                ParallelismMode = parallelismMode
+                ParallelismMode = parallelismMode,
+                SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             var evaluation = engine.Search(startState, 5);
 

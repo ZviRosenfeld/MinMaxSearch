@@ -44,6 +44,7 @@ namespace CheckersTests
                 MinScore = CheckersState.MIN_WIN,
                 MaxScore = CheckersState.MAX_WIN,
                 ParallelismMode = parallelismMode,
+                SkipEvaluationForFirstNodeSingleNeighbor = false
             };
 
         public static CheckerPiece[,] Move(this CheckerPiece[,] board, CheckerPiece pieceToMove, int i_from, int j_from, int i_to, int j_to, bool isJump)

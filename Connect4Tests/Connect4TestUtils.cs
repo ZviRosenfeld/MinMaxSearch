@@ -13,6 +13,7 @@ namespace Connect4Tests
                 MinScore = BoardEvaluator.MinEvaluation,
                 MaxScore = BoardEvaluator.MaxEvaluation,
                 ParallelismMode = parallelismMode,
+                SkipEvaluationForFirstNodeSingleNeighbor = false
             };
 
         public static Player[,] GetEmptyBoard() =>

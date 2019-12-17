@@ -78,7 +78,13 @@ namespace MinMaxSearch
         /// Note that this CacheManager will only be used if CacheMode is set to ReuseCache
         /// </summary>
         public ICacheManager CacheManager { get; set; }= new CacheManager();
-        
+
+        /// <summary>
+        /// If this is set to true, in the case that the first node has a single neighbor, the engine will return that neighbor rather than evaluation the search tree.
+        /// Note that this only applies to the first node.
+        /// </summary>
+        public bool SkipEvaluationForFirstNodeSingleNeighbor { get; set; } = true;
+
         private IThreadManager GetThreadManager(int searchDepth)
         {
             if (ParallelismMode == ParallelismMode.FirstLevelOnly)
@@ -118,6 +124,7 @@ namespace MinMaxSearch
                 PreventLoops = PreventLoops,
                 CacheMode = CacheMode,
                 ParallelismMode = ParallelismMode,
+                SkipEvaluationForFirstNodeSingleNeighbor = SkipEvaluationForFirstNodeSingleNeighbor
             };
             foreach (var pruner in pruners)
                 newEngine.AddPruner(pruner);
@@ -156,6 +163,12 @@ namespace MinMaxSearch
             if (maxDepth < 1)
                 throw new ArgumentException($"{nameof(maxDepth)} must be at least 1. Was {maxDepth}");
             
+            if (SkipEvaluationForFirstNodeSingleNeighbor && startState.GetNeighbors().Count() == 1)
+            {
+                var singleNeighbor = startState.GetNeighbors().First();
+                return new SearchResult(singleNeighbor.Evaluate(0, new List<IState>()), startState, true, false);
+            }
+
             var searchContext = new SearchContext(maxDepth, 0, cancellationToken);
             var searchWorker = new SearchWorker(CreateSearchOptions(), GetThreadManager(maxDepth), BuildCacheManager());
             var stopwatch = new Stopwatch();

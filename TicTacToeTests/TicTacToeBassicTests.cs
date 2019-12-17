@@ -166,7 +166,8 @@ namespace TicTacToeTests
                 MinScore = -1,
                 MaxScore = 1,
                 ParallelismMode = parallelismMode,
-                CacheMode = cacheMode
+                CacheMode = cacheMode,
+                SkipEvaluationForFirstNodeSingleNeighbor = false
             };
 
         public static TicTacToeState GetEmptyTicTacToeState() => new TicTacToeState(new[,]

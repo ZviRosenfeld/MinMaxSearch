@@ -14,7 +14,11 @@ namespace MinMaxSearch.UnitTests.CacheTests
         public void ExactValueInCach_UseValue()
         {
             var searchTree = new SampleTree();
-            var engine = new SearchEngine(){CacheMode = CacheMode.ReuseCache};
+            var engine = new SearchEngine()
+            {
+                CacheMode = CacheMode.ReuseCache,
+                SkipEvaluationForFirstNodeSingleNeighbor = false
+            };
             engine.CacheManager.AddExactEvaluation(searchTree.EndState1, 3);
             Assert.AreEqual(3, engine.Search(searchTree.ChildState1, 4).Evaluation);
         }
@@ -27,7 +31,8 @@ namespace MinMaxSearch.UnitTests.CacheTests
             var engine = new SearchEngine()
             {
                 CacheMode = CacheMode.ReuseCache,
-                ParallelismMode = ParallelismMode.NonParallelism
+                ParallelismMode = ParallelismMode.NonParallelism,
+                SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             engine.CacheManager.AddMaxEvaluation(searchTree.ChildState2, -4);
             Assert.AreEqual(-2, engine.Search(searchTree.ManyChildrenState, 5).Evaluation);
@@ -42,7 +47,8 @@ namespace MinMaxSearch.UnitTests.CacheTests
             var engine = new SearchEngine()
             {
                 CacheMode = CacheMode.ReuseCache,
-                ParallelismMode = ParallelismMode.NonParallelism
+                ParallelismMode = ParallelismMode.NonParallelism,
+                SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             engine.CacheManager.AddMinEvaluation(searchTree.EndState3, 8);
             Assert.AreEqual(4, engine.Search(searchTree.ManyChildrenState, 5).Evaluation);
@@ -55,7 +61,12 @@ namespace MinMaxSearch.UnitTests.CacheTests
         {
             var maxEvaluation = 10;
             var searchTree = new SampleTree(firstPlayer);
-            var engine = new SearchEngine() {CacheMode = CacheMode.ReuseCache, MaxScore = maxEvaluation};
+            var engine = new SearchEngine()
+            {
+                CacheMode = CacheMode.ReuseCache,
+                MaxScore = maxEvaluation,
+                SkipEvaluationForFirstNodeSingleNeighbor = false
+            };
             engine.CacheManager.AddMinEvaluation(searchTree.EndState1, maxEvaluation);
             Assert.AreEqual(maxEvaluation, engine.Search(searchTree.ChildState1, 4).Evaluation);
         }
@@ -67,7 +78,12 @@ namespace MinMaxSearch.UnitTests.CacheTests
         {
             var minEvaluation = -10;
             var searchTree = new SampleTree(firstPlayer);
-            var engine = new SearchEngine() { CacheMode = CacheMode.ReuseCache, MinScore = minEvaluation };
+            var engine = new SearchEngine()
+            {
+                CacheMode = CacheMode.ReuseCache,
+                MinScore = minEvaluation,
+                SkipEvaluationForFirstNodeSingleNeighbor = false
+            };
             engine.CacheManager.AddMaxEvaluation(searchTree.EndState1, minEvaluation);
             Assert.AreEqual(minEvaluation, engine.Search(searchTree.ChildState1, 4).Evaluation);
         }

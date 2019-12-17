@@ -23,5 +23,16 @@ namespace MinMaxSearch.UnitTests
 
         public static void SetAsEndState(this IProbabilisticState state) =>
             A.CallTo(() => state.GetNeighbors()).Returns(new List<Tuple<double, List<IState>>>());
+
+        public static SearchEngine GetBasicSearchEngine(
+            ParallelismMode parallelismMode = ParallelismMode.FirstLevelOnly, int maxDegreeOfParallelism = 1,
+            int parallelismLevel = 1) =>
+            new SearchEngine()
+            {
+                SkipEvaluationForFirstNodeSingleNeighbor = false,
+                ParallelismMode = parallelismMode,
+                MaxLevelOfParallelism = parallelismLevel,
+                MaxDegreeOfParallelism = maxDegreeOfParallelism
+            };
     }
 }

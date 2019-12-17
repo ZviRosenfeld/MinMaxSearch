@@ -47,11 +47,7 @@ namespace MinMaxSearch.UnitTests
         {
             state1.SetNeigbor(endState1);
 
-            var engine = new SearchEngine()
-            {
-                MaxDegreeOfParallelism = degreeOfParallelism,
-                ParallelismMode = parallelismMode
-            };
+            var engine = TestUtils.GetBasicSearchEngine(parallelismMode, degreeOfParallelism);
             var result = engine.Search(state1, 5);
 
             Assert.IsTrue(result.IsSearchCompleted, "Search should have been completed");
@@ -78,7 +74,8 @@ namespace MinMaxSearch.UnitTests
                 FavorShortPaths = true,
                 DieEarly = true,
                 MaxScore = 10,
-                ParallelismMode = parallelismMode
+                ParallelismMode = parallelismMode,
+                SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             var result = engine.Search(state1, 5);
 
@@ -103,7 +100,8 @@ namespace MinMaxSearch.UnitTests
                 DieEarly = true,
                 MaxScore = 10,
                 IsUnstableState = (s, i, l) => unstableState,
-                ParallelismMode = ParallelismMode.NonParallelism
+                ParallelismMode = ParallelismMode.NonParallelism,
+                SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             var result = engine.Search(state1, 6);
 
@@ -123,7 +121,7 @@ namespace MinMaxSearch.UnitTests
             endState2.SetEvaluationTo(1);
             endState3.SetEvaluationTo(3);
 
-            var engine = new SearchEngine { MaxDegreeOfParallelism = degreeOfParallelism, ParallelismMode = parallelismMode};
+            var engine = TestUtils.GetBasicSearchEngine(parallelismMode, degreeOfParallelism);
             var result = engine.Search(state1, 5);
 
             Assert.AreEqual(endState3, result.NextMove, "Actually found " + result.NextMove);
@@ -144,7 +142,7 @@ namespace MinMaxSearch.UnitTests
             endState2.SetEvaluationTo(1);
             endState3.SetEvaluationTo(3);
 
-            var engine = new SearchEngine { MaxDegreeOfParallelism = degreeOfParallelism, ParallelismMode = parallelismMode};
+            var engine = TestUtils.GetBasicSearchEngine(parallelismMode, degreeOfParallelism);
             var result = engine.Search(state1, 5);
 
             Assert.AreEqual(endState3, result.NextMove, "Actually found " + result.NextMove);
@@ -161,7 +159,8 @@ namespace MinMaxSearch.UnitTests
             {
                 IsUnstableState = (s, d, l) => s.Evaluate(d, l) < 10,
                 MaxDegreeOfParallelism = degreeOfParallelism,
-                ParallelismMode = parallelismMode
+                ParallelismMode = parallelismMode,
+                SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             var result = searchEngine.Search(new IncreasingNumberState(0, Player.Max), 1);
 
@@ -188,7 +187,7 @@ namespace MinMaxSearch.UnitTests
 
             A.CallTo(() => endState1.Turn).Returns(Player.Min);
 
-            var searchEngine = new SearchEngine { MaxDegreeOfParallelism = degreeOfParallelism, ParallelismMode = parallelismMode};
+            var searchEngine = TestUtils.GetBasicSearchEngine(parallelismMode, degreeOfParallelism);
             searchEngine.Search(state1, 5);
         }
 
@@ -213,7 +212,8 @@ namespace MinMaxSearch.UnitTests
                 MaxScore = 5,
                 MinScore = 5,
                 MaxDegreeOfParallelism = degreeOfParallelism,
-                ParallelismMode = parallelismMode
+                ParallelismMode = parallelismMode,
+                SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             var evaluation = searchEngine.Search(state1, 2);
 
@@ -231,7 +231,8 @@ namespace MinMaxSearch.UnitTests
             {
                 PreventLoops = true,
                 MaxDegreeOfParallelism = degreeOfParallelism,
-                ParallelismMode = parallelismMode
+                ParallelismMode = parallelismMode,
+                SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             searchEngine.Search(new ThrowExceptionAtDepthThreeState(0, Player.Max), 5);
         }
@@ -256,11 +257,7 @@ namespace MinMaxSearch.UnitTests
             
             A.CallTo(() => state1.Turn).Returns(Player.Min);
 
-            var searchEngine = new SearchEngine()
-            {
-                MaxDegreeOfParallelism = degreeOfParallelism,
-                ParallelismMode = parallelismMode
-            };
+            var searchEngine = TestUtils.GetBasicSearchEngine(parallelismMode, degreeOfParallelism);
             var result = searchEngine.Search(state1, 5, cancellationSource.Token);
 
             Assert.AreEqual(1, result.Evaluation);
@@ -271,7 +268,7 @@ namespace MinMaxSearch.UnitTests
         [TestMethod]
         public void Search_ResultsContainsSearchTime()
         {
-            var searchEngine = new SearchEngine();
+            var searchEngine = TestUtils.GetBasicSearchEngine();
             var result1 = searchEngine.Search(new IncreasingNumberState(1, Player.Max), 5);
             var result2 = searchEngine.Search(new IncreasingNumberState(1, Player.Max), 20);
 
@@ -286,7 +283,7 @@ namespace MinMaxSearch.UnitTests
         [TestMethod]
         public void Search_SearchDepthIsRight(int depth, ParallelismMode parallelismMode)
         {
-            var engine = new SearchEngine { MaxDegreeOfParallelism = 8 };
+            var engine = TestUtils.GetBasicSearchEngine(maxDegreeOfParallelism: 8);
             var result = engine.Search(new IncreasingNumberState(8, Player.Max), depth);
             Assert.AreEqual(depth, result.SearchDepth, "Got wring depth");
         }
@@ -303,17 +300,39 @@ namespace MinMaxSearch.UnitTests
             state2.SetEvaluationTo(1);
             state3.SetEvaluationTo(3);
             var cancellationSource = new CancellationTokenSource(20);
-            var engine = new SearchEngine()
-            {
-                MaxDegreeOfParallelism = degreeOfParallelism,
-                ParallelismMode = parallelismMode
-            };
+            var engine = TestUtils.GetBasicSearchEngine(parallelismMode, degreeOfParallelism);
 
             var result = engine.SearchAsync(state1, int.MaxValue, cancellationSource.Token).Result;
 
             Assert.AreEqual(3, result.Evaluation, "Didn't get a good enough state");
             if (parallelismMode == ParallelismMode.NonParallelism)
                 A.CallTo(() => state3.GetNeighbors()).MustNotHaveHappened();
+        }
+
+        [TestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public void SkipEvaluationForFirstNodeSingleNeighborTest(bool skip)
+        {
+            var engine = new SearchEngine(){SkipEvaluationForFirstNodeSingleNeighbor = skip};
+
+            state1.SetNeigbor(state2);
+            state2.SetNeigbor(endState1);
+            state2.SetEvaluationTo(2);
+            endState1.SetEvaluationTo(3);
+
+            var result = engine.Search(state1, 10);
+
+            if (skip)
+            {
+                Assert.AreEqual(2, result.Evaluation);
+                Assert.AreEqual(1, result.StateSequence.Count);
+            }
+            else
+            {
+                Assert.AreEqual(3, result.Evaluation);
+                Assert.AreEqual(2, result.StateSequence.Count);
+            }
         }
     }
 }
