@@ -162,6 +162,62 @@ namespace MinMaxSearch.UnitTests
             Assert.AreEqual(new EvaluationRange(5, int.MaxValue), GetEvaluation(engine, manyChildrenState));
         }
 
+        [TestMethod]
+        [DataRow(true, true)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
+        [DataRow(false, false)]
+        public void ChildrenContainWinForMax_CachRemebersRightValues(bool dieEarly, bool favorShortPaths)
+        {
+            endState1.SetEvaluationTo(MAX_EVALUATION);
+
+            var engine = new SearchEngine()
+            {
+                CacheMode = CacheMode.ReuseCache,
+                ParallelismMode = ParallelismMode.NonParallelism,
+                MaxScore = MAX_EVALUATION,
+                MinScore = MIN_EVALUATION,
+                DieEarly = dieEarly,
+                FavorShortPaths = favorShortPaths
+            };
+            engine.Search(manyChildrenState, 10);
+
+            Assert.AreEqual(new EvaluationRange(MAX_EVALUATION, MAX_EVALUATION), GetEvaluation(engine, childState1));
+            Assert.AreEqual(new EvaluationRange(MAX_EVALUATION, MAX_EVALUATION), GetEvaluation(engine, manyChildrenState));
+        }
+        
+        [TestMethod]
+        [DataRow(true, true)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
+        [DataRow(false, false)]
+        public void ChildrenContainWinForMin_CachRemebersRightValues(bool dieEarly, bool favorShortPaths)
+        {
+            endState1.SetEvaluationTo(MIN_EVALUATION);
+
+            // Reverse the tree, so that we can check a win for min
+            A.CallTo(() => endState1.Turn).Returns(Player.Min);
+            A.CallTo(() => endState2.Turn).Returns(Player.Min);
+            A.CallTo(() => endState3.Turn).Returns(Player.Min);
+            A.CallTo(() => manyChildrenState.Turn).Returns(Player.Min);
+            A.CallTo(() => childState1.Turn).Returns(Player.Max);
+            A.CallTo(() => childState2.Turn).Returns(Player.Max);
+
+            var engine = new SearchEngine()
+            {
+                CacheMode = CacheMode.ReuseCache,
+                ParallelismMode = ParallelismMode.NonParallelism,
+                MaxScore = MAX_EVALUATION,
+                MinScore = MIN_EVALUATION,
+                DieEarly = dieEarly,
+                FavorShortPaths = favorShortPaths
+            };
+            engine.Search(manyChildrenState, 10);
+
+            Assert.AreEqual(new EvaluationRange(MIN_EVALUATION, MIN_EVALUATION), GetEvaluation(engine, childState1));
+            Assert.AreEqual(new EvaluationRange(MIN_EVALUATION, MIN_EVALUATION), GetEvaluation(engine, manyChildrenState));
+        }
+
         private EvaluationRange GetEvaluation(SearchEngine engine, IState state) =>
             ((CacheManager) engine.CacheManager)[state];
     }
