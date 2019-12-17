@@ -147,16 +147,16 @@ namespace MinMaxSearch.UnitTests
         }
 
         [TestMethod]
-        public void AlphaBetaPrunnedTree_CachRemebersRightValues()
+        [DataRow(true, true)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
+        [DataRow(false, false)]
+        public void AlphaBetaPrunnedTree_CachRemebersRightValues(bool dieEarly, bool favorShortPaths)
         {
             endState1.SetEvaluationTo(5);
             endState2.SetEvaluationTo(2); // This should cuase a pruning
 
-            var engine = new SearchEngine()
-            {
-                CacheMode = CacheMode.ReuseCache,
-                ParallelismMode = ParallelismMode.NonParallelism
-            };
+            var engine = GetReuseCacheEngine(dieEarly, favorShortPaths);
             engine.Search(manyChildrenState, 10);
             
             Assert.AreEqual(new EvaluationRange(int.MinValue, 2), GetEvaluation(engine, childState2));
@@ -165,7 +165,11 @@ namespace MinMaxSearch.UnitTests
         }
 
         [TestMethod]
-        public void Max_PrunTree_CachRemebersRightValues()
+        [DataRow(true, true)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
+        [DataRow(false, false)]
+        public void Max_PrunTree_CachRemebersRightValues(bool dieEarly, bool favorShortPaths)
         {
             endState1.SetEvaluationTo(5);
             endState2.SetEvaluationTo(6);
@@ -173,11 +177,7 @@ namespace MinMaxSearch.UnitTests
             A.CallTo(() => myPrunner.ShouldPrune(A<IState>._, A<int>._, A<List<IState>>._))
                 .ReturnsLazily((IState s, int d, List<IState> l) => s == childState2);
 
-            var engine = new SearchEngine()
-            {
-                CacheMode = CacheMode.ReuseCache,
-                ParallelismMode = ParallelismMode.NonParallelism
-            }.AddPruner(myPrunner);
+            var engine = GetReuseCacheEngine(dieEarly, favorShortPaths).AddPruner(myPrunner);
             engine.Search(manyChildrenState, 10);
             
             Assert.AreEqual(new EvaluationRange(5, 5), GetEvaluation(engine, childState1));
@@ -185,7 +185,11 @@ namespace MinMaxSearch.UnitTests
         }
 
         [TestMethod]
-        public void PrunTreeContainingMaxWin_CachRemebersRightValues()
+        [DataRow(true, true)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
+        [DataRow(false, false)]
+        public void PrunTreeContainingMaxWin_CachRemebersRightValues(bool dieEarly, bool favorShortPaths)
         {
             endState1.SetEvaluationTo(MAX_EVALUATION);
 
@@ -193,13 +197,7 @@ namespace MinMaxSearch.UnitTests
             A.CallTo(() => myPrunner.ShouldPrune(A<IState>._, A<int>._, A<List<IState>>._))
                 .ReturnsLazily((IState s, int d, List<IState> l) => s == childState2);
 
-            var engine = new SearchEngine()
-            {
-                CacheMode = CacheMode.ReuseCache,
-                ParallelismMode = ParallelismMode.NonParallelism,
-                MaxScore = MAX_EVALUATION,
-                MinScore = MIN_EVALUATION
-            }.AddPruner(myPrunner);
+            var engine = GetReuseCacheEngine(dieEarly, favorShortPaths).AddPruner(myPrunner);
             engine.Search(manyChildrenState, 10);
 
             Assert.AreEqual(new EvaluationRange(MAX_EVALUATION, MAX_EVALUATION), GetEvaluation(engine, childState1));
@@ -207,7 +205,11 @@ namespace MinMaxSearch.UnitTests
         }
 
         [TestMethod]
-        public void Min_PrunTree_CachRemebersRightValues()
+        [DataRow(true, true)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
+        [DataRow(false, false)]
+        public void Min_PrunTree_CachRemebersRightValues(bool dieEarly, bool favorShortPaths)
         {
             endState2.SetEvaluationTo(5);
             endState3.SetEvaluationTo(6);
@@ -215,11 +217,7 @@ namespace MinMaxSearch.UnitTests
             A.CallTo(() => myPrunner.ShouldPrune(A<IState>._, A<int>._, A<List<IState>>._))
                 .ReturnsLazily((IState s, int d, List<IState> l) => s == endState3);
 
-            var engine = new SearchEngine()
-            {
-                CacheMode = CacheMode.ReuseCache,
-                ParallelismMode = ParallelismMode.NonParallelism
-            }.AddPruner(myPrunner);
+            var engine = GetReuseCacheEngine(dieEarly, favorShortPaths).AddPruner(myPrunner);
             engine.Search(childState2, 10);
 
             Assert.AreEqual(new EvaluationRange(5, 5), GetEvaluation(engine, endState2));
@@ -227,7 +225,11 @@ namespace MinMaxSearch.UnitTests
         }
 
         [TestMethod]
-        public void PrunTreeContainingMinWin_CachRemebersRightValues()
+        [DataRow(true, true)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
+        [DataRow(false, false)]
+        public void PrunTreeContainingMinWin_CachRemebersRightValues(bool dieEarly, bool favorShortPaths)
         {
             endState2.SetEvaluationTo(MIN_EVALUATION);
             endState3.SetEvaluationTo(6);
@@ -235,13 +237,7 @@ namespace MinMaxSearch.UnitTests
             A.CallTo(() => myPrunner.ShouldPrune(A<IState>._, A<int>._, A<List<IState>>._))
                 .ReturnsLazily((IState s, int d, List<IState> l) => s == endState3);
 
-            var engine = new SearchEngine()
-            {
-                CacheMode = CacheMode.ReuseCache,
-                ParallelismMode = ParallelismMode.NonParallelism,
-                MaxScore = MAX_EVALUATION,
-                MinScore = MIN_EVALUATION
-            }.AddPruner(myPrunner);
+            var engine = GetReuseCacheEngine(dieEarly, favorShortPaths).AddPruner(myPrunner);
             engine.Search(childState2, 10);
 
             Assert.AreEqual(new EvaluationRange(MIN_EVALUATION, MIN_EVALUATION), GetEvaluation(engine, endState2));
@@ -249,7 +245,11 @@ namespace MinMaxSearch.UnitTests
         }
 
         [TestMethod]
-        public void PrunTreeContainingWrongWin_CachRemebersRightValues()
+        [DataRow(true, true)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
+        [DataRow(false, false)]
+        public void PrunTreeContainingWrongWin_CachRemebersRightValues(bool dieEarly, bool favorShortPaths)
         {
             endState2.SetEvaluationTo(MAX_EVALUATION);
             endState3.SetEvaluationTo(6);
@@ -257,13 +257,7 @@ namespace MinMaxSearch.UnitTests
             A.CallTo(() => myPrunner.ShouldPrune(A<IState>._, A<int>._, A<List<IState>>._))
                 .ReturnsLazily((IState s, int d, List<IState> l) => s == endState3);
 
-            var engine = new SearchEngine()
-            {
-                CacheMode = CacheMode.ReuseCache,
-                ParallelismMode = ParallelismMode.NonParallelism,
-                MaxScore = MAX_EVALUATION,
-                MinScore = MIN_EVALUATION
-            }.AddPruner(myPrunner);
+            var engine = GetReuseCacheEngine(dieEarly, favorShortPaths).AddPruner(myPrunner);
             engine.Search(childState2, 10);
 
             Assert.AreEqual(new EvaluationRange(MAX_EVALUATION, MAX_EVALUATION), GetEvaluation(engine, endState2));
@@ -279,15 +273,7 @@ namespace MinMaxSearch.UnitTests
         {
             endState1.SetEvaluationTo(MAX_EVALUATION);
 
-            var engine = new SearchEngine()
-            {
-                CacheMode = CacheMode.ReuseCache,
-                ParallelismMode = ParallelismMode.NonParallelism,
-                MaxScore = MAX_EVALUATION,
-                MinScore = MIN_EVALUATION,
-                DieEarly = dieEarly,
-                FavorShortPaths = favorShortPaths
-            };
+            var engine = GetReuseCacheEngine(dieEarly, favorShortPaths);
             engine.Search(manyChildrenState, 10);
 
             Assert.AreEqual(new EvaluationRange(MAX_EVALUATION, MAX_EVALUATION), GetEvaluation(engine, childState1));
@@ -311,7 +297,15 @@ namespace MinMaxSearch.UnitTests
             A.CallTo(() => childState1.Turn).Returns(Player.Max);
             A.CallTo(() => childState2.Turn).Returns(Player.Max);
 
-            var engine = new SearchEngine()
+            var engine = GetReuseCacheEngine(dieEarly, favorShortPaths);
+            engine.Search(manyChildrenState, 10);
+
+            Assert.AreEqual(new EvaluationRange(MIN_EVALUATION, MIN_EVALUATION), GetEvaluation(engine, childState1));
+            Assert.AreEqual(new EvaluationRange(MIN_EVALUATION, MIN_EVALUATION), GetEvaluation(engine, manyChildrenState));
+        }
+
+        private static SearchEngine GetReuseCacheEngine(bool dieEarly, bool favorShortPaths) =>
+            new SearchEngine()
             {
                 CacheMode = CacheMode.ReuseCache,
                 ParallelismMode = ParallelismMode.NonParallelism,
@@ -320,11 +314,6 @@ namespace MinMaxSearch.UnitTests
                 DieEarly = dieEarly,
                 FavorShortPaths = favorShortPaths
             };
-            engine.Search(manyChildrenState, 10);
-
-            Assert.AreEqual(new EvaluationRange(MIN_EVALUATION, MIN_EVALUATION), GetEvaluation(engine, childState1));
-            Assert.AreEqual(new EvaluationRange(MIN_EVALUATION, MIN_EVALUATION), GetEvaluation(engine, manyChildrenState));
-        }
 
         private EvaluationRange GetEvaluation(SearchEngine engine, IState state) =>
             ((CacheManager) engine.CacheManager)[state];
