@@ -18,17 +18,29 @@ namespace CheckersTests
             { CheckerPiece.Empty, CheckerPiece.MinChecker, CheckerPiece.Empty, CheckerPiece.MinChecker, CheckerPiece.Empty, CheckerPiece.MinChecker, CheckerPiece.Empty, CheckerPiece.MinChecker},
             { CheckerPiece.MinChecker, CheckerPiece.Empty, CheckerPiece.MinChecker, CheckerPiece.Empty, CheckerPiece.MinChecker, CheckerPiece.Empty, CheckerPiece.MinChecker, CheckerPiece.Empty},
         };
+        
+        public static CheckerPiece[,] GetStartBoardFullOfKings() => new[,]
+        {
+            { CheckerPiece.Empty, CheckerPiece.MaxKing, CheckerPiece.Empty, CheckerPiece.MinKing, CheckerPiece.Empty, CheckerPiece.MaxKing, CheckerPiece.Empty, CheckerPiece.MaxKing},
+            { CheckerPiece.MaxKing, CheckerPiece.Empty, CheckerPiece.MaxKing, CheckerPiece.Empty, CheckerPiece.MaxKing, CheckerPiece.Empty, CheckerPiece.MaxKing, CheckerPiece.Empty},
+            { CheckerPiece.Empty, CheckerPiece.MaxKing, CheckerPiece.Empty, CheckerPiece.MinKing, CheckerPiece.Empty, CheckerPiece.MaxKing, CheckerPiece.Empty, CheckerPiece.MaxKing},
+            { CheckerPiece.Empty, CheckerPiece.Empty, CheckerPiece.Empty, CheckerPiece.Empty, CheckerPiece.Empty, CheckerPiece.Empty, CheckerPiece.Empty, CheckerPiece.Empty},
+            { CheckerPiece.Empty, CheckerPiece.Empty, CheckerPiece.Empty, CheckerPiece.Empty, CheckerPiece.Empty, CheckerPiece.Empty, CheckerPiece.Empty, CheckerPiece.Empty},
+            { CheckerPiece.MinKing, CheckerPiece.Empty, CheckerPiece.MinKing, CheckerPiece.Empty, CheckerPiece.MinKing, CheckerPiece.Empty, CheckerPiece.MinKing, CheckerPiece.Empty},
+            { CheckerPiece.Empty, CheckerPiece.MinKing, CheckerPiece.Empty, CheckerPiece.MinKing, CheckerPiece.Empty, CheckerPiece.MinKing, CheckerPiece.Empty, CheckerPiece.MinKing},
+            { CheckerPiece.MinKing, CheckerPiece.Empty, CheckerPiece.MinKing, CheckerPiece.Empty, CheckerPiece.MinKing, CheckerPiece.Empty, CheckerPiece.MinKing, CheckerPiece.Empty},
+        };
 
         public static CheckerPiece[,] GetEmptyBoard() => GetEmptyBoard(8);
 
         public static CheckerPiece[,] GetEmptyBoard(int size) => new CheckerPiece[size, size];
 
-        public static SearchEngine GetCheckersSearchEngine(int maxDegreeOfParallelism = 1, ParallelismMode parallelismMode = ParallelismMode.NonParallelism, int levelOfParallelism = 1) =>
+        public static SearchEngine GetCheckersSearchEngine(int maxDegreeOfParallelism = 1, ParallelismMode parallelismMode = ParallelismMode.NonParallelism, int levelOfParallelism = 1, bool dieEarly = true) =>
             new SearchEngine()
             {
                 MaxDegreeOfParallelism = maxDegreeOfParallelism,
                 MaxLevelOfParallelism = levelOfParallelism,
-                DieEarly = true,
+                DieEarly = dieEarly,
                 MinScore = CheckersState.MIN_WIN,
                 MaxScore = CheckersState.MAX_WIN,
                 ParallelismMode = parallelismMode,

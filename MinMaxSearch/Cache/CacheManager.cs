@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Text;
 using MinMaxSearch.Exceptions;
 
 namespace MinMaxSearch.Cache
@@ -61,5 +63,8 @@ namespace MinMaxSearch.Cache
 
         public EvaluationRange this[IState state] => 
             cache.TryGetValue(state, out var evaluation) ? evaluation : null;
+
+        public override string ToString() => 
+            $"{nameof(CacheManager)}; count {cache.Count}";
     }
 }
