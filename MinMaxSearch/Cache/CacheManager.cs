@@ -45,6 +45,7 @@ namespace MinMaxSearch.Cache
         }
 
         public void Clear() => cache.Clear();
+
         public void Clear(Func<IState, bool> shouldClean)
         {
             var statesToRemove = new HashSet<IState>();
@@ -57,5 +58,8 @@ namespace MinMaxSearch.Cache
         }
 
         public int Count => cache.Count;
+
+        public EvaluationRange this[IState state] => 
+            cache.TryGetValue(state, out var evaluation) ? evaluation : null;
     }
 }

@@ -9,26 +9,59 @@ namespace MinMaxSearch.UnitTests
     [TestClass]
     public class CacheTest
     {
+        // This class contains 2 search trees:
+        // stat1 -> sate2 -> state3 -> endState1
+        //
+        // And:
+        //                    manyChildrenState
+        // childState1                    childState2          
+        //  endState1            endState2            endState3
+
         private readonly IDeterministicState state1 = A.Fake<IDeterministicState>();
         private readonly IDeterministicState state2 = A.Fake<IDeterministicState>();
         private readonly IDeterministicState state3 = A.Fake<IDeterministicState>();
-        private readonly IDeterministicState endState = A.Fake<IDeterministicState>();
+        private readonly IDeterministicState endState1 = A.Fake<IDeterministicState>();
+        private readonly IDeterministicState endState2 = A.Fake<IDeterministicState>();
+        private readonly IDeterministicState endState3 = A.Fake<IDeterministicState>();
+        private readonly IDeterministicState manyChildrenState = A.Fake<IDeterministicState>();
+        private readonly IDeterministicState childState1 = A.Fake<IDeterministicState>();
+        private readonly IDeterministicState childState2 = A.Fake<IDeterministicState>();
         
+        private const double MIN_EVALUATION = -10;
+        private const double MAX_EVALUATION = 10;
+
         [TestInitialize]
         public void TestInitialize()
         {
             A.CallTo(() => state1.ToString()).Returns("State1");
             A.CallTo(() => state2.ToString()).Returns("State2");
             A.CallTo(() => state3.ToString()).Returns("State3");
-            A.CallTo(() => endState.ToString()).Returns("EndState");
-            endState.SetAsEndState();
+            A.CallTo(() => endState1.ToString()).Returns("EndState1");
+            A.CallTo(() => endState2.ToString()).Returns("EndState2");
+            A.CallTo(() => endState3.ToString()).Returns("EndState3");
+            A.CallTo(() => manyChildrenState.ToString()).Returns("ManyChildrenState");
+            A.CallTo(() => childState1.ToString()).Returns("ChildState1");
+            A.CallTo(() => childState2.ToString()).Returns("ChildState2");
+            
             A.CallTo(() => state1.Turn).Returns(Player.Max);
             A.CallTo(() => state2.Turn).Returns(Player.Max);
             A.CallTo(() => state3.Turn).Returns(Player.Max);
-            A.CallTo(() => endState.Turn).Returns(Player.Max);
+            A.CallTo(() => endState1.Turn).Returns(Player.Max);
+            A.CallTo(() => endState2.Turn).Returns(Player.Max);
+            A.CallTo(() => endState3.Turn).Returns(Player.Max);
+            A.CallTo(() => manyChildrenState.Turn).Returns(Player.Max);
+            A.CallTo(() => childState1.Turn).Returns(Player.Min);
+            A.CallTo(() => childState2.Turn).Returns(Player.Min);
+
             state1.SetNeigbor(state2);
             state2.SetNeigbor(state3);
-            state3.SetNeigbor(endState);
+            state3.SetNeigbor(endState1);
+            manyChildrenState.SetNeigbors(childState1, childState2);
+            childState1.SetNeigbor(endState1);
+            childState2.SetNeigbors(endState2, endState3);
+            endState1.SetAsEndState();
+            endState2.SetAsEndState();
+            endState3.SetAsEndState();
         }
 
         [TestMethod]
@@ -69,7 +102,7 @@ namespace MinMaxSearch.UnitTests
                 CacheManager = customCache
             };
             engine.Search(state1, 10);
-            A.CallTo(() => endState.GetNeighbors()).MustNotHaveHappened();
+            A.CallTo(() => endState1.GetNeighbors()).MustNotHaveHappened();
         }
 
         [TestMethod]
@@ -110,5 +143,26 @@ namespace MinMaxSearch.UnitTests
             };
             engine.FillCache(state1, CancellationToken.None);
         }
+
+        [TestMethod]
+        public void AlphaBetaPrunnedTree_CachRemebersRightValues()
+        {
+            endState1.SetEvaluationTo(5);
+            endState2.SetEvaluationTo(2); // This should cuase a pruning
+
+            var engine = new SearchEngine()
+            {
+                CacheMode = CacheMode.ReuseCache,
+                ParallelismMode = ParallelismMode.NonParallelism
+            };
+            engine.Search(manyChildrenState, 10);
+            
+            Assert.AreEqual(new EvaluationRange(int.MinValue, 2), GetEvaluation(engine, childState2));
+            Assert.AreEqual(new EvaluationRange(5, 5), GetEvaluation(engine, childState1));
+            Assert.AreEqual(new EvaluationRange(5, int.MaxValue), GetEvaluation(engine, manyChildrenState));
+        }
+
+        private EvaluationRange GetEvaluation(SearchEngine engine, IState state) =>
+            ((CacheManager) engine.CacheManager)[state];
     }
 }

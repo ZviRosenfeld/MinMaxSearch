@@ -19,5 +19,11 @@
         }
 
         public override string ToString() => "{" + MinEvaluation + ", " + MaxEvaluation + "}";
+
+        public override bool Equals(object obj) => obj is EvaluationRange evaluationRange &&
+                                                   MaxEvaluation == evaluationRange.MaxEvaluation &&
+                                                   MinEvaluation == evaluationRange.MinEvaluation;
+
+        public override int GetHashCode() => MinEvaluation.GetHashCode() + MaxEvaluation.GetHashCode();
     }
 }
