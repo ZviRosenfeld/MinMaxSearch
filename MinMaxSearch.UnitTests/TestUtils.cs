@@ -9,7 +9,10 @@ namespace MinMaxSearch.UnitTests
     {
         public static void SetEvaluationTo(this IState state, double evaluation) =>
             A.CallTo(() => state.Evaluate(A<int>._, A<List<IState>>._)).Returns(evaluation);
-        
+
+        public static void SetEvaluationTo(this IState state, double evaluation1, double evaluation2) =>
+            A.CallTo(() => state.Evaluate(A<int>._, A<List<IState>>._)).ReturnsNextFromSequence(evaluation1, evaluation2);
+
         public static void SetNeigbors(this IDeterministicState state, IEnumerable<IState> neigbors) =>
             A.CallTo(() => state.GetNeighbors()).Returns(neigbors);
 

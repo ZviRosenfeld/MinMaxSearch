@@ -1,14 +1,14 @@
 ﻿using FakeItEasy;
 
-namespace MinMaxSearch.UnitTests.CacheTests
+namespace MinMaxSearch.UnitTests.SampleTrees
 {
     /// <summary>
     /// This class provides a search tree for the cach tests to use
     /// </summary>
-     class SampleTree
+     class Tree1
     {
         // This class uses search tree:
-        //              ManyChildrenState
+        //              StartState
         // ChildState1                    ChildState2          
         //  EndState1            EndState2            EndState3
 
@@ -19,12 +19,12 @@ namespace MinMaxSearch.UnitTests.CacheTests
         public IDeterministicState ChildState1 = A.Fake<IDeterministicState>();
         public IDeterministicState ChildState2 = A.Fake<IDeterministicState>();
         
-        public SampleTree(Player startPlayer = Player.Max)
+        public Tree1(Player startPlayer = Player.Max)
         {
             A.CallTo(() => EndState1.ToString()).Returns("EndState1");
             A.CallTo(() => EndState2.ToString()).Returns("EndState2");
             A.CallTo(() => EndState3.ToString()).Returns("EndState3");
-            A.CallTo(() => ManyChildrenState.ToString()).Returns("ManyChildrenState");
+            A.CallTo(() => ManyChildrenState.ToString()).Returns("StartState");
             A.CallTo(() => ChildState1.ToString()).Returns("ChildState1");
             A.CallTo(() => ChildState2.ToString()).Returns("ChildState2");
 

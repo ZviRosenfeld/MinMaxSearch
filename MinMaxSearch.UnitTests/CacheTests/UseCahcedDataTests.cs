@@ -1,6 +1,6 @@
-﻿using FakeItEasy;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MinMaxSearch.Cache;
+using MinMaxSearch.UnitTests.SampleTrees;
 
 namespace MinMaxSearch.UnitTests.CacheTests
 {
@@ -13,7 +13,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
         [TestMethod]
         public void ExactValueInCach_UseValue()
         {
-            var searchTree = new SampleTree();
+            var searchTree = new Tree1();
             var engine = new SearchEngine()
             {
                 CacheMode = CacheMode.ReuseCache,
@@ -26,7 +26,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
         [TestMethod]
         public void CachedMaxSmallerThanAlpha()
         {
-            var searchTree = new SampleTree();
+            var searchTree = new Tree1();
             searchTree.EndState1.SetEvaluationTo(-2);
             var engine = new SearchEngine()
             {
@@ -41,7 +41,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
         [TestMethod]
         public void CachedMinGreatrThanBeta()
         {
-            var searchTree = new SampleTree();
+            var searchTree = new Tree1();
             searchTree.EndState2.SetEvaluationTo(2);
             searchTree.EndState2.SetEvaluationTo(4);
             var engine = new SearchEngine()
@@ -60,7 +60,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
         public void MinCachedValueEqualeMaxScore_UseValue(Player firstPlayer)
         {
             var maxEvaluation = 10;
-            var searchTree = new SampleTree(firstPlayer);
+            var searchTree = new Tree1(firstPlayer);
             var engine = new SearchEngine()
             {
                 CacheMode = CacheMode.ReuseCache,
@@ -77,7 +77,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
         public void MaxCachedValueEqualeMinScore_UseValue(Player firstPlayer)
         {
             var minEvaluation = -10;
-            var searchTree = new SampleTree(firstPlayer);
+            var searchTree = new Tree1(firstPlayer);
             var engine = new SearchEngine()
             {
                 CacheMode = CacheMode.ReuseCache,

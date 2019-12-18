@@ -3,6 +3,7 @@ using FakeItEasy;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MinMaxSearch.Cache;
 using MinMaxSearch.Pruners;
+using MinMaxSearch.UnitTests.SampleTrees;
 
 namespace MinMaxSearch.UnitTests.CacheTests
 {
@@ -22,7 +23,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
         [DataRow(false, false)]
         public void AlphaBetaPrunnedTree_CachRemebersRightValues(bool dieEarly, bool favorShortPaths)
         {
-            var searchTree = new SampleTree();
+            var searchTree = new Tree1();
 
             searchTree.EndState1.SetEvaluationTo(5);
             searchTree.EndState2.SetEvaluationTo(2); // This should cuase a pruning
@@ -42,7 +43,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
         [DataRow(false, false)]
         public void Max_PrunTree_CachRemebersRightValues(bool dieEarly, bool favorShortPaths)
         {
-            var searchTree = new SampleTree();
+            var searchTree = new Tree1();
 
             searchTree.EndState1.SetEvaluationTo(5);
             searchTree.EndState2.SetEvaluationTo(6);
@@ -64,7 +65,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
         [DataRow(false, false)]
         public void PrunTreeContainingMaxWin_CachRemebersRightValues(bool dieEarly, bool favorShortPaths)
         {
-            var searchTree = new SampleTree();
+            var searchTree = new Tree1();
             searchTree.EndState1.SetEvaluationTo(MAX_EVALUATION);
 
             var myPrunner = A.Fake<IPruner>();
@@ -85,7 +86,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
         [DataRow(false, false)]
         public void Min_PrunTree_CachRemebersRightValues(bool dieEarly, bool favorShortPaths)
         {
-            var searchTree = new SampleTree();
+            var searchTree = new Tree1();
 
             searchTree.EndState2.SetEvaluationTo(5);
             searchTree.EndState3.SetEvaluationTo(6);
@@ -107,7 +108,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
         [DataRow(false, false)]
         public void PrunTreeContainingMinWin_CachRemebersRightValues(bool dieEarly, bool favorShortPaths)
         {
-            var searchTree = new SampleTree();
+            var searchTree = new Tree1();
 
             searchTree.EndState2.SetEvaluationTo(MIN_EVALUATION);
             searchTree.EndState3.SetEvaluationTo(6);
@@ -129,7 +130,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
         [DataRow(false, false)]
         public void PrunTreeContainingWrongWin_CachRemebersRightValues(bool dieEarly, bool favorShortPaths)
         {
-            var searchTree = new SampleTree();
+            var searchTree = new Tree1();
 
             searchTree.EndState2.SetEvaluationTo(MAX_EVALUATION);
             searchTree.EndState3.SetEvaluationTo(6);
@@ -151,7 +152,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
         [DataRow(false, false)]
         public void ChildrenContainWinForMax_CachRemebersRightValues(bool dieEarly, bool favorShortPaths)
         {
-            var searchTree = new SampleTree();
+            var searchTree = new Tree1();
             searchTree.EndState1.SetEvaluationTo(MAX_EVALUATION);
 
             var engine = GetReuseCacheEngine(dieEarly, favorShortPaths);
@@ -168,7 +169,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
         [DataRow(false, false)]
         public void ChildrenContainWinForMin_CachRemebersRightValues(bool dieEarly, bool favorShortPaths)
         {
-            var searchTree = new SampleTree(Player.Min);
+            var searchTree = new Tree1(Player.Min);
             searchTree.EndState1.SetEvaluationTo(MIN_EVALUATION);
 
             var engine = GetReuseCacheEngine(dieEarly, favorShortPaths);
@@ -179,9 +180,108 @@ namespace MinMaxSearch.UnitTests.CacheTests
         }
 
         [TestMethod]
+        [DataRow(true, true)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
+        [DataRow(false, false)]
+        public void RepeatedStateInStateDefinesDepthGame_CacheRepeatedValue(bool dieEarly, bool favorShortPaths)
+        {
+            var searchTree = new RepeatStateTree();
+            searchTree.ChildState2.SetEvaluationTo(3, 4);
+
+            var engine = new SearchEngine()
+            {
+                CacheMode = CacheMode.NewCache,
+                FavorShortPaths = favorShortPaths,
+                DieEarly = dieEarly,
+                StateDefinesDepth = true,
+                ParallelismMode = ParallelismMode.NonParallelism
+            };
+            var result = engine.Search(searchTree.StartState, 2);
+
+            Assert.AreEqual(3, result.Evaluation); // Check that we read evaluation for Child1 from the cache the second time
+        }
+        
+        [TestMethod]
+        [DataRow(true, false, true)]
+        [DataRow(false, true, true)]
+        [DataRow(false, false, false)]
+        public void RepeatedStateInStateDefinesDepthGame_DontCacheRepeatedValue(bool useUnstalbeStateMethod, bool reuseCache, bool stateDefinesDepth)
+        {
+            var searchTree = new RepeatStateTree();
+            searchTree.ChildState2.SetEvaluationTo(3, 4);
+
+            var engine = new SearchEngine()
+            {
+                CacheMode = reuseCache ? CacheMode.ReuseCache : CacheMode.NewCache,
+                StateDefinesDepth = stateDefinesDepth,
+                ParallelismMode = ParallelismMode.NonParallelism
+            };
+            if (useUnstalbeStateMethod)
+                engine.IsUnstableState = (s, d, l) => false;
+            
+            var result = engine.Search(searchTree.StartState, 2);
+
+            Assert.AreEqual(4, result.Evaluation); // Check that we didn't read evaluation for Child1 from the cache the second time
+        }
+
+        [TestMethod]
+        [DataRow(true, true)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
+        [DataRow(false, false)]
+        public void RepeatedStateInStateDefinesDepthGame_StatesPrunnedByAlphaBeta_CacheDonstRepeatedValue(bool dieEarly, bool favorShortPaths)
+        {
+            var searchTree = new RepeatStateTree();
+            searchTree.EndState1.SetEvaluationTo(5);
+            searchTree.EndState2.SetEvaluationTo(4, 7);
+            searchTree.EndState3.SetEvaluationTo(6);
+
+            var engine = new SearchEngine()
+            {
+                CacheMode = CacheMode.NewCache,
+                FavorShortPaths = favorShortPaths,
+                DieEarly = dieEarly,
+                StateDefinesDepth = true,
+                ParallelismMode = ParallelismMode.NonParallelism
+            };
+
+            var result = engine.Search(searchTree.StartState, 4);
+
+            Assert.AreEqual(6, result.Evaluation); // Check that we didn't read evaluation for endState2 from the cache the second time
+        }
+
+        [TestMethod]
+        [DataRow(true, true)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
+        [DataRow(false, false)]
+        public void RepeatedStateInStateDefinesDepthGame_StatesPrunnedByPrunner_CacheDonstRepeatedValue(bool dieEarly, bool favorShortPaths)
+        {
+            var searchTree = new RepeatStateTree();
+            searchTree.ChildState4.SetEvaluationTo(3, 4);
+
+            var myPrunner = A.Fake<IPruner>();
+            A.CallTo(() => myPrunner.ShouldPrune(A<IState>._, A<int>._, A<List<IState>>._))
+                .ReturnsLazily((IState s, int d, List<IState> l) => s == searchTree.ChildState5);
+            var engine = new SearchEngine()
+            {
+                CacheMode = CacheMode.NewCache,
+                FavorShortPaths = favorShortPaths,
+                DieEarly = dieEarly,
+                StateDefinesDepth = true,
+                ParallelismMode = ParallelismMode.NonParallelism
+            }.AddPruner(myPrunner);
+
+            var result = engine.Search(searchTree.StartState, 3);
+
+            Assert.AreEqual(4, result.Evaluation); // Check that we didn't read evaluation for childState5 from the cache the second time
+        }
+
+        [TestMethod]
         public void DontCachePartualValues()
         {
-            var searchTree = new SampleTree();
+            var searchTree = new Tree1();
             var extendedState = A.Fake<IDeterministicState>();
             extendedState.SetEvaluationTo(MAX_EVALUATION);
             searchTree.EndState1.SetNeigbor(extendedState);
