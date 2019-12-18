@@ -4,10 +4,10 @@ namespace MinMaxSearch
 {
     static class SearchUtils
     {
-        public static SearchResult CloneAndAddStateToTop(this SearchResult searchResult, IState state, int leaves, int internalNodes, bool fullTreeSearched, bool allChildrenAreDeadEnds)
+        public static SearchResult CloneAndAddStateToTop(this SearchResult searchResult, IState state, int leaves, int internalNodes, bool fullTreeSearched, bool allChildrenAreDeadEnds, bool childrenPrunned)
         {
             var sequance = new List<IState>(searchResult.StateSequence) {state};
-            return new SearchResult(searchResult.Evaluation, sequance, leaves, internalNodes, fullTreeSearched, allChildrenAreDeadEnds);
+            return new SearchResult(searchResult.Evaluation, sequance, leaves, internalNodes, fullTreeSearched, allChildrenAreDeadEnds, childrenPrunned);
         }
 
         public static SearchContext CloneWithMaxAlphaAndBeta(this SearchContext searchContext) => new SearchContext(

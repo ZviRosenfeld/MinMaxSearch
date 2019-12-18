@@ -15,7 +15,8 @@ namespace Connect4Tests
                 MaxScore = BoardEvaluator.MaxEvaluation,
                 ParallelismMode = parallelismMode,
                 SkipEvaluationForFirstNodeSingleNeighbor = false,
-                CacheMode = CacheMode.NewCache
+                CacheMode = CacheMode.NewCache,
+                StateDefinesDepth = true
             };
 
         public static Player[,] GetEmptyBoard() =>

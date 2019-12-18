@@ -9,35 +9,37 @@ namespace MinMaxSearch
     public class SearchResult
     {
         public SearchResult(double evaluation, List<IState> stateSequence, int leaves, int internalNodes,
-            bool fullTreeSearched, bool allChildrenAreDeadEnds)
+            bool fullTreeSearchedOrPrunned, bool allChildrenAreDeadEnds, bool childrenPrunned)
         {
+            if (allChildrenAreDeadEnds && !fullTreeSearchedOrPrunned)
+                throw new InternalException($"Code 1002 ({nameof(allChildrenAreDeadEnds)} but not {nameof(fullTreeSearchedOrPrunned)})");
+            
             Evaluation = evaluation;
             StateSequence = stateSequence;
             Leaves = leaves;
             InternalNodes = internalNodes;
-            FullTreeSearched = fullTreeSearched;
+            FullTreeSearchedOrPrunned = fullTreeSearchedOrPrunned;
             AllChildrenAreDeadEnds = allChildrenAreDeadEnds;
-            if (allChildrenAreDeadEnds && !fullTreeSearched)
-                throw new InternalException($"Code 1002 ({nameof(allChildrenAreDeadEnds)} but not {nameof(fullTreeSearched)})");
-
+            ChildrenPrunned = childrenPrunned;
             IsSearchCompleted = true;
             SearchDepth = -1;
             SearchTime = TimeSpan.Zero;
         }
 
-        public SearchResult(double evaluation, IState endState, bool fullTreeSearched = true, bool allChildrenAreDeadEnds = true)
+        public SearchResult(double evaluation, IState endState, bool fullTreeSearchedOrPrunned = true, bool childrenPrunned = false, bool allChildrenAreDeadEnds = true)
         {
+            if (allChildrenAreDeadEnds && !fullTreeSearchedOrPrunned)
+                throw new InternalException($"Code 1003 ({nameof(allChildrenAreDeadEnds)} but not {nameof(fullTreeSearchedOrPrunned)})");
+            
             Evaluation = evaluation;
             IsSearchCompleted = true;
             SearchDepth = 0;
             StateSequence = new List<IState> {endState};
             Leaves = 1;
             InternalNodes = 0;
-            FullTreeSearched = fullTreeSearched;
+            FullTreeSearchedOrPrunned = fullTreeSearchedOrPrunned;
             AllChildrenAreDeadEnds = allChildrenAreDeadEnds;
-            if (allChildrenAreDeadEnds && !fullTreeSearched)
-                throw new InternalException($"Code 1003 ({nameof(allChildrenAreDeadEnds)} but not {nameof(fullTreeSearched)})");
-
+            ChildrenPrunned = childrenPrunned;
             SearchTime = TimeSpan.Zero;
         }
 
@@ -47,7 +49,7 @@ namespace MinMaxSearch
             StateSequence = other.StateSequence.ToList();
             Leaves = other.Leaves;
             InternalNodes = other.InternalNodes;
-            FullTreeSearched = other.FullTreeSearched;
+            FullTreeSearchedOrPrunned = other.FullTreeSearchedOrPrunned;
             AllChildrenAreDeadEnds = other.AllChildrenAreDeadEnds;
             SearchTime = searchTime;
             IsSearchCompleted = isSearchCompleted;
@@ -77,12 +79,17 @@ namespace MinMaxSearch
         /// <summary>
         /// Returns true if the full tree was searched. This will return true even if some of the branches were prunned.
         /// </summary>
-        public bool FullTreeSearched { get; }
+        public bool FullTreeSearchedOrPrunned { get; }
 
         /// <summary>
         /// Returns true only if all paths lead to daed ends. If part of the tree was prunned, this will return false.
         /// </summary>
         public bool AllChildrenAreDeadEnds { get; }
+
+        /// <summary>
+        /// Returns true if some of the children were prunned away.
+        /// </summary>
+        public bool ChildrenPrunned { get; }
 
         public TimeSpan SearchTime { get; }
 
@@ -103,7 +110,7 @@ namespace MinMaxSearch
             stringBuilder.AppendLine(nameof(Leaves) + " == " + Leaves);
             stringBuilder.AppendLine(nameof(InternalNodes) + " == " + InternalNodes);
             stringBuilder.AppendLine(nameof(SearchDepth) + " == " + SearchDepth);
-            stringBuilder.AppendLine(nameof(FullTreeSearched) + " == " + FullTreeSearched);
+            stringBuilder.AppendLine(nameof(FullTreeSearchedOrPrunned) + " == " + FullTreeSearchedOrPrunned);
             stringBuilder.AppendLine(nameof(AllChildrenAreDeadEnds) + " == " + AllChildrenAreDeadEnds);
             stringBuilder.AppendLine(nameof(NextMove) + ":");
             stringBuilder.AppendLine(NextMove.ToString());

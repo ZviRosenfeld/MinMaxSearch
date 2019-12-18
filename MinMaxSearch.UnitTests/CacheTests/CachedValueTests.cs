@@ -191,6 +191,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
             var engine = GetReuseCacheEngine(true, true);
             var result = engine.Search(searchTree.ManyChildrenState, 10);
 
+            A.CallTo(() => searchTree.EndState2.Evaluate(A<int>._, A<List<IState>>._)).MustHaveHappened();
             Assert.AreEqual(null, GetEvaluation(engine, searchTree.ChildState2));
             Assert.IsTrue(result.IsSearchCompleted);
         }

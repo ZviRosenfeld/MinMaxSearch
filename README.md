@@ -172,6 +172,12 @@ The default of this setting is true. (Available since 1.5.0).
 
 Note that this only applies to the first node.
 
+### StateDefinesDepth
+Set this to true it is possible to infer a state's depth from the state alone.
+This is trues for games like tic-tac-toe and connect 4, where the depth of a state is the number of tokens on the board.
+
+The engine will use this knowledge to optimize the search.
+
 ## IterativeSearch
 
 The [IterativeSearchWrapper](MinMaxSearch/IterativeSearchWrapper.cs) wraps a search engine and can be used to perform [iterative searches](https://en.wikipedia.org/wiki/Iterative_deepening_depth-first_search).

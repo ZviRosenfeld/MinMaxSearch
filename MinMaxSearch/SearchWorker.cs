@@ -36,13 +36,13 @@ namespace MinMaxSearch
             if (searchOptions.Pruners.Any(pruner => pruner.ShouldPrune(startState, searchContext.CurrentDepth, searchContext.StatesUpTillNow)))
             {
                 var evaluation = startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow, searchOptions);
-                return new SearchResult(evaluation, startState, true, false);
+                return new SearchResult(evaluation, startState, true, true, false);
             }
 
             if (ShouldStop(startState, searchContext))
             {
                 var evaluation = startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow, searchOptions);
-                return new SearchResult(evaluation, new List<IState> { startState }, 1, 0, false, false);
+                return new SearchResult(evaluation, new List<IState> { startState }, 1, 0, false, false, false);
             }
 
             SearchResult result;
@@ -66,7 +66,9 @@ namespace MinMaxSearch
         {
             if (result.AllChildrenAreDeadEnds)
                 cache.AddExactEvaluation(state, result.Evaluation);
-            else if (result.FullTreeSearched)
+            else if (searchOptions.StateDefinesDepth && searchOptions.IsUnstableState == null && searchOptions.CacheMode != CacheMode.ReuseCache && !result.ChildrenPrunned)
+                cache.AddExactEvaluation(state, result.Evaluation);
+            else if (result.FullTreeSearchedOrPrunned)
             {
                 if (state.Turn == Player.Max)
                     cache.AddMinEvaluation(state, result.Evaluation);
@@ -91,7 +93,7 @@ namespace MinMaxSearch
                 return new SearchResult(evaluation.MaxEvaluation, startState);
 
             if (evaluation.MinEvaluation >= searchContext.Bata || evaluation.MaxEvaluation <= searchContext.Alpha)
-                return new SearchResult(startState.Turn == Player.Max ? evaluation.MinEvaluation : evaluation.MaxEvaluation, startState, true, false);
+                return new SearchResult(startState.Turn == Player.Max ? evaluation.MinEvaluation : evaluation.MaxEvaluation, startState, true, true, false);
 
             return null;
         }
@@ -102,7 +104,7 @@ namespace MinMaxSearch
             {
                 if (searchContext.PruneAtMaxDepth)
                     return true;
-                if (!searchOptions.IsUnstableState(state, searchContext.CurrentDepth, searchContext.StatesUpTillNow))
+                if (searchOptions.IsUnstableState == null || !searchOptions.IsUnstableState(state, searchContext.CurrentDepth, searchContext.StatesUpTillNow))
                     return true;
             }
             if (searchContext.CancellationToken.IsCancellationRequested)

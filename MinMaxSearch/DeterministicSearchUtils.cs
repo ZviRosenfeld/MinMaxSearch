@@ -94,14 +94,15 @@ namespace MinMaxSearch
             var bestEvaluation = player == Player.Max ? double.MinValue : double.MaxValue;
             SearchResult bestResult = null;
             int leaves = 0, internalNodes = 0;
-            bool allChildrenAreDeadEnds = !prunned, fullTreeSearched = true;
+            bool allChildrenAreDeadEnds = !prunned, fullTreeSearched = true, childrenPrunned = prunned;
             foreach (var result in results)
             {
                 var actualResult = result.Result;
                 leaves += actualResult.Leaves;
                 internalNodes += actualResult.InternalNodes;
+                childrenPrunned = childrenPrunned || actualResult.ChildrenPrunned;
                 allChildrenAreDeadEnds = allChildrenAreDeadEnds && actualResult.AllChildrenAreDeadEnds;
-                fullTreeSearched = fullTreeSearched && actualResult.FullTreeSearched;
+                fullTreeSearched = fullTreeSearched && actualResult.FullTreeSearchedOrPrunned;
                 if (IsBetterThen(actualResult.Evaluation, bestEvaluation, actualResult.StateSequence.Count,
                     bestResult?.StateSequence?.Count, player))
                 {
@@ -111,7 +112,7 @@ namespace MinMaxSearch
             }
 
             var childrenContainWiningPosition = bestEvaluation >= searchOptions.MaxScore || bestEvaluation <= searchOptions.MinScore;
-            return bestResult.CloneAndAddStateToTop(startState, leaves, internalNodes + 1, fullTreeSearched || childrenContainWiningPosition, allChildrenAreDeadEnds || childrenContainWiningPosition );
+            return bestResult.CloneAndAddStateToTop(startState, leaves, internalNodes + 1, fullTreeSearched || childrenContainWiningPosition, allChildrenAreDeadEnds || childrenContainWiningPosition, childrenPrunned);
         }
         
         private bool AlphaBataShouldPrune(double alpha, double bata, double evaluation, Player player)

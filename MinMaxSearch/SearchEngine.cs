@@ -24,7 +24,7 @@ namespace MinMaxSearch
         /// <summary>
         /// At unstable states, we'll continue searching even after we've hit the maxDepth limit
         /// </summary>
-        public Func<IState, int, List<IState>, bool> IsUnstableState { get; set; } = ((s, d, l) => false);
+        public Func<IState, int, List<IState>, bool> IsUnstableState { get; set; } = null;
 
         /// <summary>
         /// Note that this will only work if you implement Equals and GetHashValue in a meaningful way for your states. 
@@ -66,7 +66,7 @@ namespace MinMaxSearch
         public Func<IState, int, List<IState>, double> AlternateEvaluation { get; set; }
 
         private SearchOptions CreateSearchOptions() => new SearchOptions(pruners, IsUnstableState, PreventLoops,
-            FavorShortPaths, DieEarly, MaxScore, MinScore, AlternateEvaluation);
+            FavorShortPaths, DieEarly, MaxScore, MinScore, AlternateEvaluation, StateDefinesDepth, CacheMode);
 
         /// <summary>
         /// In some search domains, remembering states that lead to wins, losses or draw can improve performance.
@@ -88,6 +88,13 @@ namespace MinMaxSearch
         /// Note that this only applies to the first node.
         /// </summary>
         public bool SkipEvaluationForFirstNodeSingleNeighbor { get; set; } = true;
+
+        /// <summary>
+        /// Set this to true it is possible to infer a state's depth from the state alone.
+        /// This is trues for games like tic-tac-toe and connect 4, where the depth of a state is the number of tokens on the board.
+        /// The engine will use this knowledge to optimize the search
+        /// </summary>
+        public bool StateDefinesDepth { get; set; } = false;
 
         private IThreadManager GetThreadManager(int searchDepth)
         {
@@ -170,7 +177,7 @@ namespace MinMaxSearch
             if (SkipEvaluationForFirstNodeSingleNeighbor && startState.GetNeighbors().Count() == 1)
             {
                 var singleNeighbor = startState.GetNeighbors().First();
-                return new SearchResult(singleNeighbor.Evaluate(0, new List<IState>(), CreateSearchOptions()), startState, true, false);
+                return new SearchResult(singleNeighbor.Evaluate(0, new List<IState>(), CreateSearchOptions()), startState, true, true, false);
             }
 
             var searchContext = new SearchContext(maxDepth, 0, cancellationToken);
