@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using FakeItEasy;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MinMaxSearch.Cache;
 using MinMaxSearch.UnitTests.TestStates;
 
 namespace MinMaxSearch.UnitTests
@@ -75,7 +76,8 @@ namespace MinMaxSearch.UnitTests
                 DieEarly = true,
                 MaxScore = 10,
                 ParallelismMode = parallelismMode,
-                SkipEvaluationForFirstNodeSingleNeighbor = false
+                SkipEvaluationForFirstNodeSingleNeighbor = false,
+                CacheMode = CacheMode.NewCache
             };
             var result = engine.Search(state1, 5);
 
@@ -101,7 +103,8 @@ namespace MinMaxSearch.UnitTests
                 MaxScore = 10,
                 IsUnstableState = (s, i, l) => unstableState,
                 ParallelismMode = ParallelismMode.NonParallelism,
-                SkipEvaluationForFirstNodeSingleNeighbor = false
+                SkipEvaluationForFirstNodeSingleNeighbor = false,
+                CacheMode = CacheMode.NewCache
             };
             var result = engine.Search(state1, 6);
 
@@ -160,7 +163,8 @@ namespace MinMaxSearch.UnitTests
                 IsUnstableState = (s, d, l) => s.Evaluate(d, l) < 10,
                 MaxDegreeOfParallelism = degreeOfParallelism,
                 ParallelismMode = parallelismMode,
-                SkipEvaluationForFirstNodeSingleNeighbor = false
+                SkipEvaluationForFirstNodeSingleNeighbor = false,
+                CacheMode = CacheMode.NewCache
             };
             var result = searchEngine.Search(new IncreasingNumberState(0, Player.Max), 1);
 
@@ -213,7 +217,8 @@ namespace MinMaxSearch.UnitTests
                 MinScore = 5,
                 MaxDegreeOfParallelism = degreeOfParallelism,
                 ParallelismMode = parallelismMode,
-                SkipEvaluationForFirstNodeSingleNeighbor = false
+                SkipEvaluationForFirstNodeSingleNeighbor = false,
+                CacheMode = CacheMode.NewCache
             };
             var evaluation = searchEngine.Search(state1, 2);
 
@@ -232,7 +237,8 @@ namespace MinMaxSearch.UnitTests
                 PreventLoops = true,
                 MaxDegreeOfParallelism = degreeOfParallelism,
                 ParallelismMode = parallelismMode,
-                SkipEvaluationForFirstNodeSingleNeighbor = false
+                SkipEvaluationForFirstNodeSingleNeighbor = false,
+                CacheMode = CacheMode.NewCache
             };
             searchEngine.Search(new ThrowExceptionAtDepthThreeState(0, Player.Max), 5);
         }

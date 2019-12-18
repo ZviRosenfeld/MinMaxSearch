@@ -132,6 +132,9 @@ There are 4 ParallelismMode:
 Note that "MaxDegreeOfParallelism" will be ignored in all modes other than "TotalParallelism", and "MaxLevelOfParallelism" will be ignored in all modes other than "ParallelismByLevel".
 
 ### CacheMode
+*Very important:* You can only use that cache if your states' evaluation doesn't change depending on its location in the search tree.
+In particular, your states' evaluation can't depend on their depth in the tree of the states they've passed through. 
+
 Caching lets the engine remember stares that lead to certain win, losses or draws, so that it doesn't need to re-search trees it's already searched.
 Note that caching will only work if you implement Equals and GetHashValue in a meaningful way for your states. 
 Caching is available since version 1.5.0.

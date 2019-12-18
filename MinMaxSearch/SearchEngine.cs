@@ -70,9 +70,13 @@ namespace MinMaxSearch
 
         /// <summary>
         /// In some search domains, remembering states that lead to wins, losses or draw can improve performance.
-        /// Note that caching will only work if you implement Equals and GetHashValue in a meaningful way for your states. 
+        /// 
+        /// You can only use that cache if your states' evaluation doesn't change depending on its location in the search tree.
+        /// In particular, your states' evaluation can't depend on their depth in the tree of the states they've passed through. 
+        /// 
+        /// Note that caching will only work if you implement Equals and GetHashValue in a meaningful way for your states.
         /// </summary>
-        public CacheMode CacheMode { get; set; } = CacheMode.NewCache;
+        public CacheMode CacheMode { get; set; } = CacheMode.NoCache;
 
         /// <summary>
         /// Note that this CacheManager will only be used if CacheMode is set to ReuseCache
@@ -166,7 +170,7 @@ namespace MinMaxSearch
             if (SkipEvaluationForFirstNodeSingleNeighbor && startState.GetNeighbors().Count() == 1)
             {
                 var singleNeighbor = startState.GetNeighbors().First();
-                return new SearchResult(singleNeighbor.Evaluate(0, new List<IState>()), startState, true, false);
+                return new SearchResult(singleNeighbor.Evaluate(0, new List<IState>(), CreateSearchOptions()), startState, true, false);
             }
 
             var searchContext = new SearchContext(maxDepth, 0, cancellationToken);

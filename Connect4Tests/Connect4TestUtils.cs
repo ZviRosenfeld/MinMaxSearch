@@ -1,4 +1,5 @@
 ﻿using MinMaxSearch;
+using MinMaxSearch.Cache;
 
 namespace Connect4Tests
 {
@@ -13,7 +14,8 @@ namespace Connect4Tests
                 MinScore = BoardEvaluator.MinEvaluation,
                 MaxScore = BoardEvaluator.MaxEvaluation,
                 ParallelismMode = parallelismMode,
-                SkipEvaluationForFirstNodeSingleNeighbor = false
+                SkipEvaluationForFirstNodeSingleNeighbor = false,
+                CacheMode = CacheMode.NewCache
             };
 
         public static Player[,] GetEmptyBoard() =>

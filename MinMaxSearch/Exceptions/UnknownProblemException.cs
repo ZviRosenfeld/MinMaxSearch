@@ -17,6 +17,7 @@ namespace MinMaxSearch.Exceptions
             stringBuilder.AppendLine("Common reasons for this exception:");
             stringBuilder.AppendLine("  - Two state are considered equale even though one is Min's turn and the other is Max's turn.");
             stringBuilder.AppendLine("  - The evaluation of a state changed after it was already cahched.");
+            stringBuilder.AppendLine("  - Using a cache when a state's evaluation depends on it's depths of the states it's passed through.");
 
             return stringBuilder.ToString();
         }

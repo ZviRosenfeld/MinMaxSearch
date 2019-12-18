@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using MinMaxSearch;
+using MinMaxSearch.Cache;
 
 namespace CheckersTests
 {
@@ -44,7 +45,8 @@ namespace CheckersTests
                 MinScore = CheckersState.MIN_WIN,
                 MaxScore = CheckersState.MAX_WIN,
                 ParallelismMode = parallelismMode,
-                SkipEvaluationForFirstNodeSingleNeighbor = false
+                SkipEvaluationForFirstNodeSingleNeighbor = false,
+                CacheMode = CacheMode.NewCache
             };
 
         public static CheckerPiece[,] Move(this CheckerPiece[,] board, CheckerPiece pieceToMove, int i_from, int j_from, int i_to, int j_to, bool isJump)

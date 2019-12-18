@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using FakeItEasy;
+using MinMaxSearch.Cache;
 
 namespace MinMaxSearch.UnitTests
 {
@@ -32,7 +33,8 @@ namespace MinMaxSearch.UnitTests
                 SkipEvaluationForFirstNodeSingleNeighbor = false,
                 ParallelismMode = parallelismMode,
                 MaxLevelOfParallelism = parallelismLevel,
-                MaxDegreeOfParallelism = maxDegreeOfParallelism
+                MaxDegreeOfParallelism = maxDegreeOfParallelism,
+                CacheMode = CacheMode.NewCache
             };
     }
 }
