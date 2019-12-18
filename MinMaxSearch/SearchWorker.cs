@@ -41,9 +41,8 @@ namespace MinMaxSearch
 
             if (ShouldStop(startState, searchContext))
             {
-                var stoppedDueToPrune = searchContext.PruneAtMaxDepth && searchContext.MaxDepth == searchContext.CurrentDepth;
                 var evaluation = startState.Evaluate(searchContext.CurrentDepth, searchContext.StatesUpTillNow, searchOptions);
-                return new SearchResult(evaluation, new List<IState> {startState}, 1, 0, stoppedDueToPrune, false);
+                return new SearchResult(evaluation, new List<IState> { startState }, 1, 0, false, false);
             }
 
             SearchResult result;
@@ -86,10 +85,10 @@ namespace MinMaxSearch
                 return new SearchResult(evaluation.MaxEvaluation, startState);
 
             if (evaluation.MinEvaluation >= searchOptions.MaxScore)
-                return new SearchResult(evaluation.MinEvaluation, startState, true, false);
+                return new SearchResult(evaluation.MinEvaluation, startState);
 
             if (evaluation.MaxEvaluation <= searchOptions.MinScore)
-                return new SearchResult(evaluation.MaxEvaluation, startState, true, false);
+                return new SearchResult(evaluation.MaxEvaluation, startState);
 
             if (evaluation.MinEvaluation >= searchContext.Bata || evaluation.MaxEvaluation <= searchContext.Alpha)
                 return new SearchResult(startState.Turn == Player.Max ? evaluation.MinEvaluation : evaluation.MaxEvaluation, startState, true, false);

@@ -178,6 +178,23 @@ namespace MinMaxSearch.UnitTests.CacheTests
             Assert.AreEqual(new EvaluationRange(MIN_EVALUATION, MIN_EVALUATION), GetEvaluation(engine, searchTree.ManyChildrenState));
         }
 
+        [TestMethod]
+        public void DontCachePartualValues()
+        {
+            var searchTree = new SampleTree();
+            var extendedState = A.Fake<IDeterministicState>();
+            extendedState.SetEvaluationTo(MAX_EVALUATION);
+            searchTree.EndState1.SetNeigbor(extendedState);
+            extendedState.SetAsEndState();
+            A.CallTo(() => extendedState.Turn).Returns(Player.Min);
+
+            var engine = GetReuseCacheEngine(true, true);
+            var result = engine.Search(searchTree.ManyChildrenState, 10);
+
+            Assert.AreEqual(null, GetEvaluation(engine, searchTree.ChildState2));
+            Assert.IsTrue(result.IsSearchCompleted);
+        }
+
         private static SearchEngine GetReuseCacheEngine(bool dieEarly, bool favorShortPaths) =>
             new SearchEngine()
             {
