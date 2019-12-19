@@ -2,10 +2,34 @@ MinMaxSearch is a MinMax Search Engine that was created to be easily customized 
 
 MinMax search is a popular search technique used for finding the next-best move in zero-summed games such as tic-tac-toe, checkers or backgammon.
 
-# Download
+## Download
 You can find MinMaxSearch library on nuget.org via package name MinMaxSearch.
 
-# How to Use
+## Table of Content
+
+- [Usage](#usage)
+  - [IState](#istate)
+  - [IDeterministicState](#ideterministicstate)
+  - [IProbabilisticState](#iprobabilisticstate)
+	
+- [Tutorials](#tutorials)
+
+- [SearchEngine options](#searchengine-options)
+  - [PreventLoops](#preventloops)
+  - [FavorShortPaths](#favorshortpaths)
+  - [ParallelismMode](#parallelismmode)
+  - [CacheMode](#cachemode)
+  - [DieEarly](#dieearly)
+  - [IsUnstableState](#isunstablestate)
+  - [Pruners](#pruners)
+  - [SkipEvaluationForFirstNodeSingleNeighbor](#skipevaluationforfirstnodesingleneighbor)
+  - [StateDefinesDepth](#statedefinesdepth)
+  
+- [IterativeSearch](#iterativesearch)
+
+- [CompetitionManager](#competitionmanager)
+
+## Usage
 
 example1:
 ```csharp
@@ -32,7 +56,7 @@ SearchResult searchResult = engine.Search(startState, searchDepth, CancellationT
 
 SearchEngine has a number of Search methods that expect different parameters. Most of the parameters are straight-forward. I'd like to elaborate on the IState one.
 
-## IState
+### IState
 
 There are 2 types of states: IDeterministicState and IProbabilisticState. All your game states will need to implement one of these states.
 
@@ -109,7 +133,7 @@ You can find a tutorial on how to create a probabilistic version of tic-tac-toe 
 
 You can find a tutorial on how to create a tic-tac-toe state [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Tic-Tac-Toe-Tutorial), and one on a probabilistic version of tic-tac-toe [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Probabilistic-Tic-Tac-Toe-Tutorial).
 
-## SearchEngine options:
+## SearchEngine options
 SearchEngine can be configured with the following options:
 
 ### PreventLoops
