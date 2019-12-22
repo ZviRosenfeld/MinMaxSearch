@@ -5,7 +5,7 @@ using MinMaxSearch;
 namespace CheckersTests
 {
     /// <summary>
-    /// Since NextMovesGenerator is a rather complex class, I'm writting test to check that it works alright.
+    /// Since NextMovesGenerator is a rather complex class, I'm writing test to check that it works alright.
     /// </summary>
     [TestClass]
     public class NextMovesGeneratorTests
@@ -21,7 +21,7 @@ namespace CheckersTests
             expectedBoard[1, 1] = CheckerPiece.MinChecker;
             Assert.IsTrue(Utils.AreEquale(expectedBoard, nextMove[0].GetBoard()), "Got board" + Environment.NewLine + nextMove[0]);
         }
-
+        
         [TestMethod]
         public void MaxMoveTest()
         {
@@ -33,6 +33,26 @@ namespace CheckersTests
             expectedBoard[1, 1] = CheckerPiece.MaxChecker;
             Assert.IsTrue(Utils.AreEquale(expectedBoard, nextMove[0].GetBoard()), "Got board" + Environment.NewLine + nextMove[0]);
         }
+
+        [TestMethod]
+        public void MinCheckerDontMoveBack()
+        {
+            var board = Utils.GetEmptyBoard(2);
+            board[0, 0] = CheckerPiece.MinChecker;
+            var nextMove = new NextMovesGenerator(board, Player.Min).GenerateNextMoves();
+
+            Assert.AreEqual(0, nextMove.Count);
+        }
+        [TestMethod]
+        public void MaxCheckerDontMoveBack()
+        {
+            var board = Utils.GetEmptyBoard(2);
+            board[1, 1] = CheckerPiece.MaxChecker;
+            var nextMove = new NextMovesGenerator(board, Player.Max).GenerateNextMoves();
+
+            Assert.AreEqual(0, nextMove.Count);
+        }
+
 
         [TestMethod]
         public void MinMoveGetsKingTest()
@@ -82,6 +102,28 @@ namespace CheckersTests
             var expectedBoard = Utils.GetEmptyBoard(4);
             expectedBoard[2, 2] = CheckerPiece.MaxChecker;
             Assert.IsTrue(Utils.AreEquale(expectedBoard, nextMove[0].GetBoard()), "Got board" + Environment.NewLine + nextMove[0]);
+        }
+
+        [TestMethod]
+        public void MinCantJumpBackTest()
+        {
+            var board = Utils.GetEmptyBoard(3);
+            board[0, 0] = CheckerPiece.MinChecker;
+            board[1, 1] = CheckerPiece.MaxKing;
+            var nextMove = new NextMovesGenerator(board, Player.Min).GenerateNextMoves();
+
+            Assert.AreEqual(0, nextMove.Count);
+        }
+
+        [TestMethod]
+        public void MaxCantJumpBackTest()
+        {
+            var board = Utils.GetEmptyBoard(3);
+            board[2, 2] = CheckerPiece.MaxChecker;
+            board[1, 1] = CheckerPiece.MinChecker;
+            var nextMove = new NextMovesGenerator(board, Player.Max).GenerateNextMoves();
+
+            Assert.AreEqual(0, nextMove.Count);
         }
 
         [TestMethod]

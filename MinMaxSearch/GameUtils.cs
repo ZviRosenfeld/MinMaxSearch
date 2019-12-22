@@ -28,11 +28,11 @@ namespace MinMaxSearch
             return null;
         }
 
-        private static double GetRandomNumberUpTo(double end)
+        private static double GetRandomNumberUpTo(double max)
         {
             var random = new Random();
             var num = random.NextDouble();
-            return num * end;
+            return num * max;
         }
     }
 }
