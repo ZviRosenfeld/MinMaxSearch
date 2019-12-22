@@ -143,7 +143,7 @@ namespace TicTacToeTests
             Assert.AreEqual(0, evaluation.Evaluation);
             var lastMove = (IDeterministicState)evaluation.StateSequence.Last();
             Assert.AreEqual(0, lastMove.Evaluate(0, new List<IState>()), "Should have found a wining state");
-            Assert.IsTrue(evaluation.FullTreeSearchedOrPrunned);
+            Assert.IsTrue(evaluation.FullTreeSearchedOrPruned);
             Assert.IsFalse(evaluation.AllChildrenAreDeadEnds);
 
             if (degreeOfParallelism == 1)

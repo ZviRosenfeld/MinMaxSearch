@@ -66,9 +66,9 @@ namespace MinMaxSearch
         {
             if (result.AllChildrenAreDeadEnds)
                 cache.AddExactEvaluation(state, result.Evaluation);
-            else if (searchOptions.StateDefinesDepth && searchOptions.IsUnstableState == null && searchOptions.CacheMode != CacheMode.ReuseCache && !result.ChildrenPrunned)
+            else if (searchOptions.StateDefinesDepth && searchOptions.IsUnstableState == null && searchOptions.CacheMode != CacheMode.ReuseCache && !result.ChildrenPruned)
                 cache.AddExactEvaluation(state, result.Evaluation);
-            else if (result.FullTreeSearchedOrPrunned)
+            else if (result.FullTreeSearchedOrPruned)
             {
                 if (state.Turn == Player.Max)
                     cache.AddMinEvaluation(state, result.Evaluation);

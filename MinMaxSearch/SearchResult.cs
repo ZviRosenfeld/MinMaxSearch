@@ -9,27 +9,27 @@ namespace MinMaxSearch
     public class SearchResult
     {
         public SearchResult(double evaluation, List<IState> stateSequence, int leaves, int internalNodes,
-            bool fullTreeSearchedOrPrunned, bool allChildrenAreDeadEnds, bool childrenPrunned)
+            bool fullTreeSearchedOrPruned, bool allChildrenAreDeadEnds, bool childrenPruned)
         {
-            if (allChildrenAreDeadEnds && !fullTreeSearchedOrPrunned)
-                throw new InternalException($"Code 1002 ({nameof(allChildrenAreDeadEnds)} but not {nameof(fullTreeSearchedOrPrunned)})");
+            if (allChildrenAreDeadEnds && !fullTreeSearchedOrPruned)
+                throw new InternalException($"Code 1002 ({nameof(allChildrenAreDeadEnds)} but not {nameof(fullTreeSearchedOrPruned)})");
             
             Evaluation = evaluation;
             StateSequence = stateSequence;
             Leaves = leaves;
             InternalNodes = internalNodes;
-            FullTreeSearchedOrPrunned = fullTreeSearchedOrPrunned;
+            FullTreeSearchedOrPruned = fullTreeSearchedOrPruned;
             AllChildrenAreDeadEnds = allChildrenAreDeadEnds;
-            ChildrenPrunned = childrenPrunned;
+            ChildrenPruned = childrenPruned;
             IsSearchCompleted = true;
             SearchDepth = -1;
             SearchTime = TimeSpan.Zero;
         }
 
-        public SearchResult(double evaluation, IState endState, bool fullTreeSearchedOrPrunned = true, bool childrenPrunned = false, bool allChildrenAreDeadEnds = true)
+        public SearchResult(double evaluation, IState endState, bool fullTreeSearchedOrPruned = true, bool childrenPruned = false, bool allChildrenAreDeadEnds = true)
         {
-            if (allChildrenAreDeadEnds && !fullTreeSearchedOrPrunned)
-                throw new InternalException($"Code 1003 ({nameof(allChildrenAreDeadEnds)} but not {nameof(fullTreeSearchedOrPrunned)})");
+            if (allChildrenAreDeadEnds && !fullTreeSearchedOrPruned)
+                throw new InternalException($"Code 1003 ({nameof(allChildrenAreDeadEnds)} but not {nameof(fullTreeSearchedOrPruned)})");
             
             Evaluation = evaluation;
             IsSearchCompleted = true;
@@ -37,9 +37,9 @@ namespace MinMaxSearch
             StateSequence = new List<IState> {endState};
             Leaves = 1;
             InternalNodes = 0;
-            FullTreeSearchedOrPrunned = fullTreeSearchedOrPrunned;
+            FullTreeSearchedOrPruned = fullTreeSearchedOrPruned;
             AllChildrenAreDeadEnds = allChildrenAreDeadEnds;
-            ChildrenPrunned = childrenPrunned;
+            ChildrenPruned = childrenPruned;
             SearchTime = TimeSpan.Zero;
         }
 
@@ -49,7 +49,7 @@ namespace MinMaxSearch
             StateSequence = other.StateSequence.ToList();
             Leaves = other.Leaves;
             InternalNodes = other.InternalNodes;
-            FullTreeSearchedOrPrunned = other.FullTreeSearchedOrPrunned;
+            FullTreeSearchedOrPruned = other.FullTreeSearchedOrPruned;
             AllChildrenAreDeadEnds = other.AllChildrenAreDeadEnds;
             SearchTime = searchTime;
             IsSearchCompleted = isSearchCompleted;
@@ -77,19 +77,19 @@ namespace MinMaxSearch
         public int InternalNodes { get; }
 
         /// <summary>
-        /// Returns true if the full tree was searched. This will return true even if some of the branches were prunned.
+        /// Returns true if the full tree was searched. This will return true even if some of the branches were pruned.
         /// </summary>
-        public bool FullTreeSearchedOrPrunned { get; }
+        public bool FullTreeSearchedOrPruned { get; }
 
         /// <summary>
-        /// Returns true only if all paths lead to daed ends. If part of the tree was prunned, this will return false.
+        /// Returns true only if all paths lead to dead ends. If part of the tree was pruned, this will return false.
         /// </summary>
         public bool AllChildrenAreDeadEnds { get; }
 
         /// <summary>
-        /// Returns true if some of the children were prunned away.
+        /// Returns true if some of the children were pruned away.
         /// </summary>
-        public bool ChildrenPrunned { get; }
+        public bool ChildrenPruned { get; }
 
         public TimeSpan SearchTime { get; }
 
@@ -110,7 +110,7 @@ namespace MinMaxSearch
             stringBuilder.AppendLine(nameof(Leaves) + " == " + Leaves);
             stringBuilder.AppendLine(nameof(InternalNodes) + " == " + InternalNodes);
             stringBuilder.AppendLine(nameof(SearchDepth) + " == " + SearchDepth);
-            stringBuilder.AppendLine(nameof(FullTreeSearchedOrPrunned) + " == " + FullTreeSearchedOrPrunned);
+            stringBuilder.AppendLine(nameof(FullTreeSearchedOrPruned) + " == " + FullTreeSearchedOrPruned);
             stringBuilder.AppendLine(nameof(AllChildrenAreDeadEnds) + " == " + AllChildrenAreDeadEnds);
             stringBuilder.AppendLine(nameof(NextMove) + ":");
             stringBuilder.AppendLine(NextMove.ToString());

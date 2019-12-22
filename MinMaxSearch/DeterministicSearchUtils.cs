@@ -29,7 +29,7 @@ namespace MinMaxSearch
                 return new SearchResult(evaluation, startState);
             }
 
-            var prunned = false;
+            var pruned = false;
             var player = startState.Turn;
             var results = new List<Task<SearchResult>>();
             var cancellationSource = CancellationTokenSource.CreateLinkedTokenSource(searchContext.CancellationToken);
@@ -41,13 +41,13 @@ namespace MinMaxSearch
 
                 if (ProcessResultAndReturnWhetherWeShouldBreak(taskResult, searchContext, storedStates, state, player))
                 {
-                    prunned = true;
+                    pruned = true;
                     cancellationSource.Cancel();
                     break;
                 }
             }
             
-            return Reduce(results, player, startState, prunned);
+            return Reduce(results, player, startState, pruned);
         }
 
         private bool ProcessResultAndReturnWhetherWeShouldBreak(Task<SearchResult> taskResult, SearchContext searchContext, IDictionary<IState, double> storedStates, IState state, Player player)
@@ -89,20 +89,20 @@ namespace MinMaxSearch
             return taskResult;
         }
 
-        private SearchResult Reduce(List<Task<SearchResult>> results, Player player, IState startState, bool prunned)
+        private SearchResult Reduce(List<Task<SearchResult>> results, Player player, IState startState, bool pruned)
         {
             var bestEvaluation = player == Player.Max ? double.MinValue : double.MaxValue;
             SearchResult bestResult = null;
             int leaves = 0, internalNodes = 0;
-            bool allChildrenAreDeadEnds = !prunned, fullTreeSearched = true, childrenPrunned = prunned;
+            bool allChildrenAreDeadEnds = !pruned, fullTreeSearched = true, childrenPruned = pruned;
             foreach (var result in results)
             {
                 var actualResult = result.Result;
                 leaves += actualResult.Leaves;
                 internalNodes += actualResult.InternalNodes;
-                childrenPrunned = childrenPrunned || actualResult.ChildrenPrunned;
+                childrenPruned = childrenPruned || actualResult.ChildrenPruned;
                 allChildrenAreDeadEnds = allChildrenAreDeadEnds && actualResult.AllChildrenAreDeadEnds;
-                fullTreeSearched = fullTreeSearched && actualResult.FullTreeSearchedOrPrunned;
+                fullTreeSearched = fullTreeSearched && actualResult.FullTreeSearchedOrPruned;
                 if (IsBetterThen(actualResult.Evaluation, bestEvaluation, actualResult.StateSequence.Count,
                     bestResult?.StateSequence?.Count, player))
                 {
@@ -112,7 +112,7 @@ namespace MinMaxSearch
             }
 
             var childrenContainWiningPosition = bestEvaluation >= searchOptions.MaxScore || bestEvaluation <= searchOptions.MinScore;
-            return bestResult.CloneAndAddStateToTop(startState, leaves, internalNodes + 1, fullTreeSearched || childrenContainWiningPosition, allChildrenAreDeadEnds || childrenContainWiningPosition, childrenPrunned);
+            return bestResult.CloneAndAddStateToTop(startState, leaves, internalNodes + 1, fullTreeSearched || childrenContainWiningPosition, allChildrenAreDeadEnds || childrenContainWiningPosition, childrenPruned);
         }
         
         private bool AlphaBataShouldPrune(double alpha, double bata, double evaluation, Player player)

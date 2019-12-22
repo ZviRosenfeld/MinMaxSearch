@@ -189,7 +189,7 @@ namespace Connect4Tests
             var evaluation = engine.Search(startState, 7);
 
             Assert.IsFalse(BoardEvaluator.IsWin(((Connect4State)evaluation.StateSequence.Last()).Board, Player.Max));
-            Assert.IsFalse(evaluation.FullTreeSearchedOrPrunned);
+            Assert.IsFalse(evaluation.FullTreeSearchedOrPruned);
             Assert.IsFalse(evaluation.AllChildrenAreDeadEnds);
 
             if (degreeOfParallelism == 1)

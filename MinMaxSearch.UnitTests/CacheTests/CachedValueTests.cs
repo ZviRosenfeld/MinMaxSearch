@@ -21,7 +21,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
         [DataRow(true, false)]
         [DataRow(false, true)]
         [DataRow(false, false)]
-        public void AlphaBetaPrunnedTree_CachRemebersRightValues(bool dieEarly, bool favorShortPaths)
+        public void AlphaBetaPrunedTree_CachRemebersRightValues(bool dieEarly, bool favorShortPaths)
         {
             var searchTree = new Tree1();
 
@@ -230,7 +230,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
         [DataRow(true, false)]
         [DataRow(false, true)]
         [DataRow(false, false)]
-        public void RepeatedStateInStateDefinesDepthGame_StatesPrunnedByAlphaBeta_CacheDonstRepeatedValue(bool dieEarly, bool favorShortPaths)
+        public void RepeatedStateInStateDefinesDepthGame_StatesPrunedByAlphaBeta_CacheDonstRepeatedValue(bool dieEarly, bool favorShortPaths)
         {
             var searchTree = new RepeatStateTree();
             searchTree.EndState1.SetEvaluationTo(5);
@@ -256,7 +256,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
         [DataRow(true, false)]
         [DataRow(false, true)]
         [DataRow(false, false)]
-        public void RepeatedStateInStateDefinesDepthGame_StatesPrunnedByPrunner_CacheDonstRepeatedValue(bool dieEarly, bool favorShortPaths)
+        public void RepeatedStateInStateDefinesDepthGame_StatesPrunedByPrunner_CacheDonstRepeatedValue(bool dieEarly, bool favorShortPaths)
         {
             var searchTree = new RepeatStateTree();
             searchTree.ChildState4.SetEvaluationTo(3, 4);

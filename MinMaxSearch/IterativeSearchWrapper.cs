@@ -99,7 +99,7 @@ namespace MinMaxSearch
 
                 bestResultSoFar = result;
 
-                if (result.FullTreeSearchedOrPrunned)
+                if (result.FullTreeSearchedOrPruned)
                     break; // No point searching any deeper
             }
             stopewatch.Stop();
