@@ -19,7 +19,7 @@ namespace CheckersTests
 
         /// <summary>
         /// This is a very simple evaluation method. 
-        /// It probablly won't work well against a human player, but it's very good for tests.
+        /// It probably won't work well against a human player, but it's very good for tests.
         /// </summary>
         public double Evaluate(int depth, List<IState> passedThroughStates)
         {
@@ -78,7 +78,7 @@ namespace CheckersTests
             for (int i = 0; i < Board.GetLength(0); i++)
             {
                 for (int j = 0; j < Board.GetLength(1); j++)
-                    builder.Append(Utils.ToString(Board[i, j]) + " ");
+                    builder.Append(ChecekrsUtils.ToString(Board[i, j]) + " ");
                 builder.Append("#" + Environment.NewLine);
             }
 
