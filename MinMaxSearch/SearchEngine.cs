@@ -91,7 +91,7 @@ namespace MinMaxSearch
 
         /// <summary>
         /// Set this to true it is possible to infer a state's depth from the state alone.
-        /// This is trues for games like tic-tac-toe and connect 4, where the depth of a state is the number of tokens on the board.
+        /// This is trues for games like tic-tac-toe and connect4, where the depth of a state is the number of tokens on the board.
         /// The engine will use this knowledge to optimize the search
         /// </summary>
         public bool StateDefinesDepth { get; set; } = false;

@@ -11,6 +11,9 @@ namespace MinMaxSearch
             bool preventLoops, bool favorShortPaths, bool dieEarly, double maxScore,
             double minScore, Func<IState, int, List<IState>, double> alternateEvaluation, bool stateDefinesDepth, CacheMode cacheMode)
         {
+            if (minScore > maxScore)
+                throw new ArgumentException($"{nameof(minScore)} can't be smaller than {nameof(maxScore)}; {nameof(minScore)} == {minScore}; {nameof(maxScore)} == {maxScore}");
+
             Pruners = pruners;
             IsUnstableState = isUnstableState;
             FavorShortPaths = favorShortPaths;

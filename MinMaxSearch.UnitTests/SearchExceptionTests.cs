@@ -73,5 +73,16 @@ namespace MinMaxSearch.UnitTests
             var engine = TestUtils.GetBasicSearchEngine();
             engine.Search(new IncreasingNumberState(1, Player.Max), depth);
         }
+
+        [TestMethod]
+        [DataRow(10, 5)]
+        [ExpectedException(typeof(ArgumentException))]
+        public void Search_MinScoreGreaterThanMaxScore(int minScore, int maxScore)
+        {
+            var engine = TestUtils.GetBasicSearchEngine();
+            engine.MinScore = minScore;
+            engine.MaxScore = maxScore;
+            engine.Search(new IncreasingNumberState(1, Player.Max), 1);
+        }
     }
 }

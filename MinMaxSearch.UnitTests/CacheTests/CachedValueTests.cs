@@ -26,7 +26,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
             var searchTree = new Tree1();
 
             searchTree.EndState1.SetEvaluationTo(5);
-            searchTree.EndState2.SetEvaluationTo(2); // This should cuase a pruning
+            searchTree.EndState2.SetEvaluationTo(2); // This should cause a pruning
 
             var engine = GetReuseCacheEngine(dieEarly, favorShortPaths);
             engine.Search(searchTree.ManyChildrenState, 10);
@@ -199,7 +199,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
             };
             var result = engine.Search(searchTree.StartState, 2);
 
-            Assert.AreEqual(3, result.Evaluation); // Check that we read evaluation for Child1 from the cache the second time
+            Assert.AreEqual(3, result.Evaluation); // Check that we read the evaluation for Child1 from the cache the second time
         }
         
         [TestMethod]
@@ -222,7 +222,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
             
             var result = engine.Search(searchTree.StartState, 2);
 
-            Assert.AreEqual(4, result.Evaluation); // Check that we didn't read evaluation for Child1 from the cache the second time
+            Assert.AreEqual(4, result.Evaluation); // Check that we didn't read the evaluation for Child1 from the cache the second time
         }
 
         [TestMethod]
@@ -248,7 +248,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
 
             var result = engine.Search(searchTree.StartState, 4);
 
-            Assert.AreEqual(6, result.Evaluation); // Check that we didn't read evaluation for endState2 from the cache the second time
+            Assert.AreEqual(6, result.Evaluation); // Check that we didn't read the evaluation for endState2 from the cache the second time
         }
 
         [TestMethod]
@@ -275,7 +275,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
 
             var result = engine.Search(searchTree.StartState, 3);
 
-            Assert.AreEqual(4, result.Evaluation); // Check that we didn't read evaluation for childState5 from the cache the second time
+            Assert.AreEqual(4, result.Evaluation); // Check that we didn't read the evaluation for childState5 from the cache the second time
         }
 
         [TestMethod]
