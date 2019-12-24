@@ -33,10 +33,8 @@ namespace MinMaxSearch.UnitTests
             A.CallTo(() => evaluation2State.Turn).Returns(Player.Max);
             A.CallTo(() => evaluationNagitive2State.Turn).Returns(Player.Max);
 
-            A.CallTo(() => evaluation2State.GetNeighbors())
-                .Returns(new List<Tuple<double, List<IState>>>());
-            A.CallTo(() => evaluationNagitive2State.GetNeighbors())
-                .Returns(new List<Tuple<double, List<IState>>>());
+            evaluation2State.SetAsEndState();
+            evaluationNagitive2State.SetAsEndState();
             startState.SetNeigbors(new List<IState> {probabilisticState1, probabilisticState2});  
         }
 
@@ -47,16 +45,16 @@ namespace MinMaxSearch.UnitTests
         [TestMethod]
         public void Search_TowProbabilisticStates_ReturnBetterState(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
-            A.CallTo(() => probabilisticState1.GetNeighbors()).Returns(new List<Tuple<double, List<IState>>>()
+            A.CallTo(() => probabilisticState1.GetNeighbors()).Returns(new List<Tuple<double, IEnumerable<IState>>>()
             {
-                new Tuple<double, List<IState>>(0.4, new List<IState> {evaluation2State}),
-                new Tuple<double, List<IState>>(0.6, new List<IState> {evaluationNagitive2State}),
+                new Tuple<double, IEnumerable<IState>>(0.4, new List<IState> {evaluation2State}),
+                new Tuple<double, IEnumerable<IState>>(0.6, new List<IState> {evaluationNagitive2State}),
             });
-            A.CallTo(() => probabilisticState2.GetNeighbors()).Returns(new List<Tuple<double, List<IState>>>()
+            A.CallTo(() => probabilisticState2.GetNeighbors()).Returns(new List<Tuple<double, IEnumerable<IState>>>()
             {
-                new Tuple<double, List<IState>>(0.1, new List<IState> {evaluation2State}),
-                new Tuple<double, List<IState>>(0.4, new List<IState> {evaluationNagitive2State}),
-                new Tuple<double, List<IState>>(0.5, new List<IState> {evaluation2State}),
+                new Tuple<double, IEnumerable<IState>>(0.1, new List<IState> {evaluation2State}),
+                new Tuple<double, IEnumerable<IState>>(0.4, new List<IState> {evaluationNagitive2State}),
+                new Tuple<double, IEnumerable<IState>>(0.5, new List<IState> {evaluation2State}),
             });
 
             var searchEngine = TestUtils.GetBasicSearchEngine(parallelismMode, degreeOfParallelism);
@@ -70,10 +68,10 @@ namespace MinMaxSearch.UnitTests
         public void Search_StateWithNoRealNeighbors_EvaluatesState()
         {
             A.CallTo(() => startState.GetNeighbors()).Returns(new List<IState> {probabilisticState1});
-            A.CallTo(() => probabilisticState1.GetNeighbors()).Returns(new List<Tuple<double, List<IState>>>()
+            A.CallTo(() => probabilisticState1.GetNeighbors()).Returns(new List<Tuple<double, IEnumerable<IState>>>()
             {
-                new Tuple<double, List<IState>>(0.5, new List<IState>()),
-                new Tuple<double, List<IState>>(0.5, new List<IState>()),
+                new Tuple<double, IEnumerable<IState>>(0.5, new List<IState>()),
+                new Tuple<double, IEnumerable<IState>>(0.5, new List<IState>()),
             });
             probabilisticState1.SetEvaluationTo(2);
 
@@ -100,9 +98,9 @@ namespace MinMaxSearch.UnitTests
                 });
 
             startState.SetNeigbor(probabilisticState1);
-            A.CallTo(() => probabilisticState1.GetNeighbors()).Returns(new List<Tuple<double, List<IState>>>()
+            A.CallTo(() => probabilisticState1.GetNeighbors()).Returns(new List<Tuple<double, IEnumerable<IState>>>()
             {
-                new Tuple<double, List<IState>>(1, new List<IState> {evaluation2State, evaluationNagitive2State})
+                new Tuple<double, IEnumerable<IState>>(1, new List<IState> {evaluation2State, evaluationNagitive2State})
             });
 
             var searchEngine = TestUtils.GetBasicSearchEngine(parallelismMode, degreeOfParallelism);

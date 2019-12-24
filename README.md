@@ -105,10 +105,10 @@ If you're implementing a game like backgammon, the first state should "know" wha
 public interface IDeterministicState : IState
 {
     /// <summary>
-    /// returns a tuple containing a probability, and a list of the s neighbors for that probability
+    /// returns a tuple containing a probability, and a list of neighbors for that probability
     /// Note that a win state shouldn't return any neighbors.
     /// </summary>
-    IEnumerable<Tuple<double, List<IState>>> GetNeighbors();
+    IEnumerable<Tuple<double, IEnumerable<IState>>> GetNeighbors();
 	
     /// <summary>
     /// returns the state's evaluation (how good it is).
@@ -228,64 +228,50 @@ Want to test the effect of different evaluation-strategies or search options? Co
 CompetitionManager can play a complete game in which the players can be using a different engines/search-depths/evaluation-strategies.
 CompetitionManager will return statistics on the game, including which player won, and how long each player took doing his searching.
 
+Exsample1: Comparing different search depths
 ```CSharp
-namespace MinMaxSearch.Benchmarking
-{
-    public static class CompetitionManager
-    {
-        /// <summary>
-        /// With this method you can simulate a complete game and compare different evaluation-strategies.
-        /// </summary>
-        /// <param name="engine"> The engine to use</param>
-        /// <param name="startState"> The starting sate</param>
-        /// <param name="searchDepth"> How deep should we search</param>
-        /// <param name="maxPlayDepth"> After how many moves should we terminate the game if no one won</param>
-        /// <param name="maxAlternateEvaluation"> Will be used to evaluate the board on max's turn in stead of the state's regaler Evaluate method (if null, will use the default state's evaluation method)</param>
-        /// <param name="minAlternateEvaluation"> Will be used to evaluate the board on min's turn in stead of the state's regaler Evaluate method (if null, will use the default state's evaluation method)</param>
-        public static CompetitionResult Compete(this SearchEngine engine, IDeterministicState startState,
-            int searchDepth, Func<IState, int, List<IState>, double> maxAlternateEvaluation = null,
-            Func<IState, int, List<IState>, double> minAlternateEvaluation = null, int maxPlayDepth = int.MaxValue,
-            CancellationToken? cancellationToken = null)
-        {
-            ...
-        }
+IDeterministicState startState = new TicTacToeState();
+int minSearchDepth = 2;
+int maxSearchDepth = 5;
+ISearchEngine engine = new SearchEngine();
 
-        /// <summary>
-        /// With this method you can simulate a complete game and compare different search-depth or evaluation-strategies.
-        /// </summary>
-        /// <param name="engine"> The engine to use</param>
-        /// <param name="startState"> The starting sate</param>
-        /// <param name="playerMaxSearchDepth"> How deep should max search</param>
-        /// <param name="playerMinSearchDepth"> How deep should min search</param>
-        /// <param name="maxPlayDepth"> After how many moves should we terminate the game if no one won</param>
-        /// <param name="maxAlternateEvaluation"> Will be used to evaluate the board on max's turn in stead of the state's regaler Evaluate method (if null, will use the default state's evaluation method)</param>
-        /// <param name="minAlternateEvaluation"> Will be used to evaluate the board on min's turn in stead of the state's regaler Evaluate method (if null, will use the default state's evaluation method)</param>
-        public static CompetitionResult Compete(this SearchEngine engine, IDeterministicState startState,
-            int playerMaxSearchDepth, int playerMinSearchDepth, Func<IState, int, List<IState>, double> maxAlternateEvaluation = null,
-            Func<IState, int, List<IState>, double> minAlternateEvaluation = null, int maxPlayDepth = int.MaxValue,
-            CancellationToken? cancellationToken = null)
-        {
-            ...
-        }
+CompetitionResult competitionResult = engine.Compete(startState, maxSearchDepth, minSearchDepth);
 
-        /// <summary>
-        /// With this method you can simulate a complete game and compare different engines, search-depths or evaluation-strategies.
-        /// </summary>
-        /// <param name="maxEngine"> An engine to use for max</param>
-        /// <param name="minEngine"> An engine to use for min</param>
-        /// <param name="startState"> The starting sate</param>
-        /// <param name="playerMaxSearchDepth"> How deep should max search</param>
-        /// <param name="playerMinSearchDepth"> How deep should min search</param>
-        /// <param name="maxPlayDepth"> After how many moves should we terminate the game if no one won</param>
-        /// <param name="maxAlternateEvaluation"> Will be used to evaluate the board on max's turn in stead of the state's regaler Evaluate method (if null, will use the default state's evaluation method)</param>
-        /// <param name="minAlternateEvaluation"> Will be used to evaluate the board on min's turn in stead of the state's regaler Evaluate method (if null, will use the default state's evaluation method)</param>
-        public static CompetitionResult Compete(SearchEngine maxEngine, SearchEngine minEngine,
-            IDeterministicState startState, int playerMaxSearchDepth, int playerMinSearchDepth, 
-            int maxPlayDepth = int.MaxValue, Func<IState, int, List<IState>, double> maxAlternateEvaluation = null,
-            Func<IState, int, List<IState>, double> minAlternateEvaluation = null, CancellationToken? cancellationToken = null)
-        {
-            ...
-        }
-    }
-}
+// Print some of the results
+Console.WriteLine("Max Search Time " + competitionResult.MaxTotalTime);
+Console.WriteLine("Min Search Time " + competitionResult.MinTotalTime);
+Console.WriteLine("Final Score " + competitionResult.FinalState.Evaluate(0, new List<IState>()));
+```
+
+Exsample2: In this example we'll use a different evaluation method for min
+```CSharp
+IDeterministicState startState = new TicTacToeState();
+int searchDepth = 6;
+ISearchEngine engine = new SearchEngine();
+
+CompetitionResult competitionResult = engine.Compete(startState, searchDepth, minAlternateEvaluation: (s, d, l) => {
+                // Some alternate evaluation goes here - you probably don't really want to return 0
+                return 0;
+            });
+			
+// Print some of the results
+Console.WriteLine("Max Search Time " + competitionResult.MaxTotalTime);
+Console.WriteLine("Min Search Time " + competitionResult.MinTotalTime);
+Console.WriteLine("Final Score " + competitionResult.FinalState.Evaluate(0, new List<IState>()));
+```
+
+Exsample3: Comparing different engines
+```CSharp
+IDeterministicState startState = new TicTacToeState();
+int searchDepth = 5;
+int playDepth = 100;
+ISearchEngine engine1 = new SearchEngine();
+ISearchEngine engine2 = new SearchEngine();
+
+CompetitionResult competitionResult = CompetitionManager.Compete(engine1, engine2, startState, searchDepth, searchDepth, playDepth);
+
+// Print some of the results
+Console.WriteLine("Max Search Time " + competitionResult.MaxTotalTime);
+Console.WriteLine("Min Search Time " + competitionResult.MinTotalTime);
+Console.WriteLine("Final Score " + competitionResult.FinalState.Evaluate(0, new List<IState>()));
 ```

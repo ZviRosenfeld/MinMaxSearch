@@ -13,7 +13,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
         [TestMethod]
         public void ExactValueInCach_UseValue()
         {
-            var searchTree = new Tree1();
+            var searchTree = new DeterministicTree();
             var engine = new SearchEngine()
             {
                 CacheMode = CacheMode.ReuseCache,
@@ -26,7 +26,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
         [TestMethod]
         public void CachedMaxSmallerThanAlpha()
         {
-            var searchTree = new Tree1();
+            var searchTree = new DeterministicTree();
             searchTree.EndState1.SetEvaluationTo(-2);
             var engine = new SearchEngine()
             {
@@ -35,13 +35,13 @@ namespace MinMaxSearch.UnitTests.CacheTests
                 SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             engine.CacheManager.AddMaxEvaluation(searchTree.ChildState2, -4);
-            Assert.AreEqual(-2, engine.Search(searchTree.ManyChildrenState, 5).Evaluation);
+            Assert.AreEqual(-2, engine.Search(searchTree.RootState, 5).Evaluation);
         }
 
         [TestMethod]
         public void CachedMinGreatrThanBeta()
         {
-            var searchTree = new Tree1();
+            var searchTree = new DeterministicTree();
             searchTree.EndState2.SetEvaluationTo(2);
             searchTree.EndState2.SetEvaluationTo(4);
             var engine = new SearchEngine()
@@ -51,7 +51,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
                 SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             engine.CacheManager.AddMinEvaluation(searchTree.EndState3, 8);
-            Assert.AreEqual(4, engine.Search(searchTree.ManyChildrenState, 5).Evaluation);
+            Assert.AreEqual(4, engine.Search(searchTree.RootState, 5).Evaluation);
         }
 
         [TestMethod]
@@ -60,7 +60,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
         public void MinCachedValueEqualeMaxScore_UseValue(Player firstPlayer)
         {
             var maxEvaluation = 10;
-            var searchTree = new Tree1(firstPlayer);
+            var searchTree = new DeterministicTree(firstPlayer);
             var engine = new SearchEngine()
             {
                 CacheMode = CacheMode.ReuseCache,
@@ -77,7 +77,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
         public void MaxCachedValueEqualeMinScore_UseValue(Player firstPlayer)
         {
             var minEvaluation = -10;
-            var searchTree = new Tree1(firstPlayer);
+            var searchTree = new DeterministicTree(firstPlayer);
             var engine = new SearchEngine()
             {
                 CacheMode = CacheMode.ReuseCache,
