@@ -14,33 +14,6 @@ namespace MinMaxSearch.UnitTests
     [TestClass]
     public class SearchEngineTests
     {
-        private readonly IDeterministicState state1 = A.Fake<IDeterministicState>();
-        private readonly IDeterministicState state2 = A.Fake<IDeterministicState>();
-        private readonly IDeterministicState state3 = A.Fake<IDeterministicState>();
-        private readonly IDeterministicState endState1 = A.Fake<IDeterministicState>();
-        private readonly IDeterministicState endState2 = A.Fake<IDeterministicState>();
-        private readonly IDeterministicState endState3 = A.Fake<IDeterministicState>();
-
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            A.CallTo(() => state1.ToString()).Returns("State1");
-            A.CallTo(() => state2.ToString()).Returns("State2");
-            A.CallTo(() => state3.ToString()).Returns("State3");
-            A.CallTo(() => endState1.ToString()).Returns("EndState1");
-            A.CallTo(() => endState2.ToString()).Returns("EndState2");
-            A.CallTo(() => endState3.ToString()).Returns("EndState3");
-            endState1.SetAsEndState();
-            endState2.SetAsEndState();
-            endState3.SetAsEndState();
-            A.CallTo(() => state1.Turn).Returns(Player.Max);
-            A.CallTo(() => state2.Turn).Returns(Player.Max);
-            A.CallTo(() => state3.Turn).Returns(Player.Max);
-            A.CallTo(() => endState1.Turn).Returns(Player.Max);
-            A.CallTo(() => endState2.Turn).Returns(Player.Max);
-            A.CallTo(() => endState3.Turn).Returns(Player.Max);
-        }
-
         [DataRow(1, ParallelismMode.TotalParallelism)]
         [DataRow(2, ParallelismMode.TotalParallelism)]
         [DataRow(8, ParallelismMode.TotalParallelism)]
@@ -48,59 +21,58 @@ namespace MinMaxSearch.UnitTests
         [TestMethod]
         public void Search_IsSearchCompletedTrue(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
-            state1.SetNeigbor(endState1);
+            var tree = new UnaryDeterministicTree();
 
             var engine = TestUtils.GetBasicSearchEngine(parallelismMode, degreeOfParallelism);
-            var result = engine.Search(state1, 5);
+            var result = engine.Search(tree.State3, 5);
 
             Assert.IsTrue(result.IsSearchCompleted, "Search should have been completed");
         }
 
-        [DataRow(1, ParallelismMode.TotalParallelism)]
-        [DataRow(2, ParallelismMode.TotalParallelism)]
-        [DataRow(8, ParallelismMode.TotalParallelism)]
-        [DataRow(1, ParallelismMode.FirstLevelOnly)]
+        [DataRow(1, ParallelismMode.NonParallelism, true)]
+        [DataRow(1, ParallelismMode.NonParallelism, false)]
+        [DataRow(2, ParallelismMode.TotalParallelism, false)]
+        [DataRow(8, ParallelismMode.TotalParallelism, true)]
+        [DataRow(1, ParallelismMode.FirstLevelOnly, true)]
         [TestMethod]
-        public void Search_WinMovesTwoAndThreeStepsAway_FindTheNearerOne(int degreeOfParallelism, ParallelismMode parallelismMode)
+        public void Search_WinMovesTwoAndThreeStepsAway_FindTheNearerOne(int degreeOfParallelism, ParallelismMode parallelismMode, bool dieEarly)
         {
-            state1.SetNeigbors(new[] { state2, endState1, state3 });
-            state2.SetNeigbor(endState2);
-            state3.SetNeigbor(endState3);
+            var tree = new UnevenDeterministicTree();
 
-            endState1.SetEvaluationTo(15);
-            endState2.SetEvaluationTo(11);
-            endState3.SetEvaluationTo(18);
+            tree.EndState1.SetEvaluationTo(15);
+            tree.EndState2.SetEvaluationTo(11);
+            tree.EndState3.SetEvaluationTo(18);
 
             var engine = new SearchEngine()
             {
                 MaxDegreeOfParallelism = degreeOfParallelism,
                 FavorShortPaths = true,
-                DieEarly = true,
+                DieEarly = dieEarly,
                 MaxScore = 10,
                 ParallelismMode = parallelismMode,
                 SkipEvaluationForFirstNodeSingleNeighbor = false,
                 CacheMode = CacheMode.NewCache
             };
-            var result = engine.Search(state1, 5);
+            var result = engine.Search(tree.RootState, 5);
 
-            Assert.AreEqual(endState1, result.StateSequence.Last(), nameof(endState1) + " should have been good enough");
+            Assert.AreEqual(tree.EndState1, result.StateSequence.Last(), nameof(tree.EndState1) + " should have been good enough");
         }
 
-        [DataRow(false)]
-        [DataRow(true)]
+        [DataRow(false, false)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
+        [DataRow(true, true)]
         [TestMethod]
-        public void Search_FindWinThreeStepsAway_DontCheckNeigborsFourStepsAway(bool unstableState)
+        public void Search_FindWinThreeStepsAway_DontCheckNeigborsFourStepsAway(bool unstableState, bool favorSortPaths)
         {
-            state1.SetNeigbors(new [] {state2, state3});
-            state2.SetNeigbor(endState1);
-            state3.SetNeigbor(endState2);
+            var tree = new DeterministicTree();
 
-            endState1.SetEvaluationTo(15);
-            A.CallTo(() => endState2.Evaluate(A<int>._, A<List<IState>>._)).Invokes(() => throw new Exception("We shouldn't have needed to check " + nameof(endState2)));
+            tree.EndState1.SetEvaluationTo(15);
+            A.CallTo(() => tree.EndState2.Evaluate(A<int>._, A<List<IState>>._)).Invokes(() => throw new Exception("We shouldn't have needed to check " + nameof(tree.EndState2)));
 
             var engine = new SearchEngine()
             {
-                FavorShortPaths = true,
+                FavorShortPaths = favorSortPaths,
                 DieEarly = true,
                 MaxScore = 10,
                 IsUnstableState = (s, i, l) => unstableState,
@@ -108,9 +80,9 @@ namespace MinMaxSearch.UnitTests
                 SkipEvaluationForFirstNodeSingleNeighbor = false,
                 CacheMode = CacheMode.NewCache
             };
-            var result = engine.Search(state1, 6);
+            var result = engine.Search(tree.RootState, 6);
 
-            Assert.AreEqual(endState1, result.StateSequence.Last(), nameof(endState1) + " should have been good enough");
+            Assert.AreEqual(tree.EndState1, result.StateSequence.Last(), nameof(tree.EndState1) + " should have been good enough");
         }
 
         [DataRow(1, ParallelismMode.TotalParallelism)]
@@ -120,16 +92,15 @@ namespace MinMaxSearch.UnitTests
         [TestMethod]
         public void Search_MaxHasTwoTurnsInARow_FindBestMove(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
-            state1.SetNeigbors(new List<IState> { endState1, endState2, endState3 });
-
-            endState1.SetEvaluationTo(2);
-            endState2.SetEvaluationTo(1);
-            endState3.SetEvaluationTo(3);
+            var tree = new DeterministicTree();
+            A.CallTo(() => tree.ChildState2.Turn).Returns(Player.Max);
+            tree.EndState2.SetEvaluationTo(2);
+            tree.EndState3.SetEvaluationTo(3);
 
             var engine = TestUtils.GetBasicSearchEngine(parallelismMode, degreeOfParallelism);
-            var result = engine.Search(state1, 5);
+            var result = engine.Search(tree.ChildState2, 5);
 
-            Assert.AreEqual(endState3, result.NextMove, "Actually found " + result.NextMove);
+            Assert.AreEqual(tree.EndState3, result.NextMove, "Actually found " + result.NextMove);
         }
 
         [DataRow(1, ParallelismMode.TotalParallelism)]
@@ -137,20 +108,20 @@ namespace MinMaxSearch.UnitTests
         [DataRow(8, ParallelismMode.TotalParallelism)]
         [DataRow(1, ParallelismMode.FirstLevelOnly)]
         [TestMethod]
-        public void Search_RowOfMixedMove_FindBest(int degreeOfParallelism, ParallelismMode parallelismMode)
+        public void Search_RowOfMixedTurns_FindBest(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
-            state1.SetNeigbors(new List<IState> { endState1, endState2, endState3 });
-
-            A.CallTo(() => endState2.Turn).Returns(Player.Min);
-
-            endState1.SetEvaluationTo(2);
-            endState2.SetEvaluationTo(1);
-            endState3.SetEvaluationTo(3);
+            var tree = new DeterministicTree2();
+            A.CallTo(() => tree.ChildState1.Turn).Returns(Player.Max);
+            tree.EndState1.SetEvaluationTo(5);
+            tree.EndState2.SetEvaluationTo(6);
+            tree.EndState3.SetEvaluationTo(4);
+            tree.EndState4.SetEvaluationTo(7);
 
             var engine = TestUtils.GetBasicSearchEngine(parallelismMode, degreeOfParallelism);
-            var result = engine.Search(state1, 5);
+            var result = engine.Search(tree.RootState, 5);
 
-            Assert.AreEqual(endState3, result.NextMove, "Actually found " + result.NextMove);
+            Assert.AreEqual(tree.EndState2, result.StateSequence.Last());
+            Assert.AreEqual(6, result.Evaluation);
         }
 
         [DataRow(1, ParallelismMode.TotalParallelism)]
@@ -180,21 +151,18 @@ namespace MinMaxSearch.UnitTests
         [TestMethod]
         public void Search_CheckThatRecordPassThroughStatesIsWorking(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
-            A.CallTo(() => endState1.Evaluate(A<int>._, A<List<IState>>.That.IsEmpty()))
+            var tree = new DeterministicTree();
+            A.CallTo(() => tree.EndState1.Evaluate(A<int>._, A<List<IState>>.That.IsEmpty()))
                 .Throws(new Exception("passedStats list should have been empty"));
-            A.CallTo(() => endState1.Evaluate(A<int>._, A<List<IState>>._))
+            A.CallTo(() => tree.EndState1.Evaluate(A<int>._, A<List<IState>>._))
                 .Invokes((int i, List<IState> l) =>
                 {
                     Assert.AreEqual(1, l.Count, "passThroughStates should only have one node (state1)");
-                    Assert.IsTrue(l.Contains(state1), "passThroughStates should contain state1");
+                    Assert.IsTrue(l.Contains(tree.ChildState1), "passThroughStates should contain state1");
                 });
-
-            state1.SetNeigbors(new List<IDeterministicState> { endState1 });
-
-            A.CallTo(() => endState1.Turn).Returns(Player.Min);
-
+            
             var searchEngine = TestUtils.GetBasicSearchEngine(parallelismMode, degreeOfParallelism);
-            searchEngine.Search(state1, 5);
+            searchEngine.Search(tree.ChildState1, 5);
         }
 
         [DataRow(1, ParallelismMode.TotalParallelism)]
@@ -204,13 +172,10 @@ namespace MinMaxSearch.UnitTests
         [TestMethod]
         public void Search_DieEarllyOptionWorks(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
-            endState1.SetEvaluationTo(10);
-            endState2.SetEvaluationTo(15);
-            endState3.SetEvaluationTo(0);
-            state1.SetNeigbors(new List<IState> { endState1, endState2, endState3 });
-            A.CallTo(() => endState1.Turn).Returns(Player.Min);
-            A.CallTo(() => endState2.Turn).Returns(Player.Min);
-            A.CallTo(() => endState3.Turn).Returns(Player.Min);
+            var tree = new DeterministicTree3();
+            tree.EndState1.SetEvaluationTo(10);
+            tree.EndState2.SetEvaluationTo(15);
+            tree.EndState3.SetEvaluationTo(0);
 
             var searchEngine = new SearchEngine()
             {
@@ -222,9 +187,9 @@ namespace MinMaxSearch.UnitTests
                 SkipEvaluationForFirstNodeSingleNeighbor = false,
                 CacheMode = CacheMode.NewCache
             };
-            var evaluation = searchEngine.Search(state1, 2);
+            var evaluation = searchEngine.Search(tree.RootState, 2);
 
-            Assert.AreEqual(endState1, evaluation.StateSequence.Last(), "Should have ended with" + nameof(endState1));
+            Assert.AreEqual(tree.EndState1, evaluation.StateSequence.Last(), "Should have ended with" + nameof(tree.EndState1));
         }
 
         [DataRow(1, ParallelismMode.TotalParallelism)]
@@ -252,24 +217,24 @@ namespace MinMaxSearch.UnitTests
         [TestMethod]
         public void Search_TaskCanceld_DontContinueSearching(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
+            var tree = new UnaryDeterministicTree();
             var cancellationSource = new CancellationTokenSource();
 
-            A.CallTo(() => state1.GetNeighbors()).ReturnsLazily(() =>
+            A.CallTo(() => tree.RootState.GetNeighbors()).ReturnsLazily(() =>
             {
                 cancellationSource.Cancel();
-                return new List<IDeterministicState> {endState1};
+                return new List<IDeterministicState> {tree.State2};
             });
 
-            state1.SetEvaluationTo(1);
-            endState1.SetEvaluationTo(2);
+            tree.RootState.SetEvaluationTo(1);
+            tree.State2.SetEvaluationTo(2);
+            tree.EndState.SetEvaluationTo(2);
             
-            A.CallTo(() => state1.Turn).Returns(Player.Min);
-
             var searchEngine = TestUtils.GetBasicSearchEngine(parallelismMode, degreeOfParallelism);
-            var result = searchEngine.Search(state1, 5, cancellationSource.Token);
+            var result = searchEngine.Search(tree.RootState, 5, cancellationSource.Token);
 
             Assert.AreEqual(1, result.Evaluation);
-            Assert.AreEqual(0, result.StateSequence.Count, "We shouldn't have gotten to state3");
+            Assert.AreEqual(0, result.StateSequence.Count, "We shouldn't have gotten to past " + nameof(tree.RootState));
             Assert.IsFalse(result.IsSearchCompleted, "The search shouldn't have been completed");
         }
 
@@ -302,19 +267,17 @@ namespace MinMaxSearch.UnitTests
         [TestMethod]
         public void CancelSearch_ReturnBestResultSoFar(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
-            state1.SetNeigbors(state2, state3);
-            state2.SetNeigbor(state2);
-            state3.SetNeigbor(state3);
-            state2.SetEvaluationTo(1);
-            state3.SetEvaluationTo(3);
+            var tree = new EndlessTree();
+            tree.ChildState1.SetEvaluationTo(1);
+            tree.ChildState2.SetEvaluationTo(3);
             var cancellationSource = new CancellationTokenSource(20);
             var engine = TestUtils.GetBasicSearchEngine(parallelismMode, degreeOfParallelism);
 
-            var result = engine.SearchAsync(state1, int.MaxValue, cancellationSource.Token).Result;
+            var result = engine.SearchAsync(tree.RootState, int.MaxValue, cancellationSource.Token).Result;
 
             Assert.AreEqual(3, result.Evaluation, "Didn't get a good enough state");
             if (parallelismMode == ParallelismMode.NonParallelism)
-                A.CallTo(() => state3.GetNeighbors()).MustNotHaveHappened();
+                A.CallTo(() => tree.ChildState2.GetNeighbors()).MustNotHaveHappened();
         }
 
         [DataRow(8, ParallelismMode.TotalParallelism)]
@@ -345,23 +308,22 @@ namespace MinMaxSearch.UnitTests
         public void SkipEvaluationForFirstNodeSingleNeighborTest(bool skip)
         {
             var engine = new SearchEngine(){SkipEvaluationForFirstNodeSingleNeighbor = skip};
+            var tree = new UnaryDeterministicTree();
+            tree.State2.SetEvaluationTo(2);
+            tree.EndState.SetEvaluationTo(3);
 
-            state1.SetNeigbor(state2);
-            state2.SetNeigbor(endState1);
-            state2.SetEvaluationTo(2);
-            endState1.SetEvaluationTo(3);
-
-            var result = engine.Search(state1, 10);
+            var result = engine.Search(tree.RootState, 10);
 
             if (skip)
             {
                 Assert.AreEqual(2, result.Evaluation);
                 Assert.AreEqual(1, result.StateSequence.Count);
+                A.CallTo(() => tree.State2.GetNeighbors()).MustNotHaveHappened();
             }
             else
             {
                 Assert.AreEqual(3, result.Evaluation);
-                Assert.AreEqual(2, result.StateSequence.Count);
+                Assert.AreEqual(3, result.StateSequence.Count);
             }
         }
     }
