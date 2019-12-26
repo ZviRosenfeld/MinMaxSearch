@@ -4,7 +4,7 @@ namespace MinMaxSearch.UnitTests.SampleTrees
 {
     class RepeatStateTree : ITree
     {
-        // This class uses search tree:
+        // This class contains the following tree:
         //                                  RootState
         //       ChildState1                                childState1
         //       ChildState2                                childState2
@@ -22,14 +22,14 @@ namespace MinMaxSearch.UnitTests.SampleTrees
 
         public RepeatStateTree(Player startPlayer = Player.Max)
         {
-            A.CallTo(() => EndState1.ToString()).Returns("EndState1");
-            A.CallTo(() => EndState2.ToString()).Returns("EndState2");
-            A.CallTo(() => EndState3.ToString()).Returns("EndState3");
-            A.CallTo(() => RootState.ToString()).Returns("RootState");
-            A.CallTo(() => ChildState1.ToString()).Returns("ChildState1");
-            A.CallTo(() => ChildState2.ToString()).Returns("ChildState2");
-            A.CallTo(() => ChildState4.ToString()).Returns("ChildState4");
-            A.CallTo(() => ChildState5.ToString()).Returns("ChildState5");
+            A.CallTo(() => EndState1.ToString()).Returns(nameof(EndState1));
+            A.CallTo(() => EndState2.ToString()).Returns(nameof(EndState2));
+            A.CallTo(() => EndState3.ToString()).Returns(nameof(EndState3));
+            A.CallTo(() => RootState.ToString()).Returns(nameof(RootState));
+            A.CallTo(() => ChildState1.ToString()).Returns(nameof(ChildState1));
+            A.CallTo(() => ChildState2.ToString()).Returns(nameof(ChildState2));
+            A.CallTo(() => ChildState4.ToString()).Returns(nameof(ChildState4));
+            A.CallTo(() => ChildState5.ToString()).Returns(nameof(ChildState5));
             
             A.CallTo(() => RootState.Turn).Returns(startPlayer);
             A.CallTo(() => ChildState1.Turn).Returns(startPlayer.GetReversePlayer());

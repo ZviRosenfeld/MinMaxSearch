@@ -5,6 +5,8 @@ using System.Threading;
 using FakeItEasy;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MinMaxSearch.Cache;
+using MinMaxSearch.Pruners;
+using MinMaxSearch.UnitTests.SampleTrees;
 using MinMaxSearch.UnitTests.TestStates;
 
 namespace MinMaxSearch.UnitTests
@@ -289,7 +291,7 @@ namespace MinMaxSearch.UnitTests
         [TestMethod]
         public void Search_SearchDepthIsRight(int depth, ParallelismMode parallelismMode)
         {
-            var engine = TestUtils.GetBasicSearchEngine(maxDegreeOfParallelism: 8);
+            var engine = TestUtils.GetBasicSearchEngine(parallelismMode, 8);
             var result = engine.Search(new IncreasingNumberState(8, Player.Max), depth);
             Assert.AreEqual(depth, result.SearchDepth, "Got wring depth");
         }
@@ -313,6 +315,28 @@ namespace MinMaxSearch.UnitTests
             Assert.AreEqual(3, result.Evaluation, "Didn't get a good enough state");
             if (parallelismMode == ParallelismMode.NonParallelism)
                 A.CallTo(() => state3.GetNeighbors()).MustNotHaveHappened();
+        }
+
+        [DataRow(8, ParallelismMode.TotalParallelism)]
+        [DataRow(1, ParallelismMode.NonParallelism)]
+        [DataRow(1, ParallelismMode.FirstLevelOnly)]
+        [TestMethod]
+        public void Search_PrunerTest(int maxDegreeOfParallelism, ParallelismMode parallelismMode)
+        {
+            var tree = new DeterministicTree();
+            var pruner = A.Fake<IPruner>();
+            A.CallTo(() => pruner.ShouldPrune(A<IState>._, A<int>._, A<List<IState>>._))
+                .ReturnsLazily((IState s, int d, List<IState> l) => s.Equals(tree.ChildState2));
+            var engine = TestUtils.GetBasicSearchEngine(parallelismMode, maxDegreeOfParallelism);
+            engine.AddPruner(pruner);
+
+            tree.EndState1.SetEvaluationTo(1);
+            tree.EndState2.SetEvaluationTo(2);
+            tree.EndState3.SetEvaluationTo(2);
+            tree.ChildState2.SetEvaluationTo(-2);
+
+            var result = engine.Search(tree.RootState, 4);
+            Assert.AreEqual(1, result.Evaluation, $"We should have pruned away {nameof(tree.ChildState2)}");
         }
 
         [TestMethod]

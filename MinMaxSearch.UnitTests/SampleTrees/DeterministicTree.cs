@@ -7,7 +7,7 @@ namespace MinMaxSearch.UnitTests.SampleTrees
     /// </summary>
     class DeterministicTree : ITree
     {
-        // This class uses search tree:
+        // This class contains the following tree:
         //              RootState
         // ChildState1                    ChildState2          
         //  EndState1            EndState2            EndState3
@@ -21,12 +21,12 @@ namespace MinMaxSearch.UnitTests.SampleTrees
         
         public DeterministicTree(Player startPlayer = Player.Max)
         {
-            A.CallTo(() => EndState1.ToString()).Returns("EndState1");
-            A.CallTo(() => EndState2.ToString()).Returns("EndState2");
-            A.CallTo(() => EndState3.ToString()).Returns("EndState3");
-            A.CallTo(() => RootState.ToString()).Returns("RootState");
-            A.CallTo(() => ChildState1.ToString()).Returns("ChildState1");
-            A.CallTo(() => ChildState2.ToString()).Returns("ChildState2");
+            A.CallTo(() => EndState1.ToString()).Returns(nameof(EndState1));
+            A.CallTo(() => EndState2.ToString()).Returns(nameof(EndState2));
+            A.CallTo(() => EndState3.ToString()).Returns(nameof(EndState3));
+            A.CallTo(() => RootState.ToString()).Returns(nameof(RootState));
+            A.CallTo(() => ChildState1.ToString()).Returns(nameof(ChildState1));
+            A.CallTo(() => ChildState2.ToString()).Returns(nameof(ChildState2));
 
             A.CallTo(() => EndState1.Turn).Returns(startPlayer);
             A.CallTo(() => EndState2.Turn).Returns(startPlayer);
