@@ -76,7 +76,7 @@ Note that even for indeterministic games, the first state will need to be of typ
 This reflects the fact that algorithm answers the question "what move should I do next?" and this question has no meaning when the next state's outcome depends on a probability.
 If you're implementing a game like backgammon, the first state should "know" what the user rolled, so it should be an IDeterministicState.
 ```csharp
-public interface IDeterministicState : IState
+public interface IProbabilisticState : IState
 {
     /// <summary>
     /// returns a tuple containing a probability, and a list of the s neighbors for that probability
