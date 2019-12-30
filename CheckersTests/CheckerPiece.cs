@@ -1,6 +1,6 @@
 ﻿namespace CheckersTests
 {
-    enum CheckerPiece
+    public enum CheckerPiece
     {
         Empty,
         MinChecker,

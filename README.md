@@ -37,7 +37,7 @@ example1:
 ```csharp
 IDeterministicState startState = new TicTacToeState();
 int searchDepth = 5;
-ISearchEngine engine = new SearchEngine();
+SearchEngine engine = new SearchEngine();
 SearchResult searchResult = engine.Search(startState, searchDepth);
 ```
 
@@ -45,15 +45,15 @@ example2:
 ```csharp
 IDeterministicState startState = new Connect4State();
 int searchDepth = 5;
-CancellationTokenSource CancellationTokenSource = new CancellationTokenSource();
-ISearchEngine engine =  new SearchEngine()
+CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+SearchEngine engine =  new SearchEngine()
 {
     FavorShortPaths = true,
     DieEarly = true,
     MaxScore = 99,
     MinScore = -99
 };
-SearchResult searchResult = engine.Search(startState, searchDepth, CancellationTokenSource.Token);
+SearchResult searchResult = engine.Search(startState, searchDepth, cancellationTokenSource.Token);
 ```
 
 SearchEngine has a number of Search methods that expect different parameters. Most of the parameters are straight-forward. I'd like to elaborate on the IState one.
@@ -178,7 +178,7 @@ This is because the cache remembers the evaluations that states will lead to, bu
 So the StateSequence will end at the cached state.
 
 ### DieEarly
-If this option is set to true, the algorithm will rerun as soon as it finds a score bigger than or equal to SearchEngine.MaxScore for Max or smaller or equal to SearchEngine.MinScore for Min.
+If this option is set to true, the algorithm will rerun as soon as it finds a score greater than or equal to SearchEngine.MaxScore for Max or smaller or equal to SearchEngine.MinScore for Min.
 The rational behind this is that once the algorithm finds a win there's no point in more searching. (We assume that a score greater then MaxScore is a win for Max, and one smaller then MinScore is a win for Min).
 Note that this will only work if Equals is implement in a meaningful way on your states.
 
@@ -186,11 +186,56 @@ Note that this will only work if Equals is implement in a meaningful way on your
 Some states are more interesting than others. With this delegate you can tell the algorithm to continue searching for "interesting" states even after max search depth is exceeded.
 IsUnstableState is a delegate of type Func<IState, int, List<IState>, bool>. It receives a state and a list of the states leading up to it, and decides if it's safe to terminate the search at this state.
 
+```CSharp
+/// <summary>
+/// An example of using an IsUnstableState delegate.
+/// This delegate works on a Checkers state, and returns true if there is an available jump.
+/// </summary>
+class IsUnstableStateSample
+{
+    public ISearchEngine GetEngine()
+    {
+        var engine = new SearchEngine
+        {
+            IsUnstableState = IsUnstableStateCheckersState
+        };
+        return engine;
+    }
+
+    private bool IsUnstableStateCheckersState(IState state, int depth, List<IState> passedThroghStates)
+    {
+        var checkersState = (CheckersState) state;
+        return checkersState.CanJump();
+    }
+}
+```
+
 ### Pruners
 You can use the method SearchEngine.AddPruner(IPruner pruner) to add pruners to the search algorithm.
 Pruners can be implemented by implementing the [IPruner](https://github.com/ZviRosenfeld/MinMaxSearch/blob/master/MinMaxSearch/Pruners/IPruner.cs) interface. 
 Then, the ShouldPrune(IState state, int depth, List<IState> passedThroughStates) method will be called on every state the algorithm checks. 
 This can provide you with a lot of customization power over the algorithm.
+
+```CSharp
+class SamplePruner : IPruner 
+{
+    public bool ShouldPrune(IState state, int depth, List<IState> passedThroughStates)
+    {
+        // Some logic here to decide if we should prune
+        return false;
+    }
+}
+
+class UsePruner
+{
+    public ISearchEngine GetEngineWithPruner()
+    {
+        SearchEngine engine = new SearchEngine();
+        engine.AddPruner(new SamplePruner());
+        return engine;
+    }
+}
+```
 
 ### SkipEvaluationForFirstNodeSingleNeighbor
 If this is set to true, in the case that the *first* node has a single neighbor, the engine will return that neighbor rather than evaluation the search tree.
@@ -200,7 +245,7 @@ Note that this only applies to the first node.
 
 ### StateDefinesDepth
 Set this to true it is possible to infer a state's depth from the state alone.
-This is trues for games like tic-tac-toe and connect 4, where the depth of a state is the number of tokens on the board.
+This is true for games like tic-tac-toe and connect4, where the depth of a state is the number of tokens on the board.
 
 The engine will use this knowledge to optimize the search.
 
@@ -218,7 +263,7 @@ CancellationTokenSource CancellationTokenSource = new CancellationTokenSource();
 ISearchEngine engine = new SearchEngine();
 IterativeSearchWrapper iterativeEngine = new IterativeSearchWrapper(engine);
 // This will run an IterativeSearch beginning at depth 2, and ending with depth 5 (including)
-SearchResult searchResult = engine.IterativeSearch(startState, startDepth, endDepth, CancellationTokenSource.Token);
+SearchResult searchResult = iterativeEngine.IterativeSearch(startState, startDepth, endDepth, CancellationTokenSource.Token);
 ```
 
 ## CompetitionManager
@@ -233,7 +278,7 @@ Exsample1: Comparing different search depths
 IDeterministicState startState = new TicTacToeState();
 int minSearchDepth = 2;
 int maxSearchDepth = 5;
-ISearchEngine engine = new SearchEngine();
+SearchEngine engine = new SearchEngine();
 
 CompetitionResult competitionResult = engine.Compete(startState, maxSearchDepth, minSearchDepth);
 
@@ -247,7 +292,7 @@ Exsample2: In this example we'll use a different evaluation method for min
 ```CSharp
 IDeterministicState startState = new TicTacToeState();
 int searchDepth = 6;
-ISearchEngine engine = new SearchEngine();
+SearchEngine engine = new SearchEngine();
 
 CompetitionResult competitionResult = engine.Compete(startState, searchDepth, minAlternateEvaluation: (s, d, l) => {
                 // Some alternate evaluation goes here - you probably don't really want to return 0
@@ -265,8 +310,8 @@ Exsample3: Comparing different engines
 IDeterministicState startState = new TicTacToeState();
 int searchDepth = 5;
 int playDepth = 100;
-ISearchEngine engine1 = new SearchEngine();
-ISearchEngine engine2 = new SearchEngine();
+SearchEngine engine1 = new SearchEngine();
+SearchEngine engine2 = new SearchEngine();
 
 CompetitionResult competitionResult = CompetitionManager.Compete(engine1, engine2, startState, searchDepth, searchDepth, playDepth);
 

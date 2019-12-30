@@ -6,7 +6,7 @@ using MinMaxSearch;
 
 namespace CheckersTests
 {
-    class CheckersState : IDeterministicState
+    public class CheckersState : IDeterministicState
     {
         public const int MAX_WIN = 100;
         public const int MIN_WIN = -100;
@@ -125,5 +125,10 @@ namespace CheckersTests
 
             throw new Exception("We should never get here!");
         }
+
+        /// <summary>
+        /// This method dosn't actually do anything. It's only here to simplify exsamples.
+        /// </summary>
+        public bool CanJump() => false;
     }
 }

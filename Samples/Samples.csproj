@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CheckersTests\CheckersTests.csproj" />
+    <ProjectReference Include="..\MinMaxSearch\MinMaxSearch.csproj" />
+    <ProjectReference Include="..\TicTacToeTests\TicTacToeTests.csproj" />
+  </ItemGroup>
+
+</Project>

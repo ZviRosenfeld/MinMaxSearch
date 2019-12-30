@@ -135,7 +135,7 @@ namespace TicTacToeTests
         [TestMethod]
         public void NewGame_NoOneCanWin(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
-            TicTacToeState startState = GetEmptyTicTacToeState();
+            TicTacToeState startState = Utils.GetEmptyTicTacToeState();
 
             var engine = GetSearchEngine(degreeOfParallelism, parallelismMode);
             var evaluation = engine.Search(startState, 10);
@@ -170,12 +170,5 @@ namespace TicTacToeTests
                 SkipEvaluationForFirstNodeSingleNeighbor = false,
                 StateDefinesDepth = true
             };
-
-        public static TicTacToeState GetEmptyTicTacToeState() => new TicTacToeState(new[,]
-        {
-            { Player.Empty, Player.Empty, Player.Empty},
-            { Player.Empty, Player.Empty, Player.Empty},
-            { Player.Empty, Player.Empty, Player.Empty},
-        }, Player.Max);
     }
 }

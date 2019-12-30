@@ -15,7 +15,7 @@ namespace TicTacToeTests
         {
             var engine = TicTacToeBassicTests.GetSearchEngine(1, ParallelismMode.FirstLevelOnly);
             var competitionResult = CompetitionManager.Compete(engine, engine,
-                TicTacToeBassicTests.GetEmptyTicTacToeState(), 1, 9, 100);
+                Utils.GetEmptyTicTacToeState(), 1, 9, 100);
 
             var finalState = (TicTacToeState) competitionResult.States.Last();
             Assert.AreEqual(TicTacToeState.MinValue, finalState.Evaluate(0, new List<IState>()), "Min should have won");
@@ -29,7 +29,7 @@ namespace TicTacToeTests
         public void Compete_TestAlternateEvaluationForMinStrategie()
         {
             var engine = TicTacToeBassicTests.GetSearchEngine(1, ParallelismMode.FirstLevelOnly);
-            var competitionResult = engine.Compete(TicTacToeBassicTests.GetEmptyTicTacToeState(), 9, minAlternateEvaluation: (s, d, l) => 0);
+            var competitionResult = engine.Compete(Utils.GetEmptyTicTacToeState(), 9, minAlternateEvaluation: (s, d, l) => 0);
 
             var finalState = (TicTacToeState)competitionResult.States.Last();
             Assert.AreEqual(TicTacToeState.MaxValue, finalState.Evaluate(0, new List<IState>()), "Max should have won");
@@ -39,7 +39,7 @@ namespace TicTacToeTests
         public void Compete_TestAlternateEvaluationForMaxStrategie()
         {
             var engine = TicTacToeBassicTests.GetSearchEngine(1, ParallelismMode.FirstLevelOnly);
-            var competitionResult = engine.Compete(TicTacToeBassicTests.GetEmptyTicTacToeState(), 9, (s, d, l) => 0);
+            var competitionResult = engine.Compete(Utils.GetEmptyTicTacToeState(), 9, (s, d, l) => 0);
 
             var finalState = (TicTacToeState)competitionResult.States.Last();
             Assert.AreEqual(TicTacToeState.MinValue, finalState.Evaluate(0, new List<IState>()), "Min should have won");
@@ -49,7 +49,7 @@ namespace TicTacToeTests
         public void Compete_GameEndsAtMaxDepth()
         {
             var engine = TicTacToeBassicTests.GetSearchEngine(1, ParallelismMode.FirstLevelOnly);
-            var competitionResult = engine.Compete(TicTacToeBassicTests.GetEmptyTicTacToeState(), 2, 2, maxPlayDepth: 2);
+            var competitionResult = engine.Compete(Utils.GetEmptyTicTacToeState(), 2, 2, maxPlayDepth: 2);
 
             Assert.AreEqual(2, competitionResult.GameDepth);
             Assert.AreEqual(2, competitionResult.States.Count);
@@ -60,7 +60,7 @@ namespace TicTacToeTests
         public void Compete_MinAndMaxDontHaveAnAlternateEvaluation_ThrowException()
         {
             var engine = TicTacToeBassicTests.GetSearchEngine(1, ParallelismMode.FirstLevelOnly);
-            engine.Compete(TicTacToeBassicTests.GetEmptyTicTacToeState(), 2);           
+            engine.Compete(Utils.GetEmptyTicTacToeState(), 2);           
         }
     }
 }
