@@ -14,7 +14,7 @@ namespace MinMaxSearch.UnitTests
         [ExpectedException(typeof(Exception))]
         public void IterativeSearch_StartDepthEqualThenMaxDepth_ThrowException()
         {
-            var searchEngine = new IterativeSearchWrapper(new SearchEngine());
+            var searchEngine = new IterativeSearchWrapper(TestUtils.GetBasicSearchEngine());
             searchEngine.IterativeSearch(new IncreasingNumberState(1, Player.Max), 2, 2, CancellationToken.None);
         }
         
@@ -23,7 +23,7 @@ namespace MinMaxSearch.UnitTests
         {
             var cancellationSource = new CancellationTokenSource();
             cancellationSource.Cancel();
-            var searchEngine = new IterativeSearchWrapper(new SearchEngine());
+            var searchEngine = new IterativeSearchWrapper(TestUtils.GetBasicSearchEngine());
             var result = searchEngine.IterativeSearch(new IncreasingNumberState(1, Player.Max), 1, 2, cancellationSource.Token);
             Assert.IsNotNull(result, "We shouldn't have return a null result");
             Assert.IsFalse(result.IsSearchCompleted, "The search shouldn't have been completed");
@@ -34,7 +34,7 @@ namespace MinMaxSearch.UnitTests
         {
             var cancellationSource = new CancellationTokenSource();
             cancellationSource.Cancel();
-            var searchEngine = new IterativeSearchWrapper(new SearchEngine());
+            var searchEngine = new IterativeSearchWrapper(TestUtils.GetBasicSearchEngine());
             var result = searchEngine.IterativeSearch(new IncreasingNumberState(1, Player.Max), 1, 2, CancellationToken.None, cancellationSource.Token);
             Assert.IsTrue(result.IsSearchCompleted, "The search should have been completed");
             Assert.AreEqual(1, result.SearchDepth);
@@ -49,7 +49,7 @@ namespace MinMaxSearch.UnitTests
                 (IDeterministicState s, int d, CancellationToken c) =>
                 {
                     cancellationSource.Cancel();
-                    return new SearchResult(2, s, false);
+                    return new SearchResult(2, s, false, true, false);
                 });
             var searchEngine = new IterativeSearchWrapper(engine);
             var result = searchEngine.IterativeSearch(new IncreasingNumberState(1, Player.Max), 1, 2, CancellationToken.None, cancellationSource.Token);
@@ -62,7 +62,7 @@ namespace MinMaxSearch.UnitTests
         public void IterativeSearch_SearchCancled_WeDontContinueLookingAfterSearchCancled()
         {
             var cancellationSource = new CancellationTokenSource(100);
-            var searchEngine = new IterativeSearchWrapper(new SearchEngine());
+            var searchEngine = new IterativeSearchWrapper(TestUtils.GetBasicSearchEngine());
             var result = Task.Run(() => searchEngine.IterativeSearch(new CancelAtValue4State(1, cancellationSource, Player.Max), 1, int.MaxValue, cancellationSource.Token));
             result.Wait(200);
 
@@ -74,7 +74,7 @@ namespace MinMaxSearch.UnitTests
         [TestMethod]
         public void IterativeSearch_TimeoutSet_WeDontContinueLookingAfterTimeout()
         {
-            var searchEngine = new IterativeSearchWrapper(new SearchEngine());
+            var searchEngine = new IterativeSearchWrapper(TestUtils.GetBasicSearchEngine());
             var result = Task.Run(() => searchEngine.IterativeSearch(new SlowState(0), 1, int.MaxValue, TimeSpan.FromMilliseconds(200)));
             
             Assert.IsFalse(result.IsCompleted, "We shouldn't have stopped running yet");
@@ -90,7 +90,7 @@ namespace MinMaxSearch.UnitTests
         [TestMethod]
         public void Search_SearchDepthIsRight(int depth)
         {
-            var engine = new IterativeSearchWrapper(new SearchEngine());
+            var engine = new IterativeSearchWrapper(TestUtils.GetBasicSearchEngine());
             var result = engine.IterativeSearch(new IncreasingNumberState(8, Player.Max), 1, depth, CancellationToken.None);
             Assert.AreEqual(depth, result.SearchDepth, "Got wring depth");
         }
@@ -100,7 +100,7 @@ namespace MinMaxSearch.UnitTests
         [TestMethod]
         public void Search_IsSearchCompletedIsRight(int depth)
         {
-            var engine = new IterativeSearchWrapper(new SearchEngine());
+            var engine = new IterativeSearchWrapper(TestUtils.GetBasicSearchEngine());
             var result = engine.IterativeSearch(new IncreasingNumberState(8, Player.Max), 1, depth, CancellationToken.None);
             Assert.IsTrue(result.IsSearchCompleted, "The search should have been completed");
         }
@@ -108,7 +108,7 @@ namespace MinMaxSearch.UnitTests
         [TestMethod]
         public void IterativeSearch_ResultsContainsSearchTime()
         {
-            var searchEngine = new SearchEngine();
+            var searchEngine = TestUtils.GetBasicSearchEngine();
             var iterativeSearchWrapper = new IterativeSearchWrapper(searchEngine);
             var result1 = searchEngine.Search(new IncreasingNumberState(1, Player.Max), 20);
             var result2 = iterativeSearchWrapper.IterativeSearch(new IncreasingNumberState(1, Player.Max), 1, 20, CancellationToken.None);

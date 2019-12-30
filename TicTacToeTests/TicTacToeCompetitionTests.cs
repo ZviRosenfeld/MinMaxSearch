@@ -26,13 +26,23 @@ namespace TicTacToeTests
         }
 
         [TestMethod]
-        public void Compete_TestAlternateEvaluationStrategie()
+        public void Compete_TestAlternateEvaluationForMinStrategie()
         {
             var engine = TicTacToeBassicTests.GetSearchEngine(1, ParallelismMode.FirstLevelOnly);
-            var competitionResult = engine.Compete(TicTacToeBassicTests.GetEmptyTicTacToeState(), 9, (s, d, l) => s.Evaluate(d, l), (s, d, l) => 0);
+            var competitionResult = engine.Compete(TicTacToeBassicTests.GetEmptyTicTacToeState(), 9, minAlternateEvaluation: (s, d, l) => 0);
 
             var finalState = (TicTacToeState)competitionResult.States.Last();
             Assert.AreEqual(TicTacToeState.MaxValue, finalState.Evaluate(0, new List<IState>()), "Max should have won");
+        }
+
+        [TestMethod]
+        public void Compete_TestAlternateEvaluationForMaxStrategie()
+        {
+            var engine = TicTacToeBassicTests.GetSearchEngine(1, ParallelismMode.FirstLevelOnly);
+            var competitionResult = engine.Compete(TicTacToeBassicTests.GetEmptyTicTacToeState(), 9, (s, d, l) => 0);
+
+            var finalState = (TicTacToeState)competitionResult.States.Last();
+            Assert.AreEqual(TicTacToeState.MinValue, finalState.Evaluate(0, new List<IState>()), "Min should have won");
         }
 
         [TestMethod]
@@ -47,7 +57,7 @@ namespace TicTacToeTests
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
-        public void Compete_MinAndMaxAlternateEvaluation_ThrowException()
+        public void Compete_MinAndMaxDontHaveAnAlternateEvaluation_ThrowException()
         {
             var engine = TicTacToeBassicTests.GetSearchEngine(1, ParallelismMode.FirstLevelOnly);
             engine.Compete(TicTacToeBassicTests.GetEmptyTicTacToeState(), 2);           

@@ -37,11 +37,11 @@ namespace MinMaxSearch.UnitTests
             var state2 = A.Fake<IState>();
             var state3 = A.Fake<IState>();
 
-            A.CallTo(() => probabilisticState.GetNeighbors()).Returns(new List<Tuple<double, List<IState>>>()
+            A.CallTo(() => probabilisticState.GetNeighbors()).Returns(new List<Tuple<double, IEnumerable<IState>>>()
             {
-                new Tuple<double, List<IState>>(0.1, new List<IState> {state1}),
-                new Tuple<double, List<IState>>(0.3, new List<IState> {state2}),
-                new Tuple<double, List<IState>>(0.6, new List<IState> {state3}),
+                new Tuple<double, IEnumerable<IState>>(0.1, new List<IState> {state1}),
+                new Tuple<double, IEnumerable<IState>>(0.3, new List<IState> {state2}),
+                new Tuple<double, IEnumerable<IState>>(0.6, new List<IState> {state3}),
             });
 
             int timesGotState1 = 0, timesGotState2 = 0, timesGotState3 = 0;

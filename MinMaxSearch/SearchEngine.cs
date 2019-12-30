@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using MinMaxSearch.Cache;
 using MinMaxSearch.Exceptions;
 using MinMaxSearch.Pruners;
 using MinMaxSearch.ThreadManagment;
@@ -23,10 +24,10 @@ namespace MinMaxSearch
         /// <summary>
         /// At unstable states, we'll continue searching even after we've hit the maxDepth limit
         /// </summary>
-        public Func<IState, int, List<IState>, bool> IsUnstableState { get; set; } = ((s, d, l) => false);
+        public Func<IState, int, List<IState>, bool> IsUnstableState { get; set; } = null;
 
         /// <summary>
-        /// Note that this will only work if you implement Equals and GetHashValue in a meaningful way in the states. 
+        /// Note that this will only work if you implement Equals and GetHashValue in a meaningful way for your states. 
         /// </summary>
         public bool PreventLoops { get; set; }
 
@@ -36,20 +37,20 @@ namespace MinMaxSearch
         public bool FavorShortPaths { get; set; } = true;
 
         /// <summary>
-        /// The search will end once we find a score that is bigger then or equal to SearchEngine.MaxScore for Max or smaller or equal to SearchEngine.MinScore for Min.
+        /// The search will end once we find a score that is greater than or equal to SearchEngine.MaxScore for Max or smaller or equal to SearchEngine.MinScore for Min.
         /// </summary>
         public bool DieEarly { get; set; }
 
         /// <summary>
-        /// Any score equal to or bigger than MaxScore is considered a win for Max
+        /// Any score equal to or greater than MaxScore is considered a win for Max
         /// </summary>
         public double MaxScore { get; set; } = double.MaxValue;
 
         /// <summary>
-        /// Any score equal to or smaller than MaxScore is considered a win for Min
+        /// Any score equal to or smaller than MinScore is considered a win for Min
         /// </summary>
         public double MinScore { get; set; } = double.MinValue;
-
+        
         /// <summary>
         /// Note that this will only have an effect if ParallelismMode is set to TotalParallelism
         /// </summary>
@@ -65,7 +66,35 @@ namespace MinMaxSearch
         public Func<IState, int, List<IState>, double> AlternateEvaluation { get; set; }
 
         private SearchOptions CreateSearchOptions() => new SearchOptions(pruners, IsUnstableState, PreventLoops,
-            FavorShortPaths, DieEarly, MaxScore, MinScore, AlternateEvaluation);
+            FavorShortPaths, DieEarly, MaxScore, MinScore, AlternateEvaluation, StateDefinesDepth, CacheMode);
+
+        /// <summary>
+        /// In some search domains, remembering states that lead to wins, losses or draw can improve performance.
+        /// 
+        /// You can only use that cache if your states' evaluation doesn't change depending on its location in the search tree.
+        /// In particular, your states' evaluation can't depend on their depth in the tree of the states they've passed through. 
+        /// 
+        /// Note that caching will only work if you implement Equals and GetHashValue in a meaningful way for your states.
+        /// </summary>
+        public CacheMode CacheMode { get; set; } = CacheMode.NoCache;
+
+        /// <summary>
+        /// Note that this CacheManager will only be used if CacheMode is set to ReuseCache
+        /// </summary>
+        public ICacheManager CacheManager { get; set; }= new CacheManager();
+
+        /// <summary>
+        /// If this is set to true, in the case that the first node has a single neighbor, the engine will return that neighbor rather than evaluation the search tree.
+        /// Note that this only applies to the first node.
+        /// </summary>
+        public bool SkipEvaluationForFirstNodeSingleNeighbor { get; set; } = true;
+
+        /// <summary>
+        /// Set this to true it is possible to infer a state's depth from the state alone.
+        /// This is trues for games like tic-tac-toe and connect4, where the depth of a state is the number of tokens on the board.
+        /// The engine will use this knowledge to optimize the search
+        /// </summary>
+        public bool StateDefinesDepth { get; set; } = false;
 
         private IThreadManager GetThreadManager(int searchDepth)
         {
@@ -81,6 +110,16 @@ namespace MinMaxSearch
             return new TotalParallelismThreadManager(MaxDegreeOfParallelism, searchDepth);
         }
 
+        private ICacheManager BuildCacheManager()
+        {
+            if (CacheMode == CacheMode.NoCache)
+                return new NullCacheManager();
+            if (CacheMode == CacheMode.NewCache)
+                return new CacheManager();
+
+            return CacheManager;
+        }
+
         public SearchEngine Clone()
         {
             var newEngine = new SearchEngine()
@@ -90,9 +129,13 @@ namespace MinMaxSearch
                 FavorShortPaths = FavorShortPaths,
                 IsUnstableState = IsUnstableState,
                 MaxDegreeOfParallelism = MaxDegreeOfParallelism,
+                MaxLevelOfParallelism = MaxLevelOfParallelism,
                 MaxScore = MaxScore,
                 MinScore = MinScore,
                 PreventLoops = PreventLoops,
+                CacheMode = CacheMode,
+                ParallelismMode = ParallelismMode,
+                SkipEvaluationForFirstNodeSingleNeighbor = SkipEvaluationForFirstNodeSingleNeighbor
             };
             foreach (var pruner in pruners)
                 newEngine.AddPruner(pruner);
@@ -131,8 +174,14 @@ namespace MinMaxSearch
             if (maxDepth < 1)
                 throw new ArgumentException($"{nameof(maxDepth)} must be at least 1. Was {maxDepth}");
             
+            if (SkipEvaluationForFirstNodeSingleNeighbor && startState.GetNeighbors().Count() == 1)
+            {
+                var singleNeighbor = startState.GetNeighbors().First();
+                return new SearchResult(singleNeighbor.Evaluate(0, new List<IState>(), CreateSearchOptions()), startState, true, true, false);
+            }
+
             var searchContext = new SearchContext(maxDepth, 0, cancellationToken);
-            var searchWorker = new SearchWorker(CreateSearchOptions(), GetThreadManager(maxDepth));
+            var searchWorker = new SearchWorker(CreateSearchOptions(), GetThreadManager(maxDepth), BuildCacheManager());
             var stopwatch = new Stopwatch();
             stopwatch.Start();
             var result = searchWorker.Evaluate(startState, searchContext);

@@ -1,8 +1,8 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MinMaxSearch;
+using MinMaxSearch.Cache;
 
 namespace Connect4Tests
 {
@@ -80,28 +80,100 @@ namespace Connect4Tests
             Assert.IsTrue(BoardEvaluator.IsWin(((Connect4State) evaluation.StateSequence.Last()).Board, Player.Max), "Should have found a wining state");
         }
         
+        [DataRow(1, ParallelismMode.TotalParallelism, CacheMode.NoCache)]
+        [DataRow(2, ParallelismMode.TotalParallelism, CacheMode.NewCache)]
+        [DataRow(8, ParallelismMode.TotalParallelism, CacheMode.ReuseCache)]
+        [DataRow(1, ParallelismMode.FirstLevelOnly, CacheMode.NewCache)]
+        [TestMethod]
+        public void FiveStepsAwayFromMaxWinning_MaxTurn_MaxWin(int degreeOfParallelism, ParallelismMode parallelismMode, CacheMode cacheMode)
+        {
+            var startState = Connect4TestUtils.GetMaxFiveMovesAwayFromWinningState();
+
+            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode);
+            engine.CacheMode = cacheMode;
+            var evaluation = engine.Search(startState, 5);
+
+            Assert.AreEqual(BoardEvaluator.MaxEvaluation, evaluation.Evaluation);
+            Assert.IsTrue(BoardEvaluator.IsWin(((Connect4State)evaluation.StateSequence.Last()).Board, Player.Max), "Should have found a wining state");
+            Assert.IsTrue(evaluation.AllChildrenAreDeadEnds, "All children should be dead ends");
+        }
+
         [DataRow(1, ParallelismMode.TotalParallelism)]
         [DataRow(2, ParallelismMode.TotalParallelism)]
         [DataRow(8, ParallelismMode.TotalParallelism)]
         [DataRow(1, ParallelismMode.FirstLevelOnly)]
         [TestMethod]
-        public void FiveStepsAwayFromMaxWinning_MaxTurn_MaxWin(int degreeOfParallelism, ParallelismMode parallelismMode)
+        public void FiveStepsAwayFromMaxWinning_ReuseCache_MaxWin(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
-            var startState = new Connect4State(new[,]
-            {
-                {Player.Empty, Player.Min, Player.Max, Player.Empty, Player.Max, Player.Empty},
-                {Player.Empty, Player.Max, Player.Min, Player.Empty, Player.Empty, Player.Empty},
-                {Player.Empty, Player.Max, Player.Max, Player.Empty, Player.Empty, Player.Empty},
-                {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
-                {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
-                {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
-            }, Player.Max);
+            var startState = Connect4TestUtils.GetMaxFiveMovesAwayFromWinningState();
 
             var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode);
+            engine.CacheMode = CacheMode.ReuseCache;
+            engine.Search(startState, 5);
+            Assert.IsTrue(((CacheManager)engine.CacheManager).Count > 0, "The cache dosn't contain any states");
+            Assert.IsNotNull(engine.CacheManager.GetStateEvaluation(startState), "The cache dosn't contain the start state");
+
             var evaluation = engine.Search(startState, 5);
 
             Assert.AreEqual(BoardEvaluator.MaxEvaluation, evaluation.Evaluation);
-            Assert.IsTrue(BoardEvaluator.IsWin(((Connect4State)evaluation.StateSequence.Last()).Board, Player.Max), "Should have found a wining state");
+        }
+        
+        [DataRow(1, ParallelismMode.TotalParallelism)]
+        [DataRow(2, ParallelismMode.TotalParallelism)]
+        [DataRow(8, ParallelismMode.TotalParallelism)]
+        [DataRow(1, ParallelismMode.FirstLevelOnly)]
+        [TestMethod]
+        public void FiveStepsAwayFromMaxWinning_FillCache_MaxWin(int degreeOfParallelism, ParallelismMode parallelismMode)
+        {
+            var startState = Connect4TestUtils.GetMaxFiveMovesAwayFromWinningState();
+
+            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode);
+            engine.CacheMode = CacheMode.ReuseCache;
+            engine.DieEarly = true;
+            engine.FillCache(startState, CancellationToken.None);
+            Assert.IsTrue(((CacheManager) engine.CacheManager).Count > 0, "The cache dosn't contain any states");
+            Assert.IsNotNull(engine.CacheManager.GetStateEvaluation(startState), "The cache dosn't contain the start state");
+
+            var evaluation = engine.Search(startState, 5);
+
+            Assert.AreEqual(BoardEvaluator.MaxEvaluation, evaluation.Evaluation);
+        }
+
+        [DataRow(1, ParallelismMode.TotalParallelism)]
+        [DataRow(2, ParallelismMode.TotalParallelism)]
+        [DataRow(8, ParallelismMode.TotalParallelism)]
+        [DataRow(1, ParallelismMode.FirstLevelOnly)]
+        [TestMethod]
+        public void FiveStepsAwayFromMaxWinning_IterativeSearch_ReuseCache_MaxWin(int degreeOfParallelism, ParallelismMode parallelismMode)
+        {
+            var startState = Connect4TestUtils.GetMaxFiveMovesAwayFromWinningState();
+
+            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode);
+            engine.CacheMode = CacheMode.ReuseCache;
+            
+            var evaluation = new IterativeSearchWrapper(engine).IterativeSearch(startState, 1, 8, CancellationToken.None);
+
+            Assert.AreEqual(BoardEvaluator.MaxEvaluation, evaluation.Evaluation);
+        }
+
+        [DataRow(1, ParallelismMode.TotalParallelism)]
+        [DataRow(2, ParallelismMode.TotalParallelism)]
+        [DataRow(8, ParallelismMode.TotalParallelism)]
+        [DataRow(1, ParallelismMode.FirstLevelOnly)]
+        [TestMethod]
+        public void FiveStepsAwayFromMaxWinning_ReuseCache_DontDieEearly_MaxWin(int degreeOfParallelism, ParallelismMode parallelismMode)
+        {
+            var startState = Connect4TestUtils.GetMaxFiveMovesAwayFromWinningState();
+
+            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode);
+            engine.CacheMode = CacheMode.ReuseCache;
+            engine.DieEarly = false;
+            engine.Search(startState, 5);
+            Assert.IsTrue(((CacheManager)engine.CacheManager).Count > 0, "The cache dosn't contain any states");
+            
+            var evaluation = engine.Search(startState, 5);
+
+            Assert.AreEqual(BoardEvaluator.MaxEvaluation, evaluation.Evaluation);
         }
 
         [DataRow(1, ParallelismMode.TotalParallelism)]
@@ -117,6 +189,7 @@ namespace Connect4Tests
             var evaluation = engine.Search(startState, 7);
 
             Assert.IsFalse(BoardEvaluator.IsWin(((Connect4State)evaluation.StateSequence.Last()).Board, Player.Max));
+            Assert.IsFalse(evaluation.FullTreeSearchedOrPruned);
             Assert.IsFalse(evaluation.AllChildrenAreDeadEnds);
 
             if (degreeOfParallelism == 1)
@@ -152,7 +225,10 @@ namespace Connect4Tests
             {
                 FavorShortPaths = true,
                 MaxDegreeOfParallelism = degreeOfParallelism,
-                ParallelismMode = parallelismMode
+                ParallelismMode = parallelismMode,
+                SkipEvaluationForFirstNodeSingleNeighbor = false,
+                CacheMode = CacheMode.NewCache,
+                StateDefinesDepth = true
             };
             var evaluation = engine.Search(startState, 5);
 
@@ -182,7 +258,9 @@ namespace Connect4Tests
             {
                 FavorShortPaths = true,
                 MaxDegreeOfParallelism = degreeOfParallelism,
-                ParallelismMode = parallelismMode
+                ParallelismMode = parallelismMode,
+                SkipEvaluationForFirstNodeSingleNeighbor = false,
+                CacheMode = CacheMode.NewCache
             };
             var evaluation = engine.Search(startState, 5);
 

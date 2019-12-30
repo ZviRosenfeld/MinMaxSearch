@@ -35,6 +35,7 @@ namespace MinMaxSearch.UnitTests
             var engine = new SearchEngine()
             {
                 AlternateEvaluation = (s,d,l) => 10,
+                SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             var evaluation = engine.Search(startState, 2);
 
@@ -48,6 +49,7 @@ namespace MinMaxSearch.UnitTests
             var engine = new SearchEngine()
             {
                 AlternateEvaluation = (s, d, l) => 10,
+                SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             var evaluation = engine.Search(startState, 2);
 

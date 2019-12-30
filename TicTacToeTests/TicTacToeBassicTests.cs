@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MinMaxSearch;
+using MinMaxSearch.Cache;
 
 namespace TicTacToeTests
 {
@@ -71,48 +73,59 @@ namespace TicTacToeTests
             Assert.AreEqual(TicTacToeState.MaxValue, lastMove.Evaluate(0, new List<IState>()), "Should have found a wining state");
         }
 
-        [DataRow(1, ParallelismMode.TotalParallelism)]
-        [DataRow(2, ParallelismMode.TotalParallelism)]
-        [DataRow(8, ParallelismMode.TotalParallelism)]
-        [DataRow(1, ParallelismMode.FirstLevelOnly)]
+        [DataRow(1, ParallelismMode.TotalParallelism, CacheMode.NoCache)]
+        [DataRow(2, ParallelismMode.TotalParallelism, CacheMode.NoCache)]
+        [DataRow(8, ParallelismMode.TotalParallelism, CacheMode.NewCache)]
+        [DataRow(1, ParallelismMode.FirstLevelOnly, CacheMode.NewCache)]
+        [DataRow(1, ParallelismMode.FirstLevelOnly, CacheMode.NoCache)]
         [TestMethod]
-        public void FiveStepsAwayFromMaxWinning_MaxTurn_MaxWin(int degreeOfParallelism, ParallelismMode parallelismMode)
+        public void FiveStepsAwayFromMaxWinning_MaxTurn_MaxWin(int degreeOfParallelism, ParallelismMode parallelismMode,
+            CacheMode cacheMode)
         {
             TicTacToeState startState = new TicTacToeState(new[,]
             {
-                { Player.Max, Player.Empty, Player.Empty},
-                { Player.Min, Player.Empty, Player.Empty},
-                { Player.Empty, Player.Empty, Player.Empty},
+                {Player.Max, Player.Empty, Player.Empty},
+                {Player.Min, Player.Empty, Player.Empty},
+                {Player.Empty, Player.Empty, Player.Empty},
             }, Player.Max);
 
-            var engine = GetSearchEngine(degreeOfParallelism, parallelismMode);
+            var engine = GetSearchEngine(degreeOfParallelism, parallelismMode, cacheMode);
             var evaluation = engine.Search(startState, 5);
 
             Assert.AreEqual(TicTacToeState.MaxValue, evaluation.Evaluation);
-            var lastMove = (IDeterministicState) evaluation.StateSequence.Last();
-            Assert.AreEqual(TicTacToeState.MaxValue, lastMove.Evaluate(0, new List<IState>()), "Should have found a wining state");
+            if (cacheMode == CacheMode.NoCache)
+            {   // If we're using a cache, last moves read from the cache may not be win positions (but they will lead to one) 
+                var lastMove = (IDeterministicState) evaluation.StateSequence.Last();
+                Console.WriteLine(lastMove);
+                Assert.AreEqual(TicTacToeState.MaxValue, lastMove.Evaluate(0, new List<IState>()), "Should have found a wining state");
+            }
         }
 
-        [DataRow(1, ParallelismMode.TotalParallelism)]
-        [DataRow(2, ParallelismMode.TotalParallelism)]
-        [DataRow(8, ParallelismMode.TotalParallelism)]
-        [DataRow(1, ParallelismMode.FirstLevelOnly)]
+        [DataRow(1, ParallelismMode.TotalParallelism, CacheMode.NoCache)]
+        [DataRow(2, ParallelismMode.TotalParallelism, CacheMode.NoCache)]
+        [DataRow(8, ParallelismMode.TotalParallelism, CacheMode.NewCache)]
+        [DataRow(1, ParallelismMode.FirstLevelOnly, CacheMode.NewCache)]
+        [DataRow(1, ParallelismMode.FirstLevelOnly, CacheMode.NoCache)]
         [TestMethod]
-        public void FiveStepsAwayFromMinWinning_MinTurn_MinWin(int degreeOfParallelism, ParallelismMode parallelismMode)
+        public void FiveStepsAwayFromMinWinning_MinTurn_MinWin(int degreeOfParallelism, ParallelismMode parallelismMode, CacheMode cacheMode)
         {
             TicTacToeState startState = new TicTacToeState(new[,]
             {
-                { Player.Empty, Player.Empty, Player.Empty},
-                { Player.Empty, Player.Min, Player.Max},
-                { Player.Empty, Player.Empty, Player.Empty},
+                {Player.Empty, Player.Empty, Player.Empty},
+                {Player.Empty, Player.Min, Player.Max},
+                {Player.Empty, Player.Empty, Player.Empty},
             }, Player.Min);
 
-            var engine = GetSearchEngine(degreeOfParallelism, parallelismMode);
+            var engine = GetSearchEngine(degreeOfParallelism, parallelismMode, cacheMode);
             var evaluation = engine.Search(startState, 5);
 
             Assert.AreEqual(TicTacToeState.MinValue, evaluation.Evaluation);
-            var lastMove = (IDeterministicState)evaluation.StateSequence.Last();
-            Assert.AreEqual(TicTacToeState.MinValue, lastMove.Evaluate(0, new List<IState>()), "Should have found a wining state");
+            if (cacheMode == CacheMode.NoCache)
+            {
+                // If we're using a cache, last moves read from the cache may not be win positions (but they will lead to one)
+                var lastMove = (IDeterministicState) evaluation.StateSequence.Last();
+                Assert.AreEqual(TicTacToeState.MinValue, lastMove.Evaluate(0, new List<IState>()), "Should have found a wining state");
+            }
         }
 
         [DataRow(1, ParallelismMode.TotalParallelism)]
@@ -130,7 +143,8 @@ namespace TicTacToeTests
             Assert.AreEqual(0, evaluation.Evaluation);
             var lastMove = (IDeterministicState)evaluation.StateSequence.Last();
             Assert.AreEqual(0, lastMove.Evaluate(0, new List<IState>()), "Should have found a wining state");
-            Assert.IsTrue(evaluation.AllChildrenAreDeadEnds);
+            Assert.IsTrue(evaluation.FullTreeSearchedOrPruned);
+            Assert.IsFalse(evaluation.AllChildrenAreDeadEnds);
 
             if (degreeOfParallelism == 1)
             {
@@ -144,14 +158,17 @@ namespace TicTacToeTests
             Assert.IsTrue(evaluation.InternalNodes > 500, "Too few intarnal nodes in search.");
         }
         
-        public static SearchEngine GetSearchEngine(int degreeOfParallelism, ParallelismMode parallelismMode) =>
+        public static SearchEngine GetSearchEngine(int degreeOfParallelism, ParallelismMode parallelismMode, CacheMode cacheMode = CacheMode.NewCache) =>
             new SearchEngine()
             {
                 MaxDegreeOfParallelism = degreeOfParallelism,
                 DieEarly = true,
                 MinScore = -1,
                 MaxScore = 1,
-                ParallelismMode = parallelismMode
+                ParallelismMode = parallelismMode,
+                CacheMode = cacheMode,
+                SkipEvaluationForFirstNodeSingleNeighbor = false,
+                StateDefinesDepth = true
             };
 
         public static TicTacToeState GetEmptyTicTacToeState() => new TicTacToeState(new[,]

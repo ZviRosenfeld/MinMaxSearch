@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using MinMaxSearch.Cache;
 using MinMaxSearch.Pruners;
 
 namespace MinMaxSearch
@@ -8,8 +9,11 @@ namespace MinMaxSearch
     {
         public SearchOptions(List<IPruner> pruners, Func<IState, int, List<IState>, bool> isUnstableState,
             bool preventLoops, bool favorShortPaths, bool dieEarly, double maxScore,
-            double minScore, Func<IState, int, List<IState>, double> alternateEvaluation)
+            double minScore, Func<IState, int, List<IState>, double> alternateEvaluation, bool stateDefinesDepth, CacheMode cacheMode)
         {
+            if (minScore > maxScore)
+                throw new ArgumentException($"{nameof(minScore)} can't be smaller than {nameof(maxScore)}; {nameof(minScore)} == {minScore}; {nameof(maxScore)} == {maxScore}");
+
             Pruners = pruners;
             IsUnstableState = isUnstableState;
             FavorShortPaths = favorShortPaths;
@@ -17,6 +21,8 @@ namespace MinMaxSearch
             MaxScore = maxScore;
             MinScore = minScore;
             AlternateEvaluation = alternateEvaluation;
+            StateDefinesDepth = stateDefinesDepth;
+            CacheMode = cacheMode;
 
             var preventLoopPruner = new PreventLoopPruner();
             if (preventLoops && !pruners.Contains(preventLoopPruner))
@@ -36,5 +42,9 @@ namespace MinMaxSearch
         public double MaxScore { get; }
 
         public double MinScore { get; }
+
+        public bool StateDefinesDepth { get; }
+
+        public CacheMode CacheMode { get; }
     }
 }

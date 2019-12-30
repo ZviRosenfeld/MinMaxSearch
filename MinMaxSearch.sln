@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Connect4Tests", "Connect4Te
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProbabilisticConnect4Tests", "ProbabilisticConnect4Tests\ProbabilisticConnect4Tests.csproj", "{1554BB7F-01EC-4CFF-8082-06A42B5B8505}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheckersTests", "CheckersTests\CheckersTests.csproj", "{0595E23D-2834-41F0-9145-4307B21FC636}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{1554BB7F-01EC-4CFF-8082-06A42B5B8505}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1554BB7F-01EC-4CFF-8082-06A42B5B8505}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1554BB7F-01EC-4CFF-8082-06A42B5B8505}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0595E23D-2834-41F0-9145-4307B21FC636}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0595E23D-2834-41F0-9145-4307B21FC636}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0595E23D-2834-41F0-9145-4307B21FC636}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0595E23D-2834-41F0-9145-4307B21FC636}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

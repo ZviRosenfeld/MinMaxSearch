@@ -23,14 +23,14 @@ namespace Connect4Tests
 
         public Player Turn => connect4State.Turn;
 
-        public IEnumerable<Tuple<double, List<IState>>> GetNeighbors()
+        public IEnumerable<Tuple<double, IEnumerable<IState>>> GetNeighbors()
         {
             if (BoardEvaluator.IsWin(connect4State.Board, Turn.GetReversePlayer()))
-                return new List<Tuple<double, List<IState>>>();
+                return new List<Tuple<double, IEnumerable<IState>>>();
 
-            var result = new List<Tuple<double, List<IState>>>();
+            var result = new List<Tuple<double, IEnumerable<IState>>>();
             for (int i = 0; i < Connect4State.BoardSize; i++)
-                result.Add(new Tuple<double, List<IState>>(1.0 / Connect4State.BoardSize, GetNeighborsFrom(i)));
+                result.Add(new Tuple<double, IEnumerable<IState>>(1.0 / Connect4State.BoardSize, GetNeighborsFrom(i)));
 
             return result;
         }

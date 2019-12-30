@@ -1,20 +1,20 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MinMaxSearch;
-using System;
+﻿using System;
 using System.Text;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MinMaxSearch;
 using MinMaxSearch.Cache;
 
-namespace Connect4Tests
+namespace CheckersTests
 {
     [TestClass]
     [TestCategory("Benchmarking")]
-    public class Connect4Benchmarking
+    public class CheckersBenchmarking
     {
         [TestMethod]
-        public void BenchmarkConnect4()
+        public void BenchmarkCheckers()
         {
-            var searchDepth = 11;
-            var board = Connect4TestUtils.GetEmptyBoard();
+            var searchDepth = 8;
+            var board = TestUtils.GetStartBoard();
             Benchmark(board, searchDepth, ParallelismMode.NonParallelism);
             Benchmark(board, searchDepth, ParallelismMode.FirstLevelOnly);
             Benchmark(board, searchDepth, ParallelismMode.ParallelismByLevel, levelOfParallelism: 2);
@@ -22,17 +22,24 @@ namespace Connect4Tests
         }
 
         [TestMethod]
-        public void BenchmarkConnect4_HalfFullBoard() =>
-            Benchmark(Connect4TestUtils.GetHalfFullBoard(), 20);
+        public void BenchmarkCheckersAllKings()
+        {
+            var searchDepth = 8;
+            var board = TestUtils.GetStartBoardFullOfKings();
+            Benchmark(board, searchDepth, ParallelismMode.NonParallelism);
+            Benchmark(board, searchDepth, ParallelismMode.FirstLevelOnly);
+            Benchmark(board, searchDepth, ParallelismMode.ParallelismByLevel, levelOfParallelism: 2);
+            Benchmark(board, searchDepth, ParallelismMode.TotalParallelism, 4);
+        }
 
-        private void Benchmark(Player[,] startBoard, int searchDepth,
+        private void Benchmark(CheckerPiece[,] startBoard, int searchDepth,
             ParallelismMode parallelismMode = ParallelismMode.FirstLevelOnly, int degreeOfParallelism = 1,
             int levelOfParallelism = 1)
         {
             Console.WriteLine(GetTestMessage(parallelismMode, degreeOfParallelism, levelOfParallelism));
-            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode, levelOfParallelism);
+            var engine = TestUtils.GetCheckersSearchEngine(degreeOfParallelism, parallelismMode, levelOfParallelism);
             engine.CacheMode = CacheMode.NewCache;
-            var startState = new Connect4State(startBoard, Player.Max);
+            var startState = new CheckersState(startBoard, Player.Max);
 
             var results = engine.Search(startState, searchDepth);
             Console.WriteLine("Time: " + results.SearchTime);

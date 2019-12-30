@@ -46,7 +46,7 @@ namespace MinMaxSearch
         {
             double sum = 0;
             int leaves = 0, internalNodes = 0;
-            var allChildrenAreDeadEnds = true;
+            bool allChildrenAreDeadEnds = true, fullTreeSearched = true, childrenPruned = false;
             foreach (var result in results)
             {
                 var searchResult = result.Item2.Result;
@@ -54,9 +54,11 @@ namespace MinMaxSearch
                 leaves += searchResult.Leaves;
                 internalNodes += searchResult.InternalNodes;
                 allChildrenAreDeadEnds = allChildrenAreDeadEnds && searchResult.AllChildrenAreDeadEnds;
+                fullTreeSearched = fullTreeSearched && searchResult.FullTreeSearchedOrPruned;
+                childrenPruned = childrenPruned || searchResult.ChildrenPruned;
             }
 
-            return new SearchResult(sum, new List<IState>() {startState}, leaves, internalNodes, allChildrenAreDeadEnds);
+            return new SearchResult(sum, new List<IState>() {startState}, leaves, internalNodes, fullTreeSearched, allChildrenAreDeadEnds, childrenPruned);
         }
     }
 }

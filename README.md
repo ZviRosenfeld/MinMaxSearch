@@ -1,11 +1,37 @@
 # MinMaxSearch
-A MinMax Search Engine.
+
+MinMaxSearch is a MinMax Search Engine that was created to be easily customized and simple to use.
+
 MinMax search is a popular search technique used for finding the next-best move in zero-summed games such as tic-tac-toe, checkers or backgammon.
 
 ## Download
 You can find MinMaxSearch library on nuget.org via package name MinMaxSearch.
 
-## How to Use
+## Table of Contents
+
+- [Usage](#usage)
+  - [IState](#istate)
+  - [IDeterministicState](#ideterministicstate)
+  - [IProbabilisticState](#iprobabilisticstate)
+	
+- [Tutorials](#tutorials)
+
+- [SearchEngine options](#searchengine-options)
+  - [PreventLoops](#preventloops)
+  - [FavorShortPaths](#favorshortpaths)
+  - [ParallelismMode](#parallelismmode)
+  - [CacheMode](#cachemode)
+  - [DieEarly](#dieearly)
+  - [IsUnstableState](#isunstablestate)
+  - [Pruners](#pruners)
+  - [SkipEvaluationForFirstNodeSingleNeighbor](#skipevaluationforfirstnodesingleneighbor)
+  - [StateDefinesDepth](#statedefinesdepth)
+  
+- [IterativeSearch](#iterativesearch)
+
+- [CompetitionManager](#competitionmanager)
+
+## Usage
 
 example1:
 ```csharp
@@ -36,7 +62,7 @@ SearchEngine has a number of Search methods that expect different parameters. Mo
 
 There are 2 types of states: IDeterministicState and IProbabilisticState. All your game states will need to implement one of these states.
 
-**IDeterministicState**
+### IDeterministicState
 
 States used for deterministic games (games that have no element of luck in them), such as tic-tac-toe or checkers.
 ```csharp
@@ -68,7 +94,7 @@ The code contains examples of [Tic-tac-toe](TicTacToeTests/TicTacToeState.cs) an
 
 You can find a tutorial on how to create a tic-tac-toe state [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Tic-Tac-Toe-Tutorial).
 
-**IProbabilisticState**
+### IProbabilisticState
 
 States used for indeterministic games (games that have an element of luck in them), such as backgammon.
 
@@ -79,10 +105,10 @@ If you're implementing a game like backgammon, the first state should "know" wha
 public interface IProbabilisticState : IState
 {
     /// <summary>
-    /// returns a tuple containing a probability, and a list of the s neighbors for that probability
+    /// returns a tuple containing a probability, and a list of neighbors for that probability
     /// Note that a win state shouldn't return any neighbors.
     /// </summary>
-    IEnumerable<Tuple<double, List<IState>>> GetNeighbors();
+    IEnumerable<Tuple<double, IEnumerable<IState>>> GetNeighbors();
 	
     /// <summary>
     /// returns the state's evaluation (how good it is).
@@ -105,43 +131,78 @@ The code contains an examples of a [Probabilistic Connect-4 State](Probabilistic
 
 You can find a tutorial on how to create a probabilistic version of tic-tac-toe [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Probabilistic-Tic-Tac-Toe-Tutorial).
 
-### Tutorials
+## Tutorials
 
 You can find a tutorial on how to create a tic-tac-toe state [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Tic-Tac-Toe-Tutorial), and one on a probabilistic version of tic-tac-toe [here](https://github.com/ZviRosenfeld/MinMaxSearch/wiki/Probabilistic-Tic-Tac-Toe-Tutorial).
 
-### SearchEngine options:
+## SearchEngine options
 SearchEngine can be configured with the following options:
 
-**PreventLoops:**
+### PreventLoops
 In some games - such as tic-tac-toe or connect 4 - loops are impossible. In others - like chess - loops can be quite common. If this flag is set to true, the program will automatically recognize loop situations and not look any deeper when they occur.
-Note that this will only work if Equals is implement in a meaningful way on your states.
+Note that this will only work if Equals is implement in a meaningful way for your states.
 
-**FavorShortPaths:**
+### FavorShortPaths
 If true, the algorithm will favor short solutions over long solutions when they both result in the same score.
 If this option is off, you may experience seemingly weird behavior. Say the algorithm sees that Min can set a trap that will end in Max's defeat in six moves. Without favoring short paths, the algorithm might decide to "give up", causing Max to perform random moves, and possibly lose much sooner - even though its opponent may not have noticed the trap.
 
-**ParallelismMode**:
+Please note that FavorShortPaths may not work togather with caching. 
 
+### ParallelismMode
 There are 4 ParallelismMode:
 - *FirstLevelOnly*: In this mode only the first level of the search tree will be calculated in parallel. This is the recommended mode and normally yields the fastest searches.
-- *ParallelismByLevel*: In this mode, the first x levels of the search will be carried out in parallel. You can determine x by setting "MaxLevelOfParallelism" in the SearchEngine. (available since 1.4.3)
+- *ParallelismByLevel*: In this mode, the first x levels of the search will be carried out in parallel. You can determine x by setting "MaxLevelOfParallelism" in the SearchEngine. (available since 1.5.0)
 - *NonParallelism*: No parallelism.
 - *TotalParallelism*: In this mode, the entire search tree will be calculated in parallel, up to the "MaxDegreeOfParallelism"
 
 Note that "MaxDegreeOfParallelism" will be ignored in all modes other than "TotalParallelism", and "MaxLevelOfParallelism" will be ignored in all modes other than "ParallelismByLevel".
 
-**DieEarly:**
-If this option is set to true, the algorithm will rerun as soon as it finds a score bigger then or equal to SearchEngine.MaxScore for Max or smaller or equal to SearchEngine.MinScore for Min.
-The rationale behind this is that once the algorithm finds a win there's no point in more searching. (We assume that a score greater then MaxScore is a win for Max, and one smaller then MinScore is a win for Min).
+### CacheMode
+*Very important:* You can only use that cache if your states' evaluation doesn't change depending on its location in the search tree.
+In particular, your states' evaluation can't depend on their depth in the tree of the states they've passed through. 
+
+Caching lets the engine remember stares that lead to certain win, losses or draws, so that it doesn't need to re-search trees it's already searched.
+Note that caching will only work if you implement Equals and GetHashValue in a meaningful way for your states. 
+Caching is available since version 1.5.0.
+
+We support 3 modes of caching:
+- *NoCache*: No Caching.
+- *NewCache*: The engine will initialize and use a new cache for every search.
+- *ReuseCache*: The engine will re-use the same cache between searches. You can clean the cache by calling the CacheManager's Clean method.
+
+If you're using the ReuseCache option, you can use the FillCache extension method to fill the cache while the program is idle (say, while your opponent is considering their next move).
+Just to remember to cancel the FillCache when you're ready to run a search (using the cancellation token).
+
+Please note that when using caching, the StateSequence in the SearchResult may be cut off early. 
+This is because the cache remembers the evaluations that states will lead to, but not *how* the state lead to that evaluation.
+So the StateSequence will end at the cached state.
+
+### DieEarly
+If this option is set to true, the algorithm will rerun as soon as it finds a score bigger than or equal to SearchEngine.MaxScore for Max or smaller or equal to SearchEngine.MinScore for Min.
+The rational behind this is that once the algorithm finds a win there's no point in more searching. (We assume that a score greater then MaxScore is a win for Max, and one smaller then MinScore is a win for Min).
 Note that this will only work if Equals is implement in a meaningful way on your states.
 
-**IsUnstableState:**
+### IsUnstableState
 Some states are more interesting than others. With this delegate you can tell the algorithm to continue searching for "interesting" states even after max search depth is exceeded.
 IsUnstableState is a delegate of type Func<IState, int, List<IState>, bool>. It receives a state and a list of the states leading up to it, and decides if it's safe to terminate the search at this state.
 
-**Pruners:**
+### Pruners
 You can use the method SearchEngine.AddPruner(IPruner pruner) to add pruners to the search algorithm.
-Pruners can be implemented by implementing the IPruner interface. Then, the ShouldPrune(IState state, int depth, List<IState> passedThroughStates) method will be called on every state the algorithm checks. This can provide you with a lot of customization power over the algorithm.
+Pruners can be implemented by implementing the [IPruner](https://github.com/ZviRosenfeld/MinMaxSearch/blob/master/MinMaxSearch/Pruners/IPruner.cs) interface. 
+Then, the ShouldPrune(IState state, int depth, List<IState> passedThroughStates) method will be called on every state the algorithm checks. 
+This can provide you with a lot of customization power over the algorithm.
+
+### SkipEvaluationForFirstNodeSingleNeighbor
+If this is set to true, in the case that the *first* node has a single neighbor, the engine will return that neighbor rather than evaluation the search tree.
+The default of this setting is true. (Available since 1.5.0).
+
+Note that this only applies to the first node.
+
+### StateDefinesDepth
+Set this to true it is possible to infer a state's depth from the state alone.
+This is trues for games like tic-tac-toe and connect 4, where the depth of a state is the number of tokens on the board.
+
+The engine will use this knowledge to optimize the search.
 
 ## IterativeSearch
 
@@ -167,64 +228,50 @@ Want to test the effect of different evaluation-strategies or search options? Co
 CompetitionManager can play a complete game in which the players can be using a different engines/search-depths/evaluation-strategies.
 CompetitionManager will return statistics on the game, including which player won, and how long each player took doing his searching.
 
+Exsample1: Comparing different search depths
 ```CSharp
-namespace MinMaxSearch.Benchmarking
-{
-    public static class CompetitionManager
-    {
-        /// <summary>
-        /// With this method you can simulate a complete game and compare different evaluation-strategies.
-        /// </summary>
-        /// <param name="engine"> The engine to use</param>
-        /// <param name="startState"> The starting sate</param>
-        /// <param name="searchDepth"> How deep should we search</param>
-        /// <param name="maxPlayDepth"> After how many moves should we terminate the game if no one won</param>
-        /// <param name="maxAlternateEvaluation"> Will be used to evaluate the board on max's turn in stead of the state's regaler Evaluate method (if null, will use the default state's evaluation method)</param>
-        /// <param name="minAlternateEvaluation"> Will be used to evaluate the board on min's turn in stead of the state's regaler Evaluate method (if null, will use the default state's evaluation method)</param>
-        public static CompetitionResult Compete(this SearchEngine engine, IDeterministicState startState,
-            int searchDepth, Func<IState, int, List<IState>, double> maxAlternateEvaluation = null,
-            Func<IState, int, List<IState>, double> minAlternateEvaluation = null, int maxPlayDepth = int.MaxValue,
-            CancellationToken? cancellationToken = null)
-        {
-            ...
-        }
+IDeterministicState startState = new TicTacToeState();
+int minSearchDepth = 2;
+int maxSearchDepth = 5;
+ISearchEngine engine = new SearchEngine();
 
-        /// <summary>
-        /// With this method you can simulate a complete game and compare different search-depth or evaluation-strategies.
-        /// </summary>
-        /// <param name="engine"> The engine to use</param>
-        /// <param name="startState"> The starting sate</param>
-        /// <param name="playerMaxSearchDepth"> How deep should max search</param>
-        /// <param name="playerMinSearchDepth"> How deep should min search</param>
-        /// <param name="maxPlayDepth"> After how many moves should we terminate the game if no one won</param>
-        /// <param name="maxAlternateEvaluation"> Will be used to evaluate the board on max's turn in stead of the state's regaler Evaluate method (if null, will use the default state's evaluation method)</param>
-        /// <param name="minAlternateEvaluation"> Will be used to evaluate the board on min's turn in stead of the state's regaler Evaluate method (if null, will use the default state's evaluation method)</param>
-        public static CompetitionResult Compete(this SearchEngine engine, IDeterministicState startState,
-            int playerMaxSearchDepth, int playerMinSearchDepth, Func<IState, int, List<IState>, double> maxAlternateEvaluation = null,
-            Func<IState, int, List<IState>, double> minAlternateEvaluation = null, int maxPlayDepth = int.MaxValue,
-            CancellationToken? cancellationToken = null)
-        {
-            ...
-        }
+CompetitionResult competitionResult = engine.Compete(startState, maxSearchDepth, minSearchDepth);
 
-        /// <summary>
-        /// With this method you can simulate a complete game and compare different engines, search-depths or evaluation-strategies.
-        /// </summary>
-        /// <param name="maxEngine"> An engine to use for max</param>
-        /// <param name="minEngine"> An engine to use for min</param>
-        /// <param name="startState"> The starting sate</param>
-        /// <param name="playerMaxSearchDepth"> How deep should max search</param>
-        /// <param name="playerMinSearchDepth"> How deep should min search</param>
-        /// <param name="maxPlayDepth"> After how many moves should we terminate the game if no one won</param>
-        /// <param name="maxAlternateEvaluation"> Will be used to evaluate the board on max's turn in stead of the state's regaler Evaluate method (if null, will use the default state's evaluation method)</param>
-        /// <param name="minAlternateEvaluation"> Will be used to evaluate the board on min's turn in stead of the state's regaler Evaluate method (if null, will use the default state's evaluation method)</param>
-        public static CompetitionResult Compete(SearchEngine maxEngine, SearchEngine minEngine,
-            IDeterministicState startState, int playerMaxSearchDepth, int playerMinSearchDepth, 
-            int maxPlayDepth = int.MaxValue, Func<IState, int, List<IState>, double> maxAlternateEvaluation = null,
-            Func<IState, int, List<IState>, double> minAlternateEvaluation = null, CancellationToken? cancellationToken = null)
-        {
-            ...
-        }
-    }
-}
+// Print some of the results
+Console.WriteLine("Max Search Time " + competitionResult.MaxTotalTime);
+Console.WriteLine("Min Search Time " + competitionResult.MinTotalTime);
+Console.WriteLine("Final Score " + competitionResult.FinalState.Evaluate(0, new List<IState>()));
+```
+
+Exsample2: In this example we'll use a different evaluation method for min
+```CSharp
+IDeterministicState startState = new TicTacToeState();
+int searchDepth = 6;
+ISearchEngine engine = new SearchEngine();
+
+CompetitionResult competitionResult = engine.Compete(startState, searchDepth, minAlternateEvaluation: (s, d, l) => {
+                // Some alternate evaluation goes here - you probably don't really want to return 0
+                return 0;
+            });
+			
+// Print some of the results
+Console.WriteLine("Max Search Time " + competitionResult.MaxTotalTime);
+Console.WriteLine("Min Search Time " + competitionResult.MinTotalTime);
+Console.WriteLine("Final Score " + competitionResult.FinalState.Evaluate(0, new List<IState>()));
+```
+
+Exsample3: Comparing different engines
+```CSharp
+IDeterministicState startState = new TicTacToeState();
+int searchDepth = 5;
+int playDepth = 100;
+ISearchEngine engine1 = new SearchEngine();
+ISearchEngine engine2 = new SearchEngine();
+
+CompetitionResult competitionResult = CompetitionManager.Compete(engine1, engine2, startState, searchDepth, searchDepth, playDepth);
+
+// Print some of the results
+Console.WriteLine("Max Search Time " + competitionResult.MaxTotalTime);
+Console.WriteLine("Min Search Time " + competitionResult.MinTotalTime);
+Console.WriteLine("Final Score " + competitionResult.FinalState.Evaluate(0, new List<IState>()));
 ```

@@ -18,7 +18,7 @@ namespace MinMaxSearch.UnitTests
             A.CallTo(() => state.GetNeighbors()).Returns(new List<IDeterministicState>());
             A.CallTo(() => state.Turn).Returns(Player.Empty);
 
-            var searchEngine = new SearchEngine();
+            var searchEngine = TestUtils.GetBasicSearchEngine();
             searchEngine.Search(state, 1);
         }
 
@@ -30,7 +30,7 @@ namespace MinMaxSearch.UnitTests
             A.CallTo(() => state.GetNeighbors()).Returns(new List<IDeterministicState> { state });
             A.CallTo(() => state.Turn).Returns(Player.Empty);
 
-            var searchEngine = new SearchEngine();
+            var searchEngine = TestUtils.GetBasicSearchEngine();
             searchEngine.Search(state, 1);
         }
 
@@ -46,7 +46,7 @@ namespace MinMaxSearch.UnitTests
             A.CallTo(() => startState.GetNeighbors()).Returns(new List<IDeterministicState> { state });
             A.CallTo(() => startState.Turn).Returns(Player.Min);
 
-            var searchEngine = new SearchEngine { ParallelismMode = ParallelismMode.NonParallelism};
+            var searchEngine = TestUtils.GetBasicSearchEngine(ParallelismMode.NonParallelism);
             searchEngine.Search(startState, 1);
         }
 
@@ -60,7 +60,7 @@ namespace MinMaxSearch.UnitTests
             A.CallTo(() => state.Turn).Returns(Player.Max);
             A.CallTo(() => istate.Turn).Returns(Player.Max);
 
-            var searchEngine = new SearchEngine() { ParallelismMode = ParallelismMode.NonParallelism };
+            var searchEngine = TestUtils.GetBasicSearchEngine(ParallelismMode.NonParallelism);
             searchEngine.Search(state, 5);
         }
 
@@ -70,8 +70,19 @@ namespace MinMaxSearch.UnitTests
         [ExpectedException(typeof(ArgumentException))]
         public void Search_NegativeDepth_ThrowException(int depth)
         {
-            var engine = new SearchEngine();
+            var engine = TestUtils.GetBasicSearchEngine();
             engine.Search(new IncreasingNumberState(1, Player.Max), depth);
+        }
+
+        [TestMethod]
+        [DataRow(10, 5)]
+        [ExpectedException(typeof(ArgumentException))]
+        public void Search_MinScoreGreaterThanMaxScore(int minScore, int maxScore)
+        {
+            var engine = TestUtils.GetBasicSearchEngine();
+            engine.MinScore = minScore;
+            engine.MaxScore = maxScore;
+            engine.Search(new IncreasingNumberState(1, Player.Max), 1);
         }
     }
 }
