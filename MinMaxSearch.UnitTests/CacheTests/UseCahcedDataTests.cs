@@ -11,12 +11,11 @@ namespace MinMaxSearch.UnitTests.CacheTests
     public class UseCahcedDataTests
     {
         [TestMethod]
-        public void ExactValueInCach_UseValue()
+        public void ExactValueInCache_UseValue()
         {
             var searchTree = new DeterministicTree();
-            var engine = new SearchEngine()
+            var engine = new SearchEngine(CacheMode.ReuseCache)
             {
-                CacheMode = CacheMode.ReuseCache,
                 SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             engine.CacheManager.AddExactEvaluation(searchTree.EndState1, 3);
@@ -28,9 +27,8 @@ namespace MinMaxSearch.UnitTests.CacheTests
         {
             var searchTree = new DeterministicTree();
             searchTree.EndState1.SetEvaluationTo(-2);
-            var engine = new SearchEngine()
+            var engine = new SearchEngine(CacheMode.ReuseCache)
             {
-                CacheMode = CacheMode.ReuseCache,
                 ParallelismMode = ParallelismMode.NonParallelism,
                 SkipEvaluationForFirstNodeSingleNeighbor = false
             };
@@ -44,9 +42,8 @@ namespace MinMaxSearch.UnitTests.CacheTests
             var searchTree = new DeterministicTree();
             searchTree.EndState2.SetEvaluationTo(2);
             searchTree.EndState2.SetEvaluationTo(4);
-            var engine = new SearchEngine()
+            var engine = new SearchEngine(CacheMode.ReuseCache)
             {
-                CacheMode = CacheMode.ReuseCache,
                 ParallelismMode = ParallelismMode.NonParallelism,
                 SkipEvaluationForFirstNodeSingleNeighbor = false
             };
@@ -61,9 +58,8 @@ namespace MinMaxSearch.UnitTests.CacheTests
         {
             var maxEvaluation = 10;
             var searchTree = new DeterministicTree(firstPlayer);
-            var engine = new SearchEngine()
+            var engine = new SearchEngine(CacheMode.ReuseCache)
             {
-                CacheMode = CacheMode.ReuseCache,
                 MaxScore = maxEvaluation,
                 SkipEvaluationForFirstNodeSingleNeighbor = false
             };
@@ -78,9 +74,8 @@ namespace MinMaxSearch.UnitTests.CacheTests
         {
             var minEvaluation = -10;
             var searchTree = new DeterministicTree(firstPlayer);
-            var engine = new SearchEngine()
+            var engine = new SearchEngine(CacheMode.ReuseCache)
             {
-                CacheMode = CacheMode.ReuseCache,
                 MinScore = minEvaluation,
                 SkipEvaluationForFirstNodeSingleNeighbor = false
             };

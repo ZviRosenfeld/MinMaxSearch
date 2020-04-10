@@ -13,6 +13,23 @@ namespace MinMaxSearch
 {
     public class SearchEngine : ISearchEngine
     {
+        public SearchEngine()
+        {
+        }
+
+        public SearchEngine(CacheMode cacheMode)
+        {
+            CacheMode = cacheMode;
+            if (cacheMode == CacheMode.ReuseCache)
+                CacheManager = new CacheManager();
+        }
+
+        public SearchEngine(ICacheManager cacheManager)
+        {
+            CacheManager = cacheManager;
+            CacheMode = CacheMode.ReuseCache;
+        }
+
         private readonly List<IPruner> pruners = new List<IPruner>();
 
         public SearchEngine AddPruner(IPruner pruner)
@@ -76,12 +93,12 @@ namespace MinMaxSearch
         /// 
         /// Note that caching will only work if you implement Equals and GetHashValue in a meaningful way for your states.
         /// </summary>
-        public CacheMode CacheMode { get; set; } = CacheMode.NoCache;
+        public CacheMode CacheMode { get; } = CacheMode.NoCache;
 
         /// <summary>
         /// Note that this CacheManager will only be used if CacheMode is set to ReuseCache
         /// </summary>
-        public ICacheManager CacheManager { get; set; }= new CacheManager();
+        public ICacheManager CacheManager { get; }
 
         /// <summary>
         /// If this is set to true, in the case that the first node has a single neighbor, the engine will return that neighbor rather than evaluation the search tree.
@@ -120,29 +137,37 @@ namespace MinMaxSearch
             return CacheManager;
         }
 
-        public SearchEngine Clone()
+        public SearchEngine CloneWithCacheManager(ICacheManager cacheManager)
         {
-            var newEngine = new SearchEngine()
-            {
-                AlternateEvaluation = AlternateEvaluation,
-                DieEarly = DieEarly,
-                FavorShortPaths = FavorShortPaths,
-                IsUnstableState = IsUnstableState,
-                MaxDegreeOfParallelism = MaxDegreeOfParallelism,
-                MaxLevelOfParallelism = MaxLevelOfParallelism,
-                MaxScore = MaxScore,
-                MinScore = MinScore,
-                PreventLoops = PreventLoops,
-                CacheMode = CacheMode,
-                ParallelismMode = ParallelismMode,
-                SkipEvaluationForFirstNodeSingleNeighbor = SkipEvaluationForFirstNodeSingleNeighbor
-            };
-            foreach (var pruner in pruners)
-                newEngine.AddPruner(pruner);
-
+            var newEngine = new SearchEngine(cacheManager);
+            CopySearchOptions(newEngine);
             return newEngine;
         }
-        
+
+        public SearchEngine Clone()
+        {
+            var newEngine = new SearchEngine(CacheMode);
+            CopySearchOptions(newEngine);
+            return newEngine;
+        }
+
+        private void CopySearchOptions(SearchEngine newEngine)
+        {
+            newEngine.AlternateEvaluation = AlternateEvaluation;
+            newEngine.DieEarly = DieEarly;
+            newEngine.FavorShortPaths = FavorShortPaths;
+            newEngine.IsUnstableState = IsUnstableState;
+            newEngine.MaxDegreeOfParallelism = MaxDegreeOfParallelism;
+            newEngine.MaxLevelOfParallelism = MaxLevelOfParallelism;
+            newEngine.MaxScore = MaxScore;
+            newEngine.MinScore = MinScore;
+            newEngine.PreventLoops = PreventLoops;
+            newEngine.ParallelismMode = ParallelismMode;
+            newEngine.SkipEvaluationForFirstNodeSingleNeighbor = SkipEvaluationForFirstNodeSingleNeighbor;
+            foreach (var pruner in pruners)
+                newEngine.AddPruner(pruner);
+        }
+
         /// <summary>
         /// Runs a search.
         /// </summary>

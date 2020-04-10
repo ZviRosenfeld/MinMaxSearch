@@ -5,8 +5,8 @@ namespace Connect4Tests
 {
     public class Connect4TestUtils
     {
-        public static SearchEngine GetSearchEngine(int maxDegreeOfParallelism, ParallelismMode parallelismMode, int levelOfParallelism = 1) =>
-            new SearchEngine()
+        public static SearchEngine GetSearchEngine(int maxDegreeOfParallelism, ParallelismMode parallelismMode, int levelOfParallelism = 1, CacheMode cacheMode = CacheMode.NewCache) =>
+            new SearchEngine(cacheMode)
             {
                 MaxDegreeOfParallelism = maxDegreeOfParallelism,
                 MaxLevelOfParallelism = levelOfParallelism,
@@ -15,7 +15,6 @@ namespace Connect4Tests
                 MaxScore = BoardEvaluator.MaxEvaluation,
                 ParallelismMode = parallelismMode,
                 SkipEvaluationForFirstNodeSingleNeighbor = false,
-                CacheMode = CacheMode.NewCache,
                 StateDefinesDepth = true
             };
 

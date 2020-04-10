@@ -18,7 +18,7 @@ namespace MinMaxSearch.Cache
         void Clear();
 
         /// <summary>
-        /// State will only be deleted if the 'shouldClean' conditon is meat
+        /// State will only be deleted if the 'shouldClean' condition is meat
         /// </summary>
         void Clear(Func<IState, bool> shouldClean);
     }

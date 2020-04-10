@@ -14,9 +14,8 @@ namespace MinMaxSearch.UnitTests.CacheTests
         public void Search_EngineRemebersCachedStates()
         {
             var tree = new UnaryDeterministicTree();
-            var engine = new SearchEngine()
+            var engine = new SearchEngine(CacheMode.ReuseCache)
             {
-                CacheMode = CacheMode.ReuseCache,
                 SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             engine.Search(tree.RootState, 10); // This should put all the states in the cache
@@ -26,12 +25,11 @@ namespace MinMaxSearch.UnitTests.CacheTests
         }
 
         [TestMethod]
-        public void FillCache_EngineRemebersCachedStates()
+        public void FillCache_EngineRemembersCachedStates()
         {
             var tree = new UnaryDeterministicTree();
-            var engine = new SearchEngine()
+            var engine = new SearchEngine(CacheMode.ReuseCache)
             {
-                CacheMode = CacheMode.ReuseCache,
                 SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             engine.FillCache(tree.RootState, CancellationToken.None);
@@ -47,10 +45,8 @@ namespace MinMaxSearch.UnitTests.CacheTests
             var customCache = A.Fake<ICacheManager>();
             A.CallTo(() => customCache.GetStateEvaluation(A<IState>._)).Returns(new EvaluationRange(1));
 
-            var engine = new SearchEngine()
+            var engine = new SearchEngine(customCache)
             {
-                CacheMode = CacheMode.ReuseCache,
-                CacheManager = customCache,
                 SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             engine.Search(tree.RootState, 10);
@@ -61,9 +57,8 @@ namespace MinMaxSearch.UnitTests.CacheTests
         public void ClearCacheWithCondition()
         {
             var tree = new UnaryDeterministicTree();
-            var engine = new SearchEngine()
+            var engine = new SearchEngine(CacheMode.ReuseCache)
             {
-                CacheMode = CacheMode.ReuseCache,
                 SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             engine.Search(tree.RootState, 10); // This should put all the states in the cache
@@ -76,9 +71,8 @@ namespace MinMaxSearch.UnitTests.CacheTests
         public void ClearCache_CacheCleared()
         {
             var tree = new UnaryDeterministicTree();
-            var engine = new SearchEngine()
+            var engine = new SearchEngine(CacheMode.ReuseCache)
             {
-                CacheMode = CacheMode.ReuseCache,
                 SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             engine.Search(tree.RootState, 10); // This should put all the states in the cache
@@ -94,9 +88,8 @@ namespace MinMaxSearch.UnitTests.CacheTests
         public void FillCache_CacheModeNotSetToResueCache_ThrowsException(CacheMode cacheMode)
         {
             var tree = new UnaryDeterministicTree();
-            var engine = new SearchEngine()
+            var engine = new SearchEngine(cacheMode)
             {
-                CacheMode = cacheMode,
                 SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             engine.FillCache(tree.RootState, CancellationToken.None);
