@@ -13,12 +13,12 @@ namespace MinMaxSearch.Samples
         {
             var engine = new SearchEngine
             {
-                IsUnstableState = IsUnstableStateCheckersState
+                IsUnstableState = IsUnstableCheckersState
             };
             return engine;
         }
 
-        private bool IsUnstableStateCheckersState(IState state, int depth, List<IState> passedThroghStates)
+        private bool IsUnstableCheckersState(IState state, int depth, List<IState> passedThroghStates)
         {
             var checkersState = (CheckersState) state;
             return checkersState.CanJump();
