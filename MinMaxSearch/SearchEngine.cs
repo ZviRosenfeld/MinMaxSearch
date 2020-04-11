@@ -27,6 +27,8 @@ namespace MinMaxSearch
                 CacheManager = GetCacheManager(cacheKeyType);
                 cacheManagerFactory = () => CacheManager;
             }
+            else if (cacheMode == CacheMode.NoCache)
+                cacheManagerFactory = () => new NullCacheManager();
             else
                 cacheManagerFactory = () => GetCacheManager(cacheKeyType);
         }
