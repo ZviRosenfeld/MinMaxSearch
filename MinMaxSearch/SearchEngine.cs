@@ -18,6 +18,13 @@ namespace MinMaxSearch
             cacheManagerFactory = () => new NullCacheManager();
         }
 
+        /// <summary>
+        /// In some search domains, remembering states that lead to wins, losses or draw can improve performance.
+        /// 
+        /// Use this constrocter to create an engine with a cahce.
+        /// 
+        /// Note that caching will only work if you implement Equals and GetHashValue in a meaningful way for your states.
+        /// </summary>
         public SearchEngine(CacheMode cacheMode, CacheKeyType cacheKeyType)
         {
             CacheMode = cacheMode;
@@ -44,6 +51,13 @@ namespace MinMaxSearch
             }
         }
 
+        /// <summary>
+        /// In some search domains, remembering states that lead to wins, losses or draw can improve performance.
+        /// 
+        /// Use this constrocter to create an engine with a custom cahce.
+        /// 
+        /// Note that caching will only work if you implement Equals and GetHashValue in a meaningful way for your states.
+        /// </summary>
         public SearchEngine(CacheMode cacheMode, Func<ICacheManager> cacheManagerFactory)
         {
             CacheMode = cacheMode;
@@ -113,20 +127,13 @@ namespace MinMaxSearch
         private SearchOptions CreateSearchOptions() => new SearchOptions(pruners, IsUnstableState, PreventLoops,
             FavorShortPaths, DieEarly, MaxScore, MinScore, AlternateEvaluation, StateDefinesDepth, CacheMode);
 
-        /// <summary>
-        /// In some search domains, remembering states that lead to wins, losses or draw can improve performance.
-        /// 
-        /// You can only use that cache if your states' evaluation doesn't change depending on its location in the search tree.
-        /// In particular, your states' evaluation can't depend on their depth in the tree of the states they've passed through. 
-        /// 
-        /// Note that caching will only work if you implement Equals and GetHashValue in a meaningful way for your states.
-        /// </summary>
         public CacheMode CacheMode { get; } = CacheMode.NoCache;
 
-        public CacheKeyType CacheKeyType { get; }
+        public CacheKeyType CacheKeyType { get; } = CacheKeyType.StateOnly;
 
         /// <summary>
-        /// Note that this CacheManager will only be used if CacheMode is set to ReuseCache
+        /// Note that this CacheManager will only be used if CacheMode is set to ReuseCache.
+        /// Otherwise, the engine will initialize a new cache for each search.
         /// </summary>
         public ICacheManager CacheManager { get; }
 
@@ -157,16 +164,6 @@ namespace MinMaxSearch
                 return new SequencelThreadManager();
 
             return new TotalParallelismThreadManager(MaxDegreeOfParallelism, searchDepth);
-        }
-
-        private ICacheManager BuildCacheManageree()
-        {
-            if (CacheMode == CacheMode.NoCache)
-                return new NullCacheManager();
-            if (CacheMode == CacheMode.NewCache)
-                return new StateCacheManager();
-
-            return CacheManager;
         }
 
         public SearchEngine CloneWithCacheManager(ICacheManager cacheManager)
