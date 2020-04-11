@@ -189,7 +189,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
             var searchTree = new RepeatStateTree();
             searchTree.ChildState2.SetEvaluationTo(3, 4);
 
-            var engine = new SearchEngine(CacheMode.NewCache)
+            var engine = new SearchEngine(CacheMode.NewCache, CacheKeyType.StateOnly)
             {
                 FavorShortPaths = favorShortPaths,
                 DieEarly = dieEarly,
@@ -210,7 +210,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
             var searchTree = new RepeatStateTree();
             searchTree.ChildState2.SetEvaluationTo(3, 4);
 
-            var engine = new SearchEngine(reuseCache ? CacheMode.ReuseCache : CacheMode.NewCache)
+            var engine = new SearchEngine(reuseCache ? CacheMode.ReuseCache : CacheMode.NewCache, CacheKeyType.StateOnly)
             {
                 StateDefinesDepth = stateDefinesDepth,
                 ParallelismMode = ParallelismMode.NonParallelism
@@ -235,7 +235,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
             searchTree.EndState2.SetEvaluationTo(4, 7);
             searchTree.EndState3.SetEvaluationTo(6);
 
-            var engine = new SearchEngine(CacheMode.NewCache)
+            var engine = new SearchEngine(CacheMode.NewCache, CacheKeyType.StateOnly)
             {
                 FavorShortPaths = favorShortPaths,
                 DieEarly = dieEarly,
@@ -261,7 +261,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
             var myPruner = A.Fake<IPruner>();
             A.CallTo(() => myPruner.ShouldPrune(A<IState>._, A<int>._, A<List<IState>>._))
                 .ReturnsLazily((IState s, int d, List<IState> l) => s == searchTree.ChildState5);
-            var engine = new SearchEngine(CacheMode.NewCache)
+            var engine = new SearchEngine(CacheMode.NewCache, CacheKeyType.StateOnly)
             {
                 FavorShortPaths = favorShortPaths,
                 DieEarly = dieEarly,
@@ -293,7 +293,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
         }
 
         private static SearchEngine GetReuseCacheEngine(bool dieEarly, bool favorShortPaths) =>
-            new SearchEngine(CacheMode.ReuseCache)
+            new SearchEngine(CacheMode.ReuseCache, CacheKeyType.StateOnly)
             {
                 ParallelismMode = ParallelismMode.NonParallelism,
                 MaxScore = MAX_EVALUATION,
@@ -304,6 +304,6 @@ namespace MinMaxSearch.UnitTests.CacheTests
             };
 
         private EvaluationRange GetEvaluation(SearchEngine engine, IState state) =>
-            ((CacheManager)engine.CacheManager)[state];
+            ((StateCacheManager)engine.CacheManager)[state];
     }
 }

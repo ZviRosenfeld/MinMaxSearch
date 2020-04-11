@@ -58,28 +58,28 @@ namespace MinMaxSearch
                     throw new BadStateTypeException($"State must implement {nameof(IDeterministicState)} or {nameof(IProbabilisticState)}");
             }
 
-            AddResultToCach(startState, result);
+            AddResultToCach(startState, searchContext.CurrentDepth, searchContext.StatesUpTillNow, result);
             return result;
         }
 
-        private void AddResultToCach(IState state, SearchResult result)
+        private void AddResultToCach(IState state, int depth, IList<IState> statesUpTillNow, SearchResult result)
         {
             if (result.AllChildrenAreDeadEnds)
-                cache.AddExactEvaluation(state, result.Evaluation);
+                cache.AddExactEvaluation(state, depth, statesUpTillNow, result.Evaluation);
             else if (searchOptions.StateDefinesDepth && searchOptions.IsUnstableState == null && searchOptions.CacheMode != CacheMode.ReuseCache && !result.ChildrenPruned)
-                cache.AddExactEvaluation(state, result.Evaluation);
+                cache.AddExactEvaluation(state, depth, statesUpTillNow, result.Evaluation);
             else if (result.FullTreeSearchedOrPruned)
             {
                 if (state.Turn == Player.Max)
-                    cache.AddMinEvaluation(state, result.Evaluation);
+                    cache.AddMinEvaluation(state, depth, statesUpTillNow, result.Evaluation);
                 else
-                    cache.AddMaxEvaluation(state, result.Evaluation);
+                    cache.AddMaxEvaluation(state, depth, statesUpTillNow, result.Evaluation);
             }
         }
 
         private SearchResult CheckCacheForEvaluation(IState startState, SearchContext searchContext)
         {
-            var evaluation = cache.GetStateEvaluation(startState);
+            var evaluation = cache.GetStateEvaluation(startState, searchContext.CurrentDepth, searchContext.StatesUpTillNow);
             if (evaluation == null)
                 return null;
 

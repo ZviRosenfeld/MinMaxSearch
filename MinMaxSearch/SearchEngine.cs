@@ -15,19 +15,45 @@ namespace MinMaxSearch
     {
         public SearchEngine()
         {
+            cacheManagerFactory = () => new NullCacheManager();
         }
 
-        public SearchEngine(CacheMode cacheMode)
+        public SearchEngine(CacheMode cacheMode, CacheKeyType cacheKeyType)
         {
             CacheMode = cacheMode;
+
             if (cacheMode == CacheMode.ReuseCache)
-                CacheManager = new CacheManager();
+            {
+                CacheManager = GetCacheManager(cacheKeyType);
+                cacheManagerFactory = () => CacheManager;
+            }
+            else
+                cacheManagerFactory = () => GetCacheManager(cacheKeyType);
         }
 
-        public SearchEngine(ICacheManager cacheManager)
+        private ICacheManager GetCacheManager(CacheKeyType cacheKeyType)
         {
-            CacheManager = cacheManager;
-            CacheMode = CacheMode.ReuseCache;
+            switch (cacheKeyType)
+            {
+                case CacheKeyType.StateOnly: return new StateCacheManager();
+                case CacheKeyType.StateAndDepth: return new StateAndDepthCacheManager();
+                case CacheKeyType.StateAndPassedThroughStates: return new StateAndPassedThroughCacheManager();
+                default: throw new InternalException("Code 1005 (not supported cache type)");
+            }
+        }
+
+        public SearchEngine(CacheMode cacheMode, Func<ICacheManager> cacheManagerFactory)
+        {
+            CacheMode = CacheMode;
+            if (cacheMode == CacheMode.ReuseCache)
+            {
+                CacheManager = cacheManagerFactory();
+                cacheManagerFactory = () => CacheManager;
+            }
+            else
+            {
+                this.cacheManagerFactory = cacheManagerFactory;
+            }
         }
 
         private readonly List<IPruner> pruners = new List<IPruner>();
@@ -95,10 +121,14 @@ namespace MinMaxSearch
         /// </summary>
         public CacheMode CacheMode { get; } = CacheMode.NoCache;
 
+        public CacheKeyType CacheKeyType { get; }
+
         /// <summary>
         /// Note that this CacheManager will only be used if CacheMode is set to ReuseCache
         /// </summary>
         public ICacheManager CacheManager { get; }
+
+        private Func<ICacheManager> cacheManagerFactory;
 
         /// <summary>
         /// If this is set to true, in the case that the first node has a single neighbor, the engine will return that neighbor rather than evaluation the search tree.
@@ -127,26 +157,26 @@ namespace MinMaxSearch
             return new TotalParallelismThreadManager(MaxDegreeOfParallelism, searchDepth);
         }
 
-        private ICacheManager BuildCacheManager()
+        private ICacheManager BuildCacheManageree()
         {
             if (CacheMode == CacheMode.NoCache)
                 return new NullCacheManager();
             if (CacheMode == CacheMode.NewCache)
-                return new CacheManager();
+                return new StateCacheManager();
 
             return CacheManager;
         }
 
         public SearchEngine CloneWithCacheManager(ICacheManager cacheManager)
         {
-            var newEngine = new SearchEngine(cacheManager);
+            var newEngine = new SearchEngine(CacheMode, () => cacheManager);
             CopySearchOptions(newEngine);
             return newEngine;
         }
 
         public SearchEngine Clone()
         {
-            var newEngine = new SearchEngine(CacheMode);
+            var newEngine = new SearchEngine(CacheMode, CacheKeyType);
             CopySearchOptions(newEngine);
             return newEngine;
         }
@@ -206,7 +236,7 @@ namespace MinMaxSearch
             }
 
             var searchContext = new SearchContext(maxDepth, 0, cancellationToken);
-            var searchWorker = new SearchWorker(CreateSearchOptions(), GetThreadManager(maxDepth), BuildCacheManager());
+            var searchWorker = new SearchWorker(CreateSearchOptions(), GetThreadManager(maxDepth), cacheManagerFactory());
             var stopwatch = new Stopwatch();
             stopwatch.Start();
             var result = searchWorker.Evaluate(startState, searchContext);

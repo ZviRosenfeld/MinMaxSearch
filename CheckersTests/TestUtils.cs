@@ -37,7 +37,7 @@ namespace CheckersTests
         public static CheckerPiece[,] GetEmptyBoard(int size) => new CheckerPiece[size, size];
 
         public static SearchEngine GetCheckersSearchEngine(int maxDegreeOfParallelism = 1, ParallelismMode parallelismMode = ParallelismMode.NonParallelism, int levelOfParallelism = 1, bool dieEarly = true, CacheMode cacheMode = CacheMode.NewCache) =>
-            new SearchEngine(cacheMode)
+            new SearchEngine(cacheMode, CacheKeyType.StateOnly)
             {
                 MaxDegreeOfParallelism = maxDegreeOfParallelism,
                 MaxLevelOfParallelism = levelOfParallelism,

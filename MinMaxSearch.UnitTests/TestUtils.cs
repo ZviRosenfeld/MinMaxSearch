@@ -31,7 +31,7 @@ namespace MinMaxSearch.UnitTests
         public static SearchEngine GetBasicSearchEngine(
             ParallelismMode parallelismMode = ParallelismMode.FirstLevelOnly, int maxDegreeOfParallelism = 1,
             int parallelismLevel = 1) =>
-            new SearchEngine(CacheMode.NewCache)
+            new SearchEngine(CacheMode.NewCache, CacheKeyType.StateOnly)
             {
                 SkipEvaluationForFirstNodeSingleNeighbor = false,
                 ParallelismMode = parallelismMode,

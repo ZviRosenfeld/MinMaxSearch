@@ -6,7 +6,7 @@ namespace Connect4Tests
     public class Connect4TestUtils
     {
         public static SearchEngine GetSearchEngine(int maxDegreeOfParallelism, ParallelismMode parallelismMode, int levelOfParallelism = 1, CacheMode cacheMode = CacheMode.NewCache) =>
-            new SearchEngine(cacheMode)
+            new SearchEngine(cacheMode, CacheKeyType.StateOnly)
             {
                 MaxDegreeOfParallelism = maxDegreeOfParallelism,
                 MaxLevelOfParallelism = levelOfParallelism,

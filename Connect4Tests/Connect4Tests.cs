@@ -108,8 +108,8 @@ namespace Connect4Tests
 
             var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode, 1 , CacheMode.ReuseCache);
             engine.Search(startState, 5);
-            Assert.IsTrue(((CacheManager)engine.CacheManager).Count > 0, "The cache doesn't contain any states");
-            Assert.IsNotNull(engine.CacheManager.GetStateEvaluation(startState), "The cache doesn't contain the start state");
+            Assert.IsTrue(((StateCacheManager)engine.CacheManager).Count > 0, "The cache doesn't contain any states");
+            Assert.IsNotNull(engine.CacheManager.GetStateEvaluation(startState, 0 , null), "The cache doesn't contain the start state");
 
             var evaluation = engine.Search(startState, 5);
 
@@ -128,8 +128,8 @@ namespace Connect4Tests
             var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode, 1, CacheMode.ReuseCache);
             engine.DieEarly = true;
             engine.FillCache(startState, CancellationToken.None);
-            Assert.IsTrue(((CacheManager) engine.CacheManager).Count > 0, "The cache doesn't contain any states");
-            Assert.IsNotNull(engine.CacheManager.GetStateEvaluation(startState), "The cache doesn't contain the start state");
+            Assert.IsTrue(((StateCacheManager) engine.CacheManager).Count > 0, "The cache doesn't contain any states");
+            Assert.IsNotNull(engine.CacheManager.GetStateEvaluation(startState, 0, null), "The cache doesn't contain the start state");
 
             var evaluation = engine.Search(startState, 5);
 
@@ -162,7 +162,7 @@ namespace Connect4Tests
             var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode, 1, CacheMode.ReuseCache);
             engine.DieEarly = false;
             engine.Search(startState, 5);
-            Assert.IsTrue(((CacheManager)engine.CacheManager).Count > 0, "The cache doesn't contain any states");
+            Assert.IsTrue(((StateCacheManager)engine.CacheManager).Count > 0, "The cache doesn't contain any states");
             
             var evaluation = engine.Search(startState, 5);
 
@@ -214,7 +214,7 @@ namespace Connect4Tests
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
             }, Player.Max);
 
-            var engine = new SearchEngine(CacheMode.NewCache)
+            var engine = new SearchEngine(CacheMode.NewCache, CacheKeyType.StateOnly)
             {
                 FavorShortPaths = true,
                 MaxDegreeOfParallelism = degreeOfParallelism,
@@ -246,7 +246,7 @@ namespace Connect4Tests
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
             }, Player.Min);
 
-            var engine = new SearchEngine(CacheMode.NewCache)
+            var engine = new SearchEngine(CacheMode.NewCache, CacheKeyType.StateOnly)
             {
                 FavorShortPaths = true,
                 MaxDegreeOfParallelism = degreeOfParallelism,

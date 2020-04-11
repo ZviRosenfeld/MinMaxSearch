@@ -159,7 +159,7 @@ namespace TicTacToeTests
         }
         
         public static SearchEngine GetSearchEngine(int degreeOfParallelism, ParallelismMode parallelismMode, CacheMode cacheMode = CacheMode.NewCache) =>
-            new SearchEngine(cacheMode)
+            new SearchEngine(cacheMode, CacheKeyType.StateOnly)
             {
                 MaxDegreeOfParallelism = degreeOfParallelism,
                 DieEarly = true,
