@@ -44,11 +44,11 @@ namespace MinMaxSearch
 
         public SearchEngine(CacheMode cacheMode, Func<ICacheManager> cacheManagerFactory)
         {
-            CacheMode = CacheMode;
+            CacheMode = cacheMode;
             if (cacheMode == CacheMode.ReuseCache)
             {
                 CacheManager = cacheManagerFactory();
-                cacheManagerFactory = () => CacheManager;
+                this.cacheManagerFactory = () => CacheManager;
             }
             else
             {
