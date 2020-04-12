@@ -32,7 +32,10 @@ namespace MinMaxSearch
 
             if (cacheMode == CacheMode.NoCache)
                 throw new MinMaxSearchException($"Can't set {nameof(cacheMode)} to {CacheMode.NoCache} when using a cache. If you don't want to use a cache, please use the empty constructor.");
-            else if (cacheMode == CacheMode.ReuseCache)
+            if (cacheKeyType == CacheKeyType.Unknown)
+                throw new MinMaxSearchException($"{nameof(CacheKeyType)} can't be of type {nameof(CacheKeyType.Unknown)}");
+            
+            if (cacheMode == CacheMode.ReuseCache)
             {
                 CacheManager = GetCacheManager(cacheKeyType);
                 cacheManagerFactory = () => CacheManager;

@@ -96,5 +96,12 @@ namespace MinMaxSearch.UnitTests
             var engine = new SearchEngine(cacheMode, cacheKeyType) { StateDefinesDepth = true };
             engine.Search(new IncreasingNumberState(1, Player.Max), 1);
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(MinMaxSearchException))]
+        public void Constructor_CacheKeyTypeUnknown_ThrowException()
+        {
+            new SearchEngine(CacheMode.NewCache, CacheKeyType.Unknown);
+        }
     }
 }
