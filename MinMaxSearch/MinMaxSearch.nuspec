@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>MinMaxSearch</id>
-    <version>1.5.0</version>
+    <version>1.5.1</version>
 	<title>A MinMax Search Engine</title>
     <description>A MinMax Search Engine. MinMaxSearch was created to be easily customized and simple to use.</description>
     <authors>Zvi Rosenfeld</authors>
@@ -11,6 +11,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <tags>MinMaxSearch MinMax Minimax Expectiminimax</tags>
 	<copyright>Zvi Rosenfeld</copyright>
+	<releaseNotes>Changed and improved that cache. The cache must now be set in the constructor.</releaseNotes>
   </metadata>
   <files>
         <file src="bin\Release\netstandard2.0\*.dll" target="lib\netstandard2.0" />

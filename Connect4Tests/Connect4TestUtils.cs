@@ -5,18 +5,20 @@ namespace Connect4Tests
 {
     public class Connect4TestUtils
     {
-        public static SearchEngine GetSearchEngine(int maxDegreeOfParallelism, ParallelismMode parallelismMode, int levelOfParallelism = 1, CacheMode cacheMode = CacheMode.NewCache) =>
-            new SearchEngine(cacheMode, CacheKeyType.StateOnly)
-            {
-                MaxDegreeOfParallelism = maxDegreeOfParallelism,
-                MaxLevelOfParallelism = levelOfParallelism,
-                DieEarly = true,
-                MinScore = BoardEvaluator.MinEvaluation,
-                MaxScore = BoardEvaluator.MaxEvaluation,
-                ParallelismMode = parallelismMode,
-                SkipEvaluationForFirstNodeSingleNeighbor = false,
-                StateDefinesDepth = true
-            };
+        public static SearchEngine GetSearchEngine(int maxDegreeOfParallelism, ParallelismMode parallelismMode, int levelOfParallelism = 1, CacheMode cacheMode = CacheMode.NewCache)
+        {
+            var engine = cacheMode == CacheMode.NoCache ? new SearchEngine() : new SearchEngine(cacheMode, CacheKeyType.StateOnly);
+            engine.MaxDegreeOfParallelism = maxDegreeOfParallelism;
+            engine.MaxLevelOfParallelism = levelOfParallelism;
+            engine.DieEarly = true;
+            engine.MinScore = BoardEvaluator.MinEvaluation;
+            engine.MaxScore = BoardEvaluator.MaxEvaluation;
+            engine.ParallelismMode = parallelismMode;
+            engine.SkipEvaluationForFirstNodeSingleNeighbor = false;
+            engine.StateDefinesDepth = true;
+
+            return engine;
+        }
 
         public static Player[,] GetEmptyBoard() =>
             new[,]

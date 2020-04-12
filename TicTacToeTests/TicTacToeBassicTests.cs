@@ -150,24 +150,27 @@ namespace TicTacToeTests
             {
                 //Check that the our optimizations are working
                 Assert.IsTrue(evaluation.Leaves < 63000, "Too many leaves in search.");
-                Assert.IsTrue(evaluation.InternalNodes < 84000, "Too many intarnal nodes in search.");
+                Assert.IsTrue(evaluation.InternalNodes < 84000, "Too many internal nodes in search.");
             }
 
             // Too few leaves or internal nodes means that something went wrong
             Assert.IsTrue(evaluation.Leaves > 500, "Too few leaves in search.");
-            Assert.IsTrue(evaluation.InternalNodes > 500, "Too few intarnal nodes in search.");
+            Assert.IsTrue(evaluation.InternalNodes > 500, "Too few internal nodes in search.");
         }
-        
-        public static SearchEngine GetSearchEngine(int degreeOfParallelism, ParallelismMode parallelismMode, CacheMode cacheMode = CacheMode.NewCache) =>
-            new SearchEngine(cacheMode, CacheKeyType.StateOnly)
-            {
-                MaxDegreeOfParallelism = degreeOfParallelism,
-                DieEarly = true,
-                MinScore = -1,
-                MaxScore = 1,
-                ParallelismMode = parallelismMode,
-                SkipEvaluationForFirstNodeSingleNeighbor = false,
-                StateDefinesDepth = true
-            };
+
+        public static SearchEngine GetSearchEngine(int degreeOfParallelism, ParallelismMode parallelismMode, CacheMode cacheMode = CacheMode.NewCache)
+        {
+            var searchEngine = cacheMode == CacheMode.NoCache ? new SearchEngine() : new SearchEngine(cacheMode, CacheKeyType.StateOnly);
+
+            searchEngine.MaxDegreeOfParallelism = degreeOfParallelism;
+            searchEngine.DieEarly = true;
+            searchEngine.MinScore = -1;
+            searchEngine.MaxScore = 1;
+            searchEngine.ParallelismMode = parallelismMode;
+            searchEngine.SkipEvaluationForFirstNodeSingleNeighbor = false;
+            searchEngine.StateDefinesDepth = true;
+
+            return searchEngine;
+        }
     }
 }

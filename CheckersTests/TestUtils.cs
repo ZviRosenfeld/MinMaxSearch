@@ -36,17 +36,19 @@ namespace CheckersTests
 
         public static CheckerPiece[,] GetEmptyBoard(int size) => new CheckerPiece[size, size];
 
-        public static SearchEngine GetCheckersSearchEngine(int maxDegreeOfParallelism = 1, ParallelismMode parallelismMode = ParallelismMode.NonParallelism, int levelOfParallelism = 1, bool dieEarly = true, CacheMode cacheMode = CacheMode.NewCache) =>
-            new SearchEngine(cacheMode, CacheKeyType.StateOnly)
-            {
-                MaxDegreeOfParallelism = maxDegreeOfParallelism,
-                MaxLevelOfParallelism = levelOfParallelism,
-                DieEarly = dieEarly,
-                MinScore = CheckersState.MIN_WIN,
-                MaxScore = CheckersState.MAX_WIN,
-                ParallelismMode = parallelismMode,
-                SkipEvaluationForFirstNodeSingleNeighbor = false,
-            };
+        public static SearchEngine GetCheckersSearchEngine(int maxDegreeOfParallelism = 1, ParallelismMode parallelismMode = ParallelismMode.NonParallelism, int levelOfParallelism = 1, bool dieEarly = true, CacheMode cacheMode = CacheMode.NewCache)
+        {
+            var engine = cacheMode == CacheMode.NoCache ? new SearchEngine() : new SearchEngine(cacheMode, CacheKeyType.StateOnly);
+            engine.MaxDegreeOfParallelism = maxDegreeOfParallelism;
+            engine.MaxLevelOfParallelism = levelOfParallelism;
+            engine.DieEarly = dieEarly;
+            engine.MinScore = CheckersState.MIN_WIN;
+            engine.MaxScore = CheckersState.MAX_WIN;
+            engine.ParallelismMode = parallelismMode;
+            engine.SkipEvaluationForFirstNodeSingleNeighbor = false;
+
+            return engine;
+        }
         
         public static bool AreEquale(CheckerPiece[,] board1, CheckerPiece[,] board2)
         {
