@@ -2,6 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Zvi Rosenfeld</Authors>
+    <Description>A MinMax Search Engine. MinMaxSearch was created to be easily customized and simple to use.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/ZviRosenfeld/MinMaxSearch</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>

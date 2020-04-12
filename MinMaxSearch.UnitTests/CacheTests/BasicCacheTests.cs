@@ -1,4 +1,6 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using FakeItEasy;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MinMaxSearch.Cache;
@@ -11,27 +13,96 @@ namespace MinMaxSearch.UnitTests.CacheTests
     public class BasicCacheTests
     {
         [TestMethod]
-        public void Search_EngineRemebersCachedStates()
+        [DataRow(CacheKeyType.StateOnly)]
+        [DataRow(CacheKeyType.StateAndDepth)]
+        [DataRow(CacheKeyType.StateAndPassedThroughStates)]
+        public void Search_EngineRemebersCachedStates(CacheKeyType cacheKeyType)
         {
             var tree = new UnaryDeterministicTree();
-            var engine = new SearchEngine()
+            var engine = new SearchEngine(CacheMode.ReuseCache, cacheKeyType)
             {
-                CacheMode = CacheMode.ReuseCache,
                 SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             engine.Search(tree.RootState, 10); // This should put all the states in the cache
             var result = engine.Search(tree.RootState, 10);
-            Assert.AreEqual(result.StateSequence.Count, 1);
+            Assert.AreEqual(1, result.StateSequence.Count);
             Assert.IsTrue(result.FullTreeSearchedOrPruned);
         }
 
         [TestMethod]
-        public void FillCache_EngineRemebersCachedStates()
+        [ExpectedException(typeof(MinMaxSearchException))]
+        [DataRow(CacheKeyType.StateOnly)]
+        [DataRow(CacheKeyType.StateAndDepth)]
+        [DataRow(CacheKeyType.StateAndPassedThroughStates)]
+        public void Search_NoCacheMode_ThrowException(CacheKeyType cacheKeyType)
+        {
+            new SearchEngine(CacheMode.NoCache, cacheKeyType);           
+        }
+
+        [TestMethod]
+        public void Search_CacheKeyStateOnly_EngineRemebersCachedStates()
         {
             var tree = new UnaryDeterministicTree();
-            var engine = new SearchEngine()
+            var engine = new SearchEngine(CacheMode.ReuseCache, CacheKeyType.StateOnly)
             {
-                CacheMode = CacheMode.ReuseCache,
+                SkipEvaluationForFirstNodeSingleNeighbor = false
+            };
+            engine.Search(tree.State2, 10); // This should put state's 2 and 3 in the cache
+            var result = engine.Search(tree.RootState, 10);
+            Assert.AreEqual(1, result.StateSequence.Count); // The tree should end at state2 - which is cached
+            Assert.AreEqual(tree.State2, result.StateSequence.Last());
+            Assert.IsTrue(result.FullTreeSearchedOrPruned);
+        }
+
+        [TestMethod]
+        public void Search_CacheKeyStateAndDepth_EngineDoesntUseCachedStatesWithDiffrentDepth()
+        {
+            var tree = new UnaryDeterministicTree();
+            var engine = new SearchEngine(CacheMode.ReuseCache, CacheKeyType.StateAndDepth)
+            {
+                SkipEvaluationForFirstNodeSingleNeighbor = false
+            };
+            engine.Search(tree.State2, 10); 
+            var result = engine.Search(tree.RootState, 10);
+            Assert.AreEqual(3, result.StateSequence.Count);  // The tree shouldn't end at state2 - since it's cached with depth 1, and in the second search it will have depth 2
+            Assert.AreEqual(tree.EndState, result.StateSequence.Last());
+        }
+
+        [TestMethod]
+        public void Search_CacheKeyStateAndDepth_EngineRemembersUsedCachedStatesWithSameDiffrentDepth()
+        {
+            var tree = new RepeatStateTree2();
+            var engine = new SearchEngine(CacheMode.ReuseCache, CacheKeyType.StateAndDepth)
+            {
+                SkipEvaluationForFirstNodeSingleNeighbor = false
+            };
+            engine.Search(tree.State1, 10);
+            var result = engine.Search(tree.State2, 10); // This should put state3 into the cache with depth 1
+            Assert.AreEqual(1, result.StateSequence.Count);
+            Assert.AreEqual(tree.State3, result.StateSequence.Last());
+            Assert.IsTrue(result.FullTreeSearchedOrPruned);
+        }
+
+        [TestMethod]
+        public void Search_CacheKeyStateAndPassedThroughStates_EngineDoesntUseCachedStatesWithDiffrentPassedThroughStates()
+        {
+            var tree = new RepeatStateTree2();
+            var engine = new SearchEngine(CacheMode.ReuseCache, CacheKeyType.StateAndPassedThroughStates)
+            {
+                SkipEvaluationForFirstNodeSingleNeighbor = false
+            };
+            engine.Search(tree.State1, 10);
+            var result = engine.Search(tree.State2, 10); // This should put state3 into the cache with depth 1
+            Assert.AreEqual(2, result.StateSequence.Count);
+            Assert.AreEqual(tree.EndState1, result.StateSequence.Last());
+        }
+
+        [TestMethod]
+        public void FillCache_EngineRemembersCachedStates()
+        {
+            var tree = new UnaryDeterministicTree();
+            var engine = new SearchEngine(CacheMode.ReuseCache, CacheKeyType.StateOnly)
+            {
                 SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             engine.FillCache(tree.RootState, CancellationToken.None);
@@ -41,16 +112,16 @@ namespace MinMaxSearch.UnitTests.CacheTests
         }
 
         [TestMethod]
-        public void SetCustomCache_UseCustomCache()
+        [DataRow(CacheMode.NewCache)]
+        [DataRow(CacheMode.ReuseCache)]
+        public void SetCustomCache_UseCustomCache(CacheMode cacheMode)
         {
             var tree = new UnaryDeterministicTree();
             var customCache = A.Fake<ICacheManager>();
-            A.CallTo(() => customCache.GetStateEvaluation(A<IState>._)).Returns(new EvaluationRange(1));
+            A.CallTo(() => customCache.GetStateEvaluation(A<IState>._, A<int>._, A<IList<IState>>._)).Returns(new EvaluationRange(1));
 
-            var engine = new SearchEngine()
+            var engine = new SearchEngine(cacheMode, () => customCache)
             {
-                CacheMode = CacheMode.ReuseCache,
-                CacheManager = customCache,
                 SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             engine.Search(tree.RootState, 10);
@@ -58,16 +129,22 @@ namespace MinMaxSearch.UnitTests.CacheTests
         }
 
         [TestMethod]
+        [ExpectedException(typeof(MinMaxSearchException))]
+        public void SetCustomCacheAndNoCacheMode_ThroWException()
+        {
+            new SearchEngine(CacheMode.NoCache, () => A.Fake<ICacheManager>());
+        }
+
+        [TestMethod]
         public void ClearCacheWithCondition()
         {
             var tree = new UnaryDeterministicTree();
-            var engine = new SearchEngine()
+            var engine = new SearchEngine(CacheMode.ReuseCache, CacheKeyType.StateOnly)
             {
-                CacheMode = CacheMode.ReuseCache,
                 SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             engine.Search(tree.RootState, 10); // This should put all the states in the cache
-            engine.CacheManager.Clear(s => s != tree.State2);
+            engine.CacheManager.Clear((s, _, l) => s != tree.State2);
             var result = engine.Search(tree.RootState, 10);
             Assert.AreNotEqual(result.StateSequence.Count, 2);
         }
@@ -76,9 +153,8 @@ namespace MinMaxSearch.UnitTests.CacheTests
         public void ClearCache_CacheCleared()
         {
             var tree = new UnaryDeterministicTree();
-            var engine = new SearchEngine()
+            var engine = new SearchEngine(CacheMode.ReuseCache, CacheKeyType.StateOnly)
             {
-                CacheMode = CacheMode.ReuseCache,
                 SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             engine.Search(tree.RootState, 10); // This should put all the states in the cache
@@ -94,9 +170,8 @@ namespace MinMaxSearch.UnitTests.CacheTests
         public void FillCache_CacheModeNotSetToResueCache_ThrowsException(CacheMode cacheMode)
         {
             var tree = new UnaryDeterministicTree();
-            var engine = new SearchEngine()
+            var engine = new SearchEngine(cacheMode, CacheKeyType.StateOnly)
             {
-                CacheMode = cacheMode,
                 SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             engine.FillCache(tree.RootState, CancellationToken.None);

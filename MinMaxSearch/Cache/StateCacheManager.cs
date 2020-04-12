@@ -1,20 +1,18 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Text;
 using MinMaxSearch.Exceptions;
 
 namespace MinMaxSearch.Cache
 {
-    public class CacheManager : ICacheManager
+    public class StateCacheManager : ICacheManager
     {
         private readonly ConcurrentDictionary<IState, EvaluationRange> cache = new ConcurrentDictionary<IState, EvaluationRange>();
 
-        public void AddExactEvaluation(IState state, double evaluation) =>
+        public void AddExactEvaluation(IState state, int depth, IList<IState> passedThroughStates, double evaluation) =>
             cache[state] = new EvaluationRange(evaluation);
 
-        public void AddMinEvaluation(IState state, double minEvaluation)
+        public void AddMinEvaluation(IState state, int depth, IList<IState> passedThroughStates, double minEvaluation)
         {
             var containsValue = cache.TryGetValue(state, out var evaluation);
             if (containsValue && evaluation.MinEvaluation < minEvaluation)
@@ -27,7 +25,7 @@ namespace MinMaxSearch.Cache
                 cache[state] = new EvaluationRange(minEvaluation, int.MaxValue);
         }
 
-        public void AddMaxEvaluation(IState state, double maxEvaluation)
+        public void AddMaxEvaluation(IState state, int depth, IList<IState> passedThroughStates, double maxEvaluation)
         {
             var containsValue = cache.TryGetValue(state, out var evaluation);
             if (containsValue && evaluation.MaxEvaluation > maxEvaluation)
@@ -40,7 +38,7 @@ namespace MinMaxSearch.Cache
                 cache[state] = new EvaluationRange(int.MinValue, maxEvaluation);
         }
 
-        public EvaluationRange GetStateEvaluation(IState state)
+        public EvaluationRange GetStateEvaluation(IState state, int depth, IList<IState> passedThroughStates)
         {
             var containsState = cache.TryGetValue(state, out var evaluation);
             return containsState ? evaluation : null;
@@ -48,11 +46,11 @@ namespace MinMaxSearch.Cache
 
         public void Clear() => cache.Clear();
 
-        public void Clear(Func<IState, bool> shouldClean)
+        public void Clear(Func<IState, int, IList<IState>, bool> shouldClean)
         {
             var statesToRemove = new HashSet<IState>();
             foreach (var state in cache.Keys)
-                if (shouldClean(state))
+                if (shouldClean(state, 0, new List<IState>()))
                     statesToRemove.Add(state);
 
             foreach (var state in statesToRemove)
@@ -65,6 +63,6 @@ namespace MinMaxSearch.Cache
             cache.TryGetValue(state, out var evaluation) ? evaluation : null;
 
         public override string ToString() => 
-            $"{nameof(CacheManager)}; count {cache.Count}";
+            $"{nameof(StateCacheManager)}; count {cache.Count}";
     }
 }

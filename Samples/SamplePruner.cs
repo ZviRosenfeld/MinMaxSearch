@@ -7,7 +7,7 @@ namespace MinMaxSearch.Samples
     {
         public bool ShouldPrune(IState state, int depth, List<IState> passedThroughStates)
         {
-            // Some logic here to decide if we should prune
+            // Some logic here to decide if we should prune - you probably don't want to always return false for a real pruner.
             return false;
         }
     }

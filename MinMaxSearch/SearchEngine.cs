@@ -13,6 +13,65 @@ namespace MinMaxSearch
 {
     public class SearchEngine : ISearchEngine
     {
+        public SearchEngine()
+        {
+            cacheManagerFactory = () => new NullCacheManager();
+        }
+
+        /// <summary>
+        /// In some search domains, remembering states that lead to wins, losses or draw can improve performance.
+        /// 
+        /// Use this constructor to create an engine with a cache.
+        /// 
+        /// Note that caching will only work if you implement Equals and GetHashValue in a meaningful way for your states.
+        /// </summary>
+        public SearchEngine(CacheMode cacheMode, CacheKeyType cacheKeyType)
+        {
+            CacheMode = cacheMode;
+
+            if (cacheMode == CacheMode.NoCache)
+                throw new MinMaxSearchException($"Can't set {nameof(cacheMode)} to {CacheMode.NoCache} when using a cache. If you don't want to use a cache, please use the empty constructor.");
+            else if (cacheMode == CacheMode.ReuseCache)
+            {
+                CacheManager = GetCacheManager(cacheKeyType);
+                cacheManagerFactory = () => CacheManager;
+            }
+            else
+                cacheManagerFactory = () => GetCacheManager(cacheKeyType);
+        }
+
+        private ICacheManager GetCacheManager(CacheKeyType cacheKeyType)
+        {
+            switch (cacheKeyType)
+            {
+                case CacheKeyType.StateOnly: return new StateCacheManager();
+                case CacheKeyType.StateAndDepth: return new StateAndDepthCacheManager();
+                case CacheKeyType.StateAndPassedThroughStates: return new StateAndPassedThroughCacheManager();
+                default: throw new InternalException("Code 1005 (not supported cache type)");
+            }
+        }
+
+        /// <summary>
+        /// In some search domains, remembering states that lead to wins, losses or draw can improve performance.
+        /// 
+        /// Use this constructor to create an engine with a custom cache.
+        /// 
+        /// Note that caching will only work if you implement Equals and GetHashValue in a meaningful way for your states.
+        /// </summary>
+        public SearchEngine(CacheMode cacheMode, Func<ICacheManager> cacheManagerFactory)
+        {
+            CacheMode = cacheMode;
+            if (cacheMode == CacheMode.NoCache)
+                throw new MinMaxSearchException($"Can't set {nameof(cacheMode)} to {CacheMode.NoCache} when using a cache. If you don't want to use a cache, please use the empty constructor.");
+            else if (cacheMode == CacheMode.ReuseCache)
+            {
+                CacheManager = cacheManagerFactory();
+                this.cacheManagerFactory = () => CacheManager;
+            }
+            else
+                this.cacheManagerFactory = cacheManagerFactory;
+        }
+
         private readonly List<IPruner> pruners = new List<IPruner>();
 
         public SearchEngine AddPruner(IPruner pruner)
@@ -68,20 +127,17 @@ namespace MinMaxSearch
         private SearchOptions CreateSearchOptions() => new SearchOptions(pruners, IsUnstableState, PreventLoops,
             FavorShortPaths, DieEarly, MaxScore, MinScore, AlternateEvaluation, StateDefinesDepth, CacheMode);
 
-        /// <summary>
-        /// In some search domains, remembering states that lead to wins, losses or draw can improve performance.
-        /// 
-        /// You can only use that cache if your states' evaluation doesn't change depending on its location in the search tree.
-        /// In particular, your states' evaluation can't depend on their depth in the tree of the states they've passed through. 
-        /// 
-        /// Note that caching will only work if you implement Equals and GetHashValue in a meaningful way for your states.
-        /// </summary>
-        public CacheMode CacheMode { get; set; } = CacheMode.NoCache;
+        public CacheMode CacheMode { get; } = CacheMode.NoCache;
+
+        public CacheKeyType CacheKeyType { get; } = CacheKeyType.StateOnly;
 
         /// <summary>
-        /// Note that this CacheManager will only be used if CacheMode is set to ReuseCache
+        /// Note that this CacheManager will only be used if CacheMode is set to ReuseCache.
+        /// Otherwise, the engine will initialize a new cache for each search.
         /// </summary>
-        public ICacheManager CacheManager { get; set; }= new CacheManager();
+        public ICacheManager CacheManager { get; }
+
+        private Func<ICacheManager> cacheManagerFactory;
 
         /// <summary>
         /// If this is set to true, in the case that the first node has a single neighbor, the engine will return that neighbor rather than evaluation the search tree.
@@ -110,39 +166,37 @@ namespace MinMaxSearch
             return new TotalParallelismThreadManager(MaxDegreeOfParallelism, searchDepth);
         }
 
-        private ICacheManager BuildCacheManager()
+        public SearchEngine CloneWithCacheManager(ICacheManager cacheManager)
         {
-            if (CacheMode == CacheMode.NoCache)
-                return new NullCacheManager();
-            if (CacheMode == CacheMode.NewCache)
-                return new CacheManager();
-
-            return CacheManager;
+            var newEngine = new SearchEngine(CacheMode, () => cacheManager);
+            CopySearchOptions(newEngine);
+            return newEngine;
         }
 
         public SearchEngine Clone()
         {
-            var newEngine = new SearchEngine()
-            {
-                AlternateEvaluation = AlternateEvaluation,
-                DieEarly = DieEarly,
-                FavorShortPaths = FavorShortPaths,
-                IsUnstableState = IsUnstableState,
-                MaxDegreeOfParallelism = MaxDegreeOfParallelism,
-                MaxLevelOfParallelism = MaxLevelOfParallelism,
-                MaxScore = MaxScore,
-                MinScore = MinScore,
-                PreventLoops = PreventLoops,
-                CacheMode = CacheMode,
-                ParallelismMode = ParallelismMode,
-                SkipEvaluationForFirstNodeSingleNeighbor = SkipEvaluationForFirstNodeSingleNeighbor
-            };
-            foreach (var pruner in pruners)
-                newEngine.AddPruner(pruner);
-
+            var newEngine = new SearchEngine(CacheMode, CacheKeyType);
+            CopySearchOptions(newEngine);
             return newEngine;
         }
-        
+
+        private void CopySearchOptions(SearchEngine newEngine)
+        {
+            newEngine.AlternateEvaluation = AlternateEvaluation;
+            newEngine.DieEarly = DieEarly;
+            newEngine.FavorShortPaths = FavorShortPaths;
+            newEngine.IsUnstableState = IsUnstableState;
+            newEngine.MaxDegreeOfParallelism = MaxDegreeOfParallelism;
+            newEngine.MaxLevelOfParallelism = MaxLevelOfParallelism;
+            newEngine.MaxScore = MaxScore;
+            newEngine.MinScore = MinScore;
+            newEngine.PreventLoops = PreventLoops;
+            newEngine.ParallelismMode = ParallelismMode;
+            newEngine.SkipEvaluationForFirstNodeSingleNeighbor = SkipEvaluationForFirstNodeSingleNeighbor;
+            foreach (var pruner in pruners)
+                newEngine.AddPruner(pruner);
+        }
+
         /// <summary>
         /// Runs a search.
         /// </summary>
@@ -181,7 +235,7 @@ namespace MinMaxSearch
             }
 
             var searchContext = new SearchContext(maxDepth, 0, cancellationToken);
-            var searchWorker = new SearchWorker(CreateSearchOptions(), GetThreadManager(maxDepth), BuildCacheManager());
+            var searchWorker = new SearchWorker(CreateSearchOptions(), GetThreadManager(maxDepth), cacheManagerFactory());
             var stopwatch = new Stopwatch();
             stopwatch.Start();
             var result = searchWorker.Evaluate(startState, searchContext);

@@ -89,8 +89,7 @@ namespace Connect4Tests
         {
             var startState = Connect4TestUtils.GetMaxFiveMovesAwayFromWinningState();
 
-            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode);
-            engine.CacheMode = cacheMode;
+            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode, 1, CacheMode.ReuseCache);
             var evaluation = engine.Search(startState, 5);
 
             Assert.AreEqual(BoardEvaluator.MaxEvaluation, evaluation.Evaluation);
@@ -107,11 +106,10 @@ namespace Connect4Tests
         {
             var startState = Connect4TestUtils.GetMaxFiveMovesAwayFromWinningState();
 
-            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode);
-            engine.CacheMode = CacheMode.ReuseCache;
+            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode, 1 , CacheMode.ReuseCache);
             engine.Search(startState, 5);
-            Assert.IsTrue(((CacheManager)engine.CacheManager).Count > 0, "The cache dosn't contain any states");
-            Assert.IsNotNull(engine.CacheManager.GetStateEvaluation(startState), "The cache dosn't contain the start state");
+            Assert.IsTrue(((StateCacheManager)engine.CacheManager).Count > 0, "The cache doesn't contain any states");
+            Assert.IsNotNull(engine.CacheManager.GetStateEvaluation(startState, 0 , null), "The cache doesn't contain the start state");
 
             var evaluation = engine.Search(startState, 5);
 
@@ -127,12 +125,11 @@ namespace Connect4Tests
         {
             var startState = Connect4TestUtils.GetMaxFiveMovesAwayFromWinningState();
 
-            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode);
-            engine.CacheMode = CacheMode.ReuseCache;
+            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode, 1, CacheMode.ReuseCache);
             engine.DieEarly = true;
             engine.FillCache(startState, CancellationToken.None);
-            Assert.IsTrue(((CacheManager) engine.CacheManager).Count > 0, "The cache dosn't contain any states");
-            Assert.IsNotNull(engine.CacheManager.GetStateEvaluation(startState), "The cache dosn't contain the start state");
+            Assert.IsTrue(((StateCacheManager) engine.CacheManager).Count > 0, "The cache doesn't contain any states");
+            Assert.IsNotNull(engine.CacheManager.GetStateEvaluation(startState, 0, null), "The cache doesn't contain the start state");
 
             var evaluation = engine.Search(startState, 5);
 
@@ -147,12 +144,9 @@ namespace Connect4Tests
         public void FiveStepsAwayFromMaxWinning_IterativeSearch_ReuseCache_MaxWin(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
             var startState = Connect4TestUtils.GetMaxFiveMovesAwayFromWinningState();
-
-            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode);
-            engine.CacheMode = CacheMode.ReuseCache;
+            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode, 1, CacheMode.ReuseCache);
             
             var evaluation = new IterativeSearchWrapper(engine).IterativeSearch(startState, 1, 8, CancellationToken.None);
-
             Assert.AreEqual(BoardEvaluator.MaxEvaluation, evaluation.Evaluation);
         }
 
@@ -161,15 +155,14 @@ namespace Connect4Tests
         [DataRow(8, ParallelismMode.TotalParallelism)]
         [DataRow(1, ParallelismMode.FirstLevelOnly)]
         [TestMethod]
-        public void FiveStepsAwayFromMaxWinning_ReuseCache_DontDieEearly_MaxWin(int degreeOfParallelism, ParallelismMode parallelismMode)
+        public void FiveStepsAwayFromMaxWinning_ReuseCache_DontDieEarly_MaxWin(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
             var startState = Connect4TestUtils.GetMaxFiveMovesAwayFromWinningState();
 
-            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode);
-            engine.CacheMode = CacheMode.ReuseCache;
+            var engine = Connect4TestUtils.GetSearchEngine(degreeOfParallelism, parallelismMode, 1, CacheMode.ReuseCache);
             engine.DieEarly = false;
             engine.Search(startState, 5);
-            Assert.IsTrue(((CacheManager)engine.CacheManager).Count > 0, "The cache dosn't contain any states");
+            Assert.IsTrue(((StateCacheManager)engine.CacheManager).Count > 0, "The cache doesn't contain any states");
             
             var evaluation = engine.Search(startState, 5);
 
@@ -221,13 +214,12 @@ namespace Connect4Tests
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
             }, Player.Max);
 
-            var engine = new SearchEngine()
+            var engine = new SearchEngine(CacheMode.NewCache, CacheKeyType.StateOnly)
             {
                 FavorShortPaths = true,
                 MaxDegreeOfParallelism = degreeOfParallelism,
                 ParallelismMode = parallelismMode,
                 SkipEvaluationForFirstNodeSingleNeighbor = false,
-                CacheMode = CacheMode.NewCache,
                 StateDefinesDepth = true
             };
             var evaluation = engine.Search(startState, 5);
@@ -254,13 +246,12 @@ namespace Connect4Tests
                 {Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty, Player.Empty},
             }, Player.Min);
 
-            var engine = new SearchEngine()
+            var engine = new SearchEngine(CacheMode.NewCache, CacheKeyType.StateOnly)
             {
                 FavorShortPaths = true,
                 MaxDegreeOfParallelism = degreeOfParallelism,
                 ParallelismMode = parallelismMode,
-                SkipEvaluationForFirstNodeSingleNeighbor = false,
-                CacheMode = CacheMode.NewCache
+                SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             var evaluation = engine.Search(startState, 5);
 

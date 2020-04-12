@@ -38,7 +38,6 @@ namespace CheckersTests
         {
             Console.WriteLine(GetTestMessage(parallelismMode, degreeOfParallelism, levelOfParallelism));
             var engine = TestUtils.GetCheckersSearchEngine(degreeOfParallelism, parallelismMode, levelOfParallelism);
-            engine.CacheMode = CacheMode.NewCache;
             var startState = new CheckersState(startBoard, Player.Max);
 
             var results = engine.Search(startState, searchDepth);

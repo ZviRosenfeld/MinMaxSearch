@@ -43,7 +43,7 @@ namespace MinMaxSearch.UnitTests
             tree.EndState2.SetEvaluationTo(11);
             tree.EndState3.SetEvaluationTo(18);
 
-            var engine = new SearchEngine()
+            var engine = new SearchEngine(CacheMode.NewCache, CacheKeyType.StateOnly)
             {
                 MaxDegreeOfParallelism = degreeOfParallelism,
                 FavorShortPaths = true,
@@ -51,7 +51,6 @@ namespace MinMaxSearch.UnitTests
                 MaxScore = 10,
                 ParallelismMode = parallelismMode,
                 SkipEvaluationForFirstNodeSingleNeighbor = false,
-                CacheMode = CacheMode.NewCache
             };
             var result = engine.Search(tree.RootState, 5);
 
@@ -70,7 +69,7 @@ namespace MinMaxSearch.UnitTests
             tree.EndState1.SetEvaluationTo(15);
             A.CallTo(() => tree.EndState2.Evaluate(A<int>._, A<List<IState>>._)).Invokes(() => throw new Exception("We shouldn't have needed to check " + nameof(tree.EndState2)));
 
-            var engine = new SearchEngine()
+            var engine = new SearchEngine(CacheMode.NewCache, CacheKeyType.StateOnly)
             {
                 FavorShortPaths = favorSortPaths,
                 DieEarly = true,
@@ -78,7 +77,6 @@ namespace MinMaxSearch.UnitTests
                 IsUnstableState = (s, i, l) => unstableState,
                 ParallelismMode = ParallelismMode.NonParallelism,
                 SkipEvaluationForFirstNodeSingleNeighbor = false,
-                CacheMode = CacheMode.NewCache
             };
             var result = engine.Search(tree.RootState, 6);
 
@@ -131,13 +129,12 @@ namespace MinMaxSearch.UnitTests
         [TestMethod]
         public void Search_DontStopWithUnstableState(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
-            var searchEngine = new SearchEngine()
+            var searchEngine = new SearchEngine(CacheMode.NewCache, CacheKeyType.StateOnly)
             {
                 IsUnstableState = (s, d, l) => s.Evaluate(d, l) < 10,
                 MaxDegreeOfParallelism = degreeOfParallelism,
                 ParallelismMode = parallelismMode,
                 SkipEvaluationForFirstNodeSingleNeighbor = false,
-                CacheMode = CacheMode.NewCache
             };
             var result = searchEngine.Search(new IncreasingNumberState(0, Player.Max), 1);
 
@@ -177,7 +174,7 @@ namespace MinMaxSearch.UnitTests
             tree.EndState2.SetEvaluationTo(15);
             tree.EndState3.SetEvaluationTo(0);
 
-            var searchEngine = new SearchEngine()
+            var searchEngine = new SearchEngine(CacheMode.NewCache, CacheKeyType.StateOnly)
             {
                 DieEarly = true,
                 MaxScore = 5,
@@ -185,7 +182,6 @@ namespace MinMaxSearch.UnitTests
                 MaxDegreeOfParallelism = degreeOfParallelism,
                 ParallelismMode = parallelismMode,
                 SkipEvaluationForFirstNodeSingleNeighbor = false,
-                CacheMode = CacheMode.NewCache
             };
             var evaluation = searchEngine.Search(tree.RootState, 2);
 
@@ -199,13 +195,12 @@ namespace MinMaxSearch.UnitTests
         [TestMethod]
         public void Search_CheckPreventLoopPrunerWorks(int degreeOfParallelism, ParallelismMode parallelismMode)
         {
-            var searchEngine = new SearchEngine()
+            var searchEngine = new SearchEngine(CacheMode.NewCache, CacheKeyType.StateOnly)
             {
                 PreventLoops = true,
                 MaxDegreeOfParallelism = degreeOfParallelism,
                 ParallelismMode = parallelismMode,
-                SkipEvaluationForFirstNodeSingleNeighbor = false,
-                CacheMode = CacheMode.NewCache
+                SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             searchEngine.Search(new ThrowExceptionAtDepthThreeState(0, Player.Max), 5);
         }

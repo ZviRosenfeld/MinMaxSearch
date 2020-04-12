@@ -21,7 +21,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
         [DataRow(true, false)]
         [DataRow(false, true)]
         [DataRow(false, false)]
-        public void AlphaBetaPrunedTree_CachRemebersRightValues(bool dieEarly, bool favorShortPaths)
+        public void AlphaBetaPrunedTree_CacheRemembersRightValues(bool dieEarly, bool favorShortPaths)
         {
             var searchTree = new DeterministicTree();
 
@@ -189,9 +189,8 @@ namespace MinMaxSearch.UnitTests.CacheTests
             var searchTree = new RepeatStateTree();
             searchTree.ChildState2.SetEvaluationTo(3, 4);
 
-            var engine = new SearchEngine()
+            var engine = new SearchEngine(CacheMode.NewCache, CacheKeyType.StateOnly)
             {
-                CacheMode = CacheMode.NewCache,
                 FavorShortPaths = favorShortPaths,
                 DieEarly = dieEarly,
                 StateDefinesDepth = true,
@@ -206,18 +205,17 @@ namespace MinMaxSearch.UnitTests.CacheTests
         [DataRow(true, false, true)]
         [DataRow(false, true, true)]
         [DataRow(false, false, false)]
-        public void RepeatedStateInStateDefinesDepthGame_DontCacheRepeatedValue(bool useUnstalbeStateMethod, bool reuseCache, bool stateDefinesDepth)
+        public void RepeatedStateInStateDefinesDepthGame_DontCacheRepeatedValue(bool useUnstableStateMethod, bool reuseCache, bool stateDefinesDepth)
         {
             var searchTree = new RepeatStateTree();
             searchTree.ChildState2.SetEvaluationTo(3, 4);
 
-            var engine = new SearchEngine()
+            var engine = new SearchEngine(reuseCache ? CacheMode.ReuseCache : CacheMode.NewCache, CacheKeyType.StateOnly)
             {
-                CacheMode = reuseCache ? CacheMode.ReuseCache : CacheMode.NewCache,
                 StateDefinesDepth = stateDefinesDepth,
                 ParallelismMode = ParallelismMode.NonParallelism
             };
-            if (useUnstalbeStateMethod)
+            if (useUnstableStateMethod)
                 engine.IsUnstableState = (s, d, l) => false;
             
             var result = engine.Search(searchTree.RootState, 2);
@@ -230,16 +228,15 @@ namespace MinMaxSearch.UnitTests.CacheTests
         [DataRow(true, false)]
         [DataRow(false, true)]
         [DataRow(false, false)]
-        public void RepeatedStateInStateDefinesDepthGame_StatesPrunedByAlphaBeta_CacheDonstRepeatedValue(bool dieEarly, bool favorShortPaths)
+        public void RepeatedStateInStateDefinesDepthGame_StatesPrunedByAlphaBeta_CacheDoesntRepeatedValue(bool dieEarly, bool favorShortPaths)
         {
             var searchTree = new RepeatStateTree();
             searchTree.EndState1.SetEvaluationTo(5);
             searchTree.EndState2.SetEvaluationTo(4, 7);
             searchTree.EndState3.SetEvaluationTo(6);
 
-            var engine = new SearchEngine()
+            var engine = new SearchEngine(CacheMode.NewCache, CacheKeyType.StateOnly)
             {
-                CacheMode = CacheMode.NewCache,
                 FavorShortPaths = favorShortPaths,
                 DieEarly = dieEarly,
                 StateDefinesDepth = true,
@@ -256,22 +253,21 @@ namespace MinMaxSearch.UnitTests.CacheTests
         [DataRow(true, false)]
         [DataRow(false, true)]
         [DataRow(false, false)]
-        public void RepeatedStateInStateDefinesDepthGame_StatesPrunedByPrunner_CacheDonstRepeatedValue(bool dieEarly, bool favorShortPaths)
+        public void RepeatedStateInStateDefinesDepthGame_StatesPrunedByPruner_CacheDoesntRepeatedValue(bool dieEarly, bool favorShortPaths)
         {
             var searchTree = new RepeatStateTree();
             searchTree.ChildState4.SetEvaluationTo(3, 4);
 
-            var myPrunner = A.Fake<IPruner>();
-            A.CallTo(() => myPrunner.ShouldPrune(A<IState>._, A<int>._, A<List<IState>>._))
+            var myPruner = A.Fake<IPruner>();
+            A.CallTo(() => myPruner.ShouldPrune(A<IState>._, A<int>._, A<List<IState>>._))
                 .ReturnsLazily((IState s, int d, List<IState> l) => s == searchTree.ChildState5);
-            var engine = new SearchEngine()
+            var engine = new SearchEngine(CacheMode.NewCache, CacheKeyType.StateOnly)
             {
-                CacheMode = CacheMode.NewCache,
                 FavorShortPaths = favorShortPaths,
                 DieEarly = dieEarly,
                 StateDefinesDepth = true,
                 ParallelismMode = ParallelismMode.NonParallelism
-            }.AddPruner(myPrunner);
+            }.AddPruner(myPruner);
 
             var result = engine.Search(searchTree.RootState, 3);
 
@@ -297,9 +293,8 @@ namespace MinMaxSearch.UnitTests.CacheTests
         }
 
         private static SearchEngine GetReuseCacheEngine(bool dieEarly, bool favorShortPaths) =>
-            new SearchEngine()
+            new SearchEngine(CacheMode.ReuseCache, CacheKeyType.StateOnly)
             {
-                CacheMode = CacheMode.ReuseCache,
                 ParallelismMode = ParallelismMode.NonParallelism,
                 MaxScore = MAX_EVALUATION,
                 MinScore = MIN_EVALUATION,
@@ -309,6 +304,6 @@ namespace MinMaxSearch.UnitTests.CacheTests
             };
 
         private EvaluationRange GetEvaluation(SearchEngine engine, IState state) =>
-            ((CacheManager)engine.CacheManager)[state];
+            ((StateCacheManager)engine.CacheManager)[state];
     }
 }

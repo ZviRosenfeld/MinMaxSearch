@@ -20,12 +20,12 @@ You can find MinMaxSearch library on nuget.org via package name MinMaxSearch.
   - [PreventLoops](#preventloops)
   - [FavorShortPaths](#favorshortpaths)
   - [ParallelismMode](#parallelismmode)
-  - [CacheMode](#cachemode)
   - [DieEarly](#dieearly)
   - [IsUnstableState](#isunstablestate)
   - [Pruners](#pruners)
   - [SkipEvaluationForFirstNodeSingleNeighbor](#skipevaluationforfirstnodesingleneighbor)
   - [StateDefinesDepth](#statedefinesdepth)
+  - [CacheMode](#cachemode)
   
 - [IterativeSearch](#iterativesearch)
 
@@ -157,26 +157,6 @@ There are 4 ParallelismMode:
 
 Note that "MaxDegreeOfParallelism" will be ignored in all modes other than "TotalParallelism", and "MaxLevelOfParallelism" will be ignored in all modes other than "ParallelismByLevel".
 
-### CacheMode
-*Very important:* You can only use that cache if your states' evaluation doesn't change depending on its location in the search tree.
-In particular, your states' evaluation can't depend on their depth in the tree of the states they've passed through. 
-
-Caching lets the engine remember stares that lead to certain win, losses or draws, so that it doesn't need to re-search trees it's already searched.
-Note that caching will only work if you implement Equals and GetHashValue in a meaningful way for your states. 
-Caching is available since version 1.5.0.
-
-We support 3 modes of caching:
-- *NoCache*: No Caching.
-- *NewCache*: The engine will initialize and use a new cache for every search.
-- *ReuseCache*: The engine will re-use the same cache between searches. You can clean the cache by calling the CacheManager's Clean method.
-
-If you're using the ReuseCache option, you can use the FillCache extension method to fill the cache while the program is idle (say, while your opponent is considering their next move).
-Just to remember to cancel the FillCache when you're ready to run a search (using the cancellation token).
-
-Please note that when using caching, the StateSequence in the SearchResult may be cut off early. 
-This is because the cache remembers the evaluations that states will lead to, but not *how* the state lead to that evaluation.
-So the StateSequence will end at the cached state.
-
 ### DieEarly
 If this option is set to true, the algorithm will rerun as soon as it finds a score greater than or equal to SearchEngine.MaxScore for Max or smaller or equal to SearchEngine.MinScore for Min.
 The rational behind this is that once the algorithm finds a win there's no point in more searching. (We assume that a score greater then MaxScore is a win for Max, and one smaller then MinScore is a win for Min).
@@ -189,7 +169,7 @@ IsUnstableState is a delegate of type Func<IState, int, List<IState>, bool>. It 
 ```CSharp
 /// <summary>
 /// An example of using an IsUnstableState delegate.
-/// This delegate works on a Checkers state, and returns true if there is an available jump.
+/// This delegate works on a Checkers state. It returns true if there is an available jump.
 /// </summary>
 class IsUnstableStateSample
 {
@@ -197,12 +177,12 @@ class IsUnstableStateSample
     {
         var engine = new SearchEngine
         {
-            IsUnstableState = IsUnstableStateCheckersState
+            IsUnstableState = IsUnstableCheckersState
         };
         return engine;
     }
 
-    private bool IsUnstableStateCheckersState(IState state, int depth, List<IState> passedThroghStates)
+    private bool IsUnstableCheckersState(IState state, int depth, List<IState> passedThroghStates)
     {
         var checkersState = (CheckersState) state;
         return checkersState.CanJump();
@@ -221,7 +201,7 @@ class SamplePruner : IPruner
 {
     public bool ShouldPrune(IState state, int depth, List<IState> passedThroughStates)
     {
-        // Some logic here to decide if we should prune
+        // Some logic here to decide if we should prune - you probably don't want to always return false for a real pruner.
         return false;
     }
 }
@@ -248,6 +228,32 @@ Set this to true it is possible to infer a state's depth from the state alone.
 This is true for games like tic-tac-toe and connect4, where the depth of a state is the number of tokens on the board.
 
 The engine will use this knowledge to optimize the search.
+
+### CacheMode
+Caching lets the engine remember stares that lead to certain win, losses or draws, so that it doesn't need to re-search trees it's already searched.
+Note that caching will only work if you implement Equals and GetHashValue in a meaningful way for your states.
+The cahce details must be set in the engine's constructor, and can't be changed.
+Caching is available since version 1.5.1.
+
+We support 3 modes of caching:
+- *NoCache*: No Caching.
+- *NewCache*: The engine will initialize and use a new cache for every search.
+- *ReuseCache*: The engine will re-use the same cache between searches. You can clean the cache by calling the CacheManager's Clean method.
+
+If you're using the ReuseCache option, you can use the FillCache extension method to fill the cache while the program is idle (say, while your opponent is considering their next move).
+Just to remember to cancel the FillCache when you're ready to run a search (using the cancellation token).
+
+Please note that when using caching the StateSequence in the SearchResult may be cut off early. 
+This is because the cache remembers the evaluations that states will lead to, but not *how* the state lead to that evaluation.
+So the StateSequence will end at the cached state.
+
+**CacheKeyType**
+We support 3 types of cache keys out of the box: StateOnly, StateAndDepth and StateAndPassedThroughStates.
+You should choose which key type to used based on what your state's evaluation depends on.
+That is, if your state's evaluation depends on only on itself (and not its depth in the search tree, or the states it's passed through), you should use the "StateOnly" key type.
+If your state depends on the state and it's depths in the search tree, you should use the "StateAndDepth" key.
+
+If you need a more complex key, consider implementing the [ICacheManager](MinMaxSearch/Cache/ICacheManager.cs) interface.
 
 ## IterativeSearch
 

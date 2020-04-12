@@ -31,13 +31,12 @@ namespace MinMaxSearch.UnitTests
         public static SearchEngine GetBasicSearchEngine(
             ParallelismMode parallelismMode = ParallelismMode.FirstLevelOnly, int maxDegreeOfParallelism = 1,
             int parallelismLevel = 1) =>
-            new SearchEngine()
+            new SearchEngine(CacheMode.NewCache, CacheKeyType.StateOnly)
             {
                 SkipEvaluationForFirstNodeSingleNeighbor = false,
                 ParallelismMode = parallelismMode,
                 MaxLevelOfParallelism = parallelismLevel,
-                MaxDegreeOfParallelism = maxDegreeOfParallelism,
-                CacheMode = CacheMode.NewCache
+                MaxDegreeOfParallelism = maxDegreeOfParallelism
             };
     }
 }

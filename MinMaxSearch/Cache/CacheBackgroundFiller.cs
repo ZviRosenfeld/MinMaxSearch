@@ -20,10 +20,9 @@ namespace MinMaxSearch.Cache
             if (searchEngine.CacheMode != CacheMode.ReuseCache)
                 throw new MinMaxSearchException($"{nameof(FillCache)} will only work if {nameof(searchEngine.CacheMode)} is set to {CacheMode.ReuseCache}");
 
-            var newEngine = searchEngine.Clone();
+            var newEngine = searchEngine.CloneWithCacheManager(searchEngine.CacheManager);
             newEngine.ParallelismMode = parallelismMode;
             newEngine.MaxDegreeOfParallelism = maxDegreeOfParallelism;
-            newEngine.CacheManager = searchEngine.CacheManager;
 
             // Running this will fill the cache
             new IterativeSearchWrapper(newEngine).IterativeSearch(startState, 1, 100, cancellationToken);
