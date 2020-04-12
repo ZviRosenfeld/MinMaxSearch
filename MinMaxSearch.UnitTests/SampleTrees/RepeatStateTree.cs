@@ -6,8 +6,8 @@ namespace MinMaxSearch.UnitTests.SampleTrees
     {
         // This class contains the following tree:
         //                                  RootState
-        //       ChildState1                                childState1
-        //       ChildState2                                childState2
+        //       ChildState1                                ChildState1
+        //       ChildState2                                ChildState2
         //ChildState4      ChildState5            ChildState4         ChildState5
         //EndState1     EndState2 EndState3         EndState1      EndState2 EndState3
 

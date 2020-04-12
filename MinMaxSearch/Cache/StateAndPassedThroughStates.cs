@@ -27,7 +27,7 @@ namespace MinMaxSearch.Cache
                 return false;
 
             for (int i = 0; i < PassedThroughStates.Count; i++)
-                if (PassedThroughStates[i].Equals(other.PassedThroughStates[i]))
+                if (!PassedThroughStates[i].Equals(other.PassedThroughStates[i]))
                     return false;
 
             return true;
@@ -35,5 +35,8 @@ namespace MinMaxSearch.Cache
 
         public override int GetHashCode() => 
             State.GetHashCode() + PassedThroughStates.Sum(passedThroughState => passedThroughState.GetHashCode());
+
+        public override string ToString() =>
+            $"{nameof(State)} = {State}; {nameof(PassedThroughStates)} Count = {PassedThroughStates.Count}";
     }
 }

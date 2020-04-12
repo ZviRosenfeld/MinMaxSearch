@@ -18,5 +18,8 @@
             obj is StateAndDepth other &&
             State.Equals(other.State) &&
             Depth == other.Depth;
+
+        public override string ToString() =>
+            $"{State}; Depth = {Depth}";
     }
 }

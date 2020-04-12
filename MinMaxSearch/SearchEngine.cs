@@ -21,7 +21,7 @@ namespace MinMaxSearch
         /// <summary>
         /// In some search domains, remembering states that lead to wins, losses or draw can improve performance.
         /// 
-        /// Use this constrocter to create an engine with a cahce.
+        /// Use this constructor to create an engine with a cache.
         /// 
         /// Note that caching will only work if you implement Equals and GetHashValue in a meaningful way for your states.
         /// </summary>
@@ -29,13 +29,13 @@ namespace MinMaxSearch
         {
             CacheMode = cacheMode;
 
-            if (cacheMode == CacheMode.ReuseCache)
+            if (cacheMode == CacheMode.NoCache)
+                throw new MinMaxSearchException($"Can't set {nameof(cacheMode)} to {CacheMode.NoCache} when using a cache. If you don't want to use a cache, please use the empty constructor.");
+            else if (cacheMode == CacheMode.ReuseCache)
             {
                 CacheManager = GetCacheManager(cacheKeyType);
                 cacheManagerFactory = () => CacheManager;
             }
-            else if (cacheMode == CacheMode.NoCache)
-                cacheManagerFactory = () => new NullCacheManager();
             else
                 cacheManagerFactory = () => GetCacheManager(cacheKeyType);
         }
@@ -54,22 +54,22 @@ namespace MinMaxSearch
         /// <summary>
         /// In some search domains, remembering states that lead to wins, losses or draw can improve performance.
         /// 
-        /// Use this constrocter to create an engine with a custom cahce.
+        /// Use this constructor to create an engine with a custom cache.
         /// 
         /// Note that caching will only work if you implement Equals and GetHashValue in a meaningful way for your states.
         /// </summary>
         public SearchEngine(CacheMode cacheMode, Func<ICacheManager> cacheManagerFactory)
         {
             CacheMode = cacheMode;
-            if (cacheMode == CacheMode.ReuseCache)
+            if (cacheMode == CacheMode.NoCache)
+                throw new MinMaxSearchException($"Can't set {nameof(cacheMode)} to {CacheMode.NoCache} when using a cache. If you don't want to use a cache, please use the empty constructor.");
+            else if (cacheMode == CacheMode.ReuseCache)
             {
                 CacheManager = cacheManagerFactory();
                 this.cacheManagerFactory = () => CacheManager;
             }
             else
-            {
                 this.cacheManagerFactory = cacheManagerFactory;
-            }
         }
 
         private readonly List<IPruner> pruners = new List<IPruner>();
