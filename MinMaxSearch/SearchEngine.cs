@@ -28,6 +28,7 @@ namespace MinMaxSearch
         public SearchEngine(CacheMode cacheMode, CacheKeyType cacheKeyType)
         {
             CacheMode = cacheMode;
+            CacheKeyType = cacheKeyType;
 
             if (cacheMode == CacheMode.NoCache)
                 throw new MinMaxSearchException($"Can't set {nameof(cacheMode)} to {CacheMode.NoCache} when using a cache. If you don't want to use a cache, please use the empty constructor.");
@@ -61,6 +62,8 @@ namespace MinMaxSearch
         public SearchEngine(CacheMode cacheMode, Func<ICacheManager> cacheManagerFactory)
         {
             CacheMode = cacheMode;
+            CacheKeyType = CacheKeyType.Unknown;
+
             if (cacheMode == CacheMode.NoCache)
                 throw new MinMaxSearchException($"Can't set {nameof(cacheMode)} to {CacheMode.NoCache} when using a cache. If you don't want to use a cache, please use the empty constructor.");
             else if (cacheMode == CacheMode.ReuseCache)
@@ -222,6 +225,9 @@ namespace MinMaxSearch
         /// <param name="cancellationToken"> Used to cancel the search</param>
         public SearchResult Search(IDeterministicState startState, int maxDepth, CancellationToken cancellationToken)
         {
+            if (StateDefinesDepth && CacheMode != CacheMode.NoCache && CacheKeyType != CacheKeyType.StateOnly)
+                throw new MinMaxSearchException($"If {nameof(StateDefinesDepth)} the cache key should be of type {CacheKeyType.StateOnly}");
+
             if (!startState.GetNeighbors().Any())
                 throw new NoNeighborsException("start state has no neighbors " + startState);
             

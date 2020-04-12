@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using FakeItEasy;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MinMaxSearch.Cache;
 using MinMaxSearch.Exceptions;
 using MinMaxSearch.UnitTests.TestStates;
 
@@ -82,6 +83,17 @@ namespace MinMaxSearch.UnitTests
             var engine = TestUtils.GetBasicSearchEngine();
             engine.MinScore = minScore;
             engine.MaxScore = maxScore;
+            engine.Search(new IncreasingNumberState(1, Player.Max), 1);
+        }
+
+        [TestMethod]
+        [DataRow(CacheMode.ReuseCache, CacheKeyType.StateAndDepth)]
+        [DataRow(CacheMode.ReuseCache, CacheKeyType.StateAndPassedThroughStates)]
+        [DataRow(CacheMode.NewCache, CacheKeyType.StateAndDepth)]
+        [ExpectedException(typeof(MinMaxSearchException))]
+        public void Search_StateDefinesDepthAndCacheKeyTypeIsStateOnly_ThrowException(CacheMode cacheMode, CacheKeyType cacheKeyType)
+        {
+            var engine = new SearchEngine(cacheMode, cacheKeyType) { StateDefinesDepth = true };
             engine.Search(new IncreasingNumberState(1, Player.Max), 1);
         }
     }

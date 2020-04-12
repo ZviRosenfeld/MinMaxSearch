@@ -6,6 +6,7 @@
     /// </summary>
     public enum CacheKeyType
     {
+        Unknown,
         /// <summary>
         /// The key will contain only the state
         /// </summary>

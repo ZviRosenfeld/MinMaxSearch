@@ -34,7 +34,7 @@ namespace MinMaxSearch.UnitTests.CacheTests
         [DataRow(CacheKeyType.StateOnly)]
         [DataRow(CacheKeyType.StateAndDepth)]
         [DataRow(CacheKeyType.StateAndPassedThroughStates)]
-        public void Search_NoCacheMode_ThrowException(CacheKeyType cacheKeyType)
+        public void Constructor_NoCacheMode_ThrowException(CacheKeyType cacheKeyType)
         {
             new SearchEngine(CacheMode.NoCache, cacheKeyType);           
         }
@@ -175,6 +175,48 @@ namespace MinMaxSearch.UnitTests.CacheTests
                 SkipEvaluationForFirstNodeSingleNeighbor = false
             };
             engine.FillCache(tree.RootState, CancellationToken.None);
+        }
+
+        [TestMethod]
+        [DataRow(CacheMode.NewCache)]
+        [DataRow(CacheMode.ReuseCache)]
+        public void Constructor_CacheModeSetToRightMode(CacheMode cacheMode)
+        {
+            var engine = new SearchEngine(cacheMode, CacheKeyType.StateOnly);
+            Assert.AreEqual(cacheMode, engine.CacheMode);
+        }
+
+        [TestMethod]
+        public void Constructor_NoCache_CacheModeSetToNoCache()
+        {
+            var engine = new SearchEngine();
+            Assert.AreEqual(CacheMode.NoCache, engine.CacheMode);
+        }
+
+        [TestMethod]
+        [DataRow(CacheMode.NewCache)]
+        [DataRow(CacheMode.ReuseCache)]
+        public void Constructor_CustomCache_CacheModeSetToRightMode(CacheMode cacheMode)
+        {
+            var engine = new SearchEngine(cacheMode, () => A.Fake<ICacheManager>());
+            Assert.AreEqual(cacheMode, engine.CacheMode);
+        }
+
+        [TestMethod]
+        public void Constructor_CustomCache_CacheKeyTypeSetToUnknown()
+        {
+            var engine = new SearchEngine(CacheMode.NewCache, () => A.Fake<ICacheManager>());
+            Assert.AreEqual(CacheKeyType.Unknown, engine.CacheKeyType);
+        }
+
+        [TestMethod]
+        [DataRow(CacheKeyType.StateOnly)]
+        [DataRow(CacheKeyType.StateAndDepth)]
+        [DataRow(CacheKeyType.StateAndPassedThroughStates)]
+        public void Constructor_CacheKeyTypeSetToRightMode(CacheKeyType cacheKeyType)
+        {
+            var engine = new SearchEngine(CacheMode.NewCache, cacheKeyType);
+            Assert.AreEqual(cacheKeyType, engine.CacheKeyType);
         }
     }
 }
