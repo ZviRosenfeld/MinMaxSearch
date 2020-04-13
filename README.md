@@ -25,7 +25,7 @@ You can find MinMaxSearch library on nuget.org via package name MinMaxSearch.
   - [Pruners](#pruners)
   - [SkipEvaluationForFirstNodeSingleNeighbor](#skipevaluationforfirstnodesingleneighbor)
   - [StateDefinesDepth](#statedefinesdepth)
-  - [CacheMode](#cachemode)
+  - [Using a Cache](#using-a-cache)
   
 - [IterativeSearch](#iterativesearch)
 
@@ -229,14 +229,13 @@ This is true for games like tic-tac-toe and connect4, where the depth of a state
 
 The engine will use this knowledge to optimize the search.
 
-### CacheMode
-Caching lets the engine remember stares that lead to certain win, losses or draws, so that it doesn't need to re-search trees it's already searched.
+### Using a Cache
+Caching lets the engine remember states that lead to certain win, losses or draws, so that it doesn't need to re-search trees it's already searched.
 Note that caching will only work if you implement Equals and GetHashValue in a meaningful way for your states.
-The cahce details must be set in the engine's constructor, and can't be changed.
+The cache details must be set in the engine's constructor, and can't be changed.
 Caching is available since version 1.5.1.
 
-We support 3 modes of caching:
-- *NoCache*: No Caching.
+We support 2 modes of caching:
 - *NewCache*: The engine will initialize and use a new cache for every search.
 - *ReuseCache*: The engine will re-use the same cache between searches. You can clean the cache by calling the CacheManager's Clean method.
 
@@ -252,8 +251,22 @@ We support 3 types of cache keys out of the box: StateOnly, StateAndDepth and St
 You should choose which key type to used based on what your state's evaluation depends on.
 That is, if your state's evaluation depends on only on itself (and not its depth in the search tree, or the states it's passed through), you should use the "StateOnly" key type.
 If your state depends on the state and it's depths in the search tree, you should use the "StateAndDepth" key.
+*The "StateOnly" key type is the most efficient, so you should use that if you can.*
 
 If you need a more complex key, consider implementing the [ICacheManager](MinMaxSearch/Cache/ICacheManager.cs) interface.
+
+Creating an engine with a cache:
+```CSharp
+// The StateOnly cache key type is the most efficient, so you should use that if you can.
+SearchEngine engine = new SearchEngine(CacheMode.ReuseCache, CacheKeyType.StateOnly);
+engine.Search(startState, 5);
+```
+
+Creating an engine with a custom cache:
+```CSharp
+// The second argument should be a factory that tells the engine how to create the custom cache.
+SearchEngine engine = new SearchEngine(CacheMode.NewCache, () => new MyCustomCache);
+```
 
 ## IterativeSearch
 
