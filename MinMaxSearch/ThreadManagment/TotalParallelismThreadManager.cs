@@ -32,7 +32,7 @@ namespace MinMaxSearch.ThreadManagment
             if (depth == maxSearchDepth - 1)
             {
                 // It's a waste of resources to start a new thread so close to the bottom of the search tree.
-                // But if depth >= maxSearchDepth it means where in an unstable state and don't know for how much deeper the tree will get, so we should start a new thread.
+                // But if depth >= maxSearchDepth it means we're in an unstable state and don't know for how much deeper the tree will get, so we should start a new thread.
                 startNewThread = false;
             }
             else

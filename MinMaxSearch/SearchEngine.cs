@@ -223,9 +223,9 @@ namespace MinMaxSearch
         /// <summary>
         /// Runs a search.
         /// </summary>
-        /// <param name="startState"> The state that the search will start from</param>
-        /// <param name="maxDepth"> The search will be terminated after maxDepth</param>
-        /// <param name="cancellationToken"> Used to cancel the search</param>
+        /// <param name="startState">The state that the search will start from</param>
+        /// <param name="maxDepth">The search will be terminated after maxDepth</param>
+        /// <param name="cancellationToken">Used to cancel the search</param>
         public SearchResult Search(IDeterministicState startState, int maxDepth, CancellationToken cancellationToken)
         {
             if (StateDefinesDepth && CacheMode != CacheMode.NoCache && CacheKeyType != CacheKeyType.StateOnly)

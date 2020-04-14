@@ -247,6 +247,7 @@ This is because the cache remembers the evaluations that states will lead to, bu
 So the StateSequence will end at the cached state.
 
 **CacheKeyType**
+
 We support 3 types of cache keys out of the box: StateOnly, StateAndDepth and StateAndPassedThroughStates.
 You should choose which key type to used based on what your state's evaluation depends on.
 That is, if your state's evaluation depends on only on itself (and not its depth in the search tree, or the states it's passed through), you should use the "StateOnly" key type.
