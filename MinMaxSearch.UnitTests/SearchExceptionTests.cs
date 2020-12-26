@@ -99,9 +99,15 @@ namespace MinMaxSearch.UnitTests
 
         [TestMethod]
         [ExpectedException(typeof(MinMaxSearchException))]
-        public void Constructor_CacheKeyTypeUnknown_ThrowException()
+        public void Constructor_UseCache_CacheKeyTypeUnknown_ThrowException()
         {
             new SearchEngine(CacheMode.NewCache, CacheKeyType.Unknown);
+        }
+
+        [TestMethod]
+        public void Constructor_NoCache_CacheKeyTypeUnknown_NoException()
+        {
+            new SearchEngine(CacheMode.NoCache, CacheKeyType.Unknown);
         }
     }
 }

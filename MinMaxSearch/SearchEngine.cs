@@ -20,9 +20,7 @@ namespace MinMaxSearch
 
         /// <summary>
         /// In some search domains, remembering states that lead to wins, losses or draw can improve performance.
-        /// 
         /// Use this constructor to create an engine with a cache.
-        /// 
         /// Note that caching will only work if you implement Equals and GetHashValue in a meaningful way for your states.
         /// </summary>
         public SearchEngine(CacheMode cacheMode, CacheKeyType cacheKeyType)
@@ -30,12 +28,12 @@ namespace MinMaxSearch
             CacheMode = cacheMode;
             CacheKeyType = cacheKeyType;
 
+            if (cacheMode != CacheMode.NoCache && cacheKeyType == CacheKeyType.Unknown)
+                throw new MinMaxSearchException($"{nameof(CacheKeyType)} can't be of type {nameof(CacheKeyType.Unknown)} when using a cache.");
+
             if (cacheMode == CacheMode.NoCache)
-                throw new MinMaxSearchException($"Can't set {nameof(cacheMode)} to {CacheMode.NoCache} when using a cache. If you don't want to use a cache, please use the empty constructor.");
-            if (cacheKeyType == CacheKeyType.Unknown)
-                throw new MinMaxSearchException($"{nameof(CacheKeyType)} can't be of type {nameof(CacheKeyType.Unknown)}");
-            
-            if (cacheMode == CacheMode.ReuseCache)
+                cacheManagerFactory = () => new NullCacheManager();
+            else if (cacheMode == CacheMode.ReuseCache)
             {
                 CacheManager = GetCacheManager(cacheKeyType);
                 cacheManagerFactory = () => CacheManager;
@@ -172,7 +170,7 @@ namespace MinMaxSearch
             return new TotalParallelismThreadManager(MaxDegreeOfParallelism, searchDepth);
         }
 
-        public SearchEngine CloneWithCacheManager(ICacheManager cacheManager)
+        internal SearchEngine CloneWithCacheManager(ICacheManager cacheManager)
         {
             var newEngine = new SearchEngine(CacheMode, () => cacheManager);
             CopySearchOptions(newEngine);

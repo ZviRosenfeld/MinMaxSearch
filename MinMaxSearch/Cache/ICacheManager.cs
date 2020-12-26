@@ -21,7 +21,7 @@ namespace MinMaxSearch.Cache
         /// <summary>
         /// State will only be deleted if the 'shouldClean' condition is meat.
         /// The shouldClean Func expects 3 parameters: the state, it's depths, and a list of the passed through states.
-        /// Depth and passed through states will be 0 and empty if the cache dosn't remember them.
+        /// Depth and passed through states will be 0 and empty if the cache doesn't remember them.
         /// </summary>
         void Clear(Func<IState, int, IList<IState>, bool> shouldClean);
     }

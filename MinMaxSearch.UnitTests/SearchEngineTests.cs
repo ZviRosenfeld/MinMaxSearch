@@ -321,5 +321,19 @@ namespace MinMaxSearch.UnitTests
                 Assert.AreEqual(3, result.StateSequence.Count);
             }
         }
+
+        [TestMethod]
+        public void Clone_NoCache_ClonedAlright()
+        {
+            var engine = new SearchEngine();
+            engine.Clone();             
+        }
+
+        [TestMethod]
+        public void Clone_Cache_ClonedAlright()
+        {
+            var engine = new SearchEngine(CacheMode.NewCache, CacheKeyType.StateOnly);
+            engine.Clone();
+        }
     }
 }
