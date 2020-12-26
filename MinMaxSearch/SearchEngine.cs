@@ -179,7 +179,15 @@ namespace MinMaxSearch
 
         public SearchEngine Clone()
         {
-            var newEngine = new SearchEngine(CacheMode, CacheKeyType);
+            SearchEngine newEngine;
+            if (CacheMode == CacheMode.NoCache)
+                newEngine = new SearchEngine();
+            // If we're using a custom cache manager
+            else if (CacheKeyType == CacheKeyType.Unknown)
+                newEngine = new SearchEngine(CacheMode, () => CacheManager);
+            else
+                newEngine = new SearchEngine(CacheMode, CacheKeyType);
+
             CopySearchOptions(newEngine);
             return newEngine;
         }

@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>MinMaxSearch</id>
-    <version>1.5.4</version>
+    <version>1.5.5</version>
 	<title>A MinMax Search Engine</title>
     <description>A MinMax Search Engine. MinMaxSearch was created to be easily customized and simple to use.</description>
     <authors>Zvi Rosenfeld</authors>

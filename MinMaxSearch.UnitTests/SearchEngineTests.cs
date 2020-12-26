@@ -326,14 +326,28 @@ namespace MinMaxSearch.UnitTests
         public void Clone_NoCache_ClonedAlright()
         {
             var engine = new SearchEngine();
-            engine.Clone();             
+            var clone = engine.Clone();
+            Assert.AreEqual(CacheMode.NoCache, clone.CacheMode);
         }
 
         [TestMethod]
         public void Clone_Cache_ClonedAlright()
         {
-            var engine = new SearchEngine(CacheMode.NewCache, CacheKeyType.StateOnly);
-            engine.Clone();
+            var engine = new SearchEngine(CacheMode.ReuseCache, CacheKeyType.StateOnly);
+            var clone = engine.Clone();
+            Assert.AreEqual(CacheMode.ReuseCache, clone.CacheMode);
+            Assert.AreEqual(CacheKeyType.StateOnly, clone.CacheKeyType);
+        }
+
+        [TestMethod]
+        public void Clone_CustomCache_ClonedAlright()
+        {
+            var fakeCacheManager = A.Fake<ICacheManager>();
+            var engine = new SearchEngine(CacheMode.ReuseCache, () => fakeCacheManager);
+            var clone = engine.Clone();
+            Assert.AreEqual(CacheMode.ReuseCache, clone.CacheMode);
+            Assert.AreEqual(CacheKeyType.Unknown, clone.CacheKeyType);
+            Assert.AreEqual(fakeCacheManager, clone.CacheManager);
         }
     }
 }

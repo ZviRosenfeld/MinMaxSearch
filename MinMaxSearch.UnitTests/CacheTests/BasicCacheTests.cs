@@ -30,6 +30,15 @@ namespace MinMaxSearch.UnitTests.CacheTests
         }
 
         [TestMethod]
+        [DataRow(CacheKeyType.StateOnly)]
+        [DataRow(CacheKeyType.StateAndDepth)]
+        [DataRow(CacheKeyType.StateAndPassedThroughStates)]
+        public void Constructor_NoCacheMode_NoException(CacheKeyType cacheKeyType)
+        {
+            new SearchEngine(CacheMode.NoCache, cacheKeyType);           
+        }
+
+        [TestMethod]
         public void Search_CacheKeyStateOnly_EngineRemebersCachedStates()
         {
             var tree = new UnaryDeterministicTree();
