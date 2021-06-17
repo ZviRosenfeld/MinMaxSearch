@@ -244,11 +244,8 @@ namespace MinMaxSearch
                 throw new ArgumentException($"{nameof(maxDepth)} must be at least 1. Was {maxDepth}");
             
             if (SkipEvaluationForFirstNodeSingleNeighbor && startState.GetNeighbors().Count() == 1)
-            {
-                var singleNeighbor = startState.GetNeighbors().First();
-                return new SearchResult(singleNeighbor.Evaluate(0, new List<IState>(), CreateSearchOptions()), startState, true, true, false);
-            }
-
+                return new SearchResult(0, startState, true, true, false);
+            
             var searchContext = new SearchContext(maxDepth, 0, cancellationToken);
             var searchWorker = new SearchWorker(CreateSearchOptions(), GetThreadManager(maxDepth), cacheManagerFactory());
             var stopwatch = new Stopwatch();
