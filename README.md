@@ -237,10 +237,10 @@ Caching is available since version 1.5.1.
 
 We support 2 modes of caching:
 - *NewCache*: The engine will initialize and use a new cache for every search.
-- *ReuseCache*: The engine will re-use the same cache between searches. You can clean the cache by calling the CacheManager's Clean method.
+- *ReuseCache*: The engine will re-use the same cache between searches. You can clean the cache by calling the CacheManager's Clean method. Don't use this option if you have pruners that relay on anything other that the state's data, depth and passedThroghStates.
 
 If you're using the ReuseCache option, you can use the FillCache extension method to fill the cache while the program is idle (say, while your opponent is considering their next move).
-Just to remember to cancel the FillCache when you're ready to run a search (using the cancellation token).
+Just remember to cancel the FillCache when you're ready to run a search (using the cancellation token).
 
 Please note that when using caching the StateSequence in the SearchResult may be cut off early. 
 This is because the cache remembers the evaluations that states will lead to, but not *how* the state lead to that evaluation.
@@ -250,7 +250,7 @@ So the StateSequence will end at the cached state.
 
 We support 3 types of cache keys out of the box: StateOnly, StateAndDepth and StateAndPassedThroughStates.
 You should choose which key type to used based on what your state's evaluation depends on.
-That is, if your state's evaluation depends on only on itself (and not its depth in the search tree, or the states it's passed through), you should use the "StateOnly" key type.
+That is, if your state's evaluation depends only on itself (and not its depth in the search tree, or the states it's passed through), you should use the "StateOnly" key type.
 If your state depends on the state and it's depths in the search tree, you should use the "StateAndDepth" key.
 *The "StateOnly" key type is the most efficient, so you should use that if you can.*
 
